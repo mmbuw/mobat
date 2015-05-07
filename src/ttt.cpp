@@ -39,83 +39,85 @@ int main (int argc, char *argv[])
     return 1;
   }
 
-  char** n = hints;
-  while(*n != NULL) {
+  std::vector<char*> devices{};
+  for(char** n = hints; *n != NULL; ++n) {
     char* name = snd_device_name_get_hint(*n, "NAME");
-    char* desc = snd_device_name_get_hint(*n, "DESC");
     char* io = snd_device_name_get_hint(*n, "IOID");
 
     if(name != NULL && strcmp("null", name) != 0) {
-      std::cout << name << std::endl;
-      // std::cout << " " << desc << std::endl;
-      // std::cout << " " << io << std::endl;
+      if(io == NULL || strcmp("Output", io) != 0) {
+        devices.push_back(name);
+      }
       free(name);
-      free(desc);
       free(io);
     }
-    ++n; 
   }
   snd_device_name_free_hint((void**)hints);
-  
-  // snd_pcm_t *capture_handle;
-  // if ((err = snd_pcm_open (&capture_handle, argv[1], SND_PCM_STREAM_CAPTURE, 0)) < 0) {
-  //   std::cerr << "cannot open audio device " << argv[1] << " " << snd_strerror(err) << std::endl;
-  //   return 1;
-  // }
+
+  for(auto device : devices) {
+    std::cout << device << std::endl;
+  }
+
+  snd_pcm_t *capture_handle;
+  if ((err = snd_pcm_open (&capture_handle, devices[0], SND_PCM_STREAM_CAPTURE, 0)) < 0) {
+    std::cerr << "cannot open audio device " << argv[1] << " " << snd_strerror(err) << std::endl;
+    return 1;
+  }
      
-  // snd_pcm_hw_params_t *hw_params;
-  // if ((err = snd_pcm_hw_params_malloc (&hw_params)) < 0) {
-  //   std::cerr << "cannot allocate hardware parameter structure " << snd_strerror(err) << std::endl;
-  //   return 1;
-  // }
+  snd_pcm_hw_params_t *hw_params;
+  if ((err = snd_pcm_hw_params_malloc (&hw_params)) < 0) {
+    std::cerr << "cannot allocate hardware parameter structure " << snd_strerror(err) << std::endl;
+    return 1;
+  }
        
-  // if ((err = snd_pcm_hw_params_any (capture_handle, hw_params)) < 0) {
-  //   std::cerr << "cannot initialize hardware parameter structure " << snd_strerror(err) << std::endl;
-  //   return 1;
-  // }
+  if ((err = snd_pcm_hw_params_any (capture_handle, hw_params)) < 0) {
+    std::cerr << "cannot initialize hardware parameter structure " << snd_strerror(err) << std::endl;
+    return 1;
+  }
 
-  // if ((err = snd_pcm_hw_params_set_access (capture_handle, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED)) < 0) {
-  //   std::cerr << "cannot set access type " << snd_strerror(err) << std::endl;
-  //   return 1;
-  // }
+  if ((err = snd_pcm_hw_params_set_access (capture_handle, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED)) < 0) {
+    std::cerr << "cannot set access type " << snd_strerror(err) << std::endl;
+    return 1;
+  }
 
-  // if ((err = snd_pcm_hw_params_set_format (capture_handle, hw_params, SND_PCM_FORMAT_S32_LE)) < 0) {
-  //   std::cerr << "cannot set sample format " << snd_strerror(err) << std::endl;
-  //   return 1;
-  // }
+  if ((err = snd_pcm_hw_params_set_format (capture_handle, hw_params, SND_PCM_FORMAT_S32_LE)) < 0) {
+    std::cerr << "cannot set sample format " << snd_strerror(err) << std::endl;
+    return 1;
+  }
 
-  // unsigned rate = 48000;
-  // err = snd_pcm_hw_params_set_rate_near (capture_handle, hw_params, &rate, 0);
-  // if (err < 0) {
-  //   std::cerr << "cannot set sample rate " << snd_strerror(err) << std::endl;
-  //   return 1;
-  // }
+  unsigned rate = 48000;
+  err = snd_pcm_hw_params_set_rate_near (capture_handle, hw_params, &rate, 0);
+  if (err < 0) {
+    std::cerr << "cannot set sample rate " << snd_strerror(err) << std::endl;
+    return 1;
+  }
 
-  // if ((err = snd_pcm_hw_params_set_channels (capture_handle, hw_params, 2)) < 0) {
-  //   std::cerr << "cannot set channel count " << snd_strerror(err) << std::endl;
-  //   return 1;
-  // }
+  if ((err = snd_pcm_hw_params_set_channels (capture_handle, hw_params, 4)) < 0) {
+    std::cerr << "cannot set channel count " << snd_strerror(err) << std::endl;
+    return 1;
+  }
 
-  // if ((err = snd_pcm_hw_params (capture_handle, hw_params)) < 0) {
-  //   std::cerr << "cannot set parameters " << snd_strerror(err) << std::endl;
-  //   return 1;
-  // }
+  if ((err = snd_pcm_hw_params (capture_handle, hw_params)) < 0) {
+    std::cerr << "cannot set parameters " << snd_strerror(err) << std::endl;
+    return 1;
+  }
 
-  // snd_pcm_hw_params_free (hw_params);
+  snd_pcm_hw_params_free (hw_params);
 
-  // if ((err = snd_pcm_prepare (capture_handle)) < 0) {
-  //   std::cerr << "cannot prepare audio interface for use " << snd_strerror(err) << std::endl;
-  //   return 1;
-  // }
+  if ((err = snd_pcm_prepare (capture_handle)) < 0) {
+    std::cerr << "cannot prepare audio interface for use " << snd_strerror(err) << std::endl;
+    return 1;
+  }
 
-  // short buf[128];
-  // for (i = 0; i < 10; ++i) {
-  //   if ((err = snd_pcm_readi (capture_handle, buf, 128)) != 128) {
-  //     std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
-  //     return 1;
-  //   }
-  // }
+  short buf[128];
+  for (i = 0; i < 10; ++i) {
+    if ((err = snd_pcm_readi (capture_handle, buf, 128)) != 128) {
+      std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
+      return 1;
+    }
+  }
 
-  // snd_pcm_close (capture_handle);
+  snd_pcm_close (capture_handle);
+  std::cout << "success" << std::endl;
   return 0;
 }
