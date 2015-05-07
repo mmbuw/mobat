@@ -5,6 +5,11 @@ project (TTT)
 # outputs an executable
 add_executable(ttt src/ttt.cpp)
 
+#request C++11 if on unix
+if(UNIX)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+endif(UNIX)
+
 # link the exe with the sound library
 target_link_libraries(ttt -lasound)
 
