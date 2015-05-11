@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  std::vector<char*> devices{};
+  std::vector<std::string> devices{};
   for(char** n = hints; *n != NULL; ++n) {
     char* name = snd_device_name_get_hint(*n, "NAME");
     char* io = snd_device_name_get_hint(*n, "IOID");
@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
   }
 
   snd_pcm_t *capture_handle;
-  err = snd_pcm_open(&capture_handle, devices[0], SND_PCM_STREAM_CAPTURE, 0);
+  err = snd_pcm_open(&capture_handle, devices[0].c_str(), SND_PCM_STREAM_CAPTURE, 0);
   if(err < 0) {
     std::cerr << "cannot open audio device " << argv[1] << " " << snd_strerror(err) << std::endl;
     return 1;
@@ -150,12 +150,14 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  err = snd_pcm_hw_params_set_channels(capture_handle, hw_params, 4);
+  unsigned num_channels = 4;
+  err = snd_pcm_hw_params_set_channels(capture_handle, hw_params, num_channels);
   if(err < 0) {
     std::cerr << "cannot set channel count " << snd_strerror(err) << std::endl;
     return 1;
   }
 
+  // install configuration, calls "snd_pcm_prepare" on handle automatically
   err = snd_pcm_hw_params(capture_handle, hw_params);
   if(err < 0) {
     std::cerr << "cannot set parameters " << snd_strerror(err) << std::endl;
@@ -164,13 +166,9 @@ int main(int argc, char *argv[])
 
   snd_pcm_hw_params_free(hw_params);
 
-  err = snd_pcm_prepare(capture_handle);
-  if(err < 0) {
-    std::cerr << "cannot prepare audio interface for use " << snd_strerror(err) << std::endl;
-    return 1;
-  }
-
-  short buf[128];
+  // 8 * sample_format_bits * num_channels
+  unsigned buffer_size = 8 * 32 * num_channels;
+  short buf[buffer_size];
   for(unsigned i = 0; i < 10; ++i) {
     err = snd_pcm_readi(capture_handle, buf, 128);
     if(err != 128) {
