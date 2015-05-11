@@ -9,7 +9,13 @@ int main(int argc, char *argv[])
 
   std::cout << "----Cards --------------------------------------------------" << std::endl;
   int card_index = -1;
-  char* card_name;
+  char card_ctl_id[32];
+
+  snd_ctl_t *card_handle;
+  snd_ctl_card_info_t* card_info;
+  snd_ctl_card_info_malloc(&card_info);
+  snd_pcm_info_t* pcm_info;
+  snd_pcm_info_malloc(&pcm_info);
 
   err = snd_card_next(&card_index);
   // iterate over cards until method fails
@@ -18,26 +24,16 @@ int main(int argc, char *argv[])
       std::cerr << "cannot get next audio card " << snd_strerror(err) << std::endl;
     }
 
-    err = snd_card_get_longname(card_index, &card_name);
-    if(err != 0) {
-      std::cerr << "cannot get audio card name " << snd_strerror(err) << std::endl;
-      return 1;
-    }
-    std::cout << card_name << std::endl;
     // create id string for card
-    char card_id[32];
-    sprintf(card_id, "hw:%d", card_index);
+    sprintf(card_ctl_id, "hw:%d", card_index);
     // control handle
-    snd_ctl_t *card_handle;
-    err = snd_ctl_open(&card_handle, card_id, 0);
+    err = snd_ctl_open(&card_handle, card_ctl_id, 0);
     if (err < 0) {
       std::cerr << "cannot open control (" << card_index << ") : " << snd_strerror(err) << std::endl;
       return 1;
     }
 
     //get sound card info 
-    snd_ctl_card_info_t* card_info;
-    snd_ctl_card_info_alloca(&card_info);
     err = snd_ctl_card_info(card_handle, card_info);
     if(err < 0) {
       std::cerr << "cannot open control hardware info (" << card_index << ") :" << snd_strerror(err) << std::endl;
@@ -45,16 +41,21 @@ int main(int argc, char *argv[])
       return 1;
     }
 
+    const char* card_name = snd_ctl_card_info_get_name(card_info);
+    const char* card_id = snd_ctl_card_info_get_id(card_info);
+    std::cout << "Card: " << card_index
+              << ", Name: \"" << card_name
+              << "\", ID: " << card_id
+              << std::endl;
+
     int device_index = -1;
     err = snd_ctl_pcm_next_device(card_handle, &device_index);
     while(device_index > -1) {
       if(err != 0) {
         std::cerr << "cannot get next pcm device " << snd_strerror(err) << std::endl;
       }
-      // configure info struct
-      snd_pcm_info_t* pcm_info;
-      snd_pcm_info_alloca(&pcm_info);
 
+      // configure info struct
       snd_pcm_info_set_device(pcm_info, device_index);
       snd_pcm_info_set_subdevice(pcm_info, 0);
       snd_pcm_info_set_stream(pcm_info, SND_PCM_STREAM_CAPTURE);
@@ -65,26 +66,24 @@ int main(int argc, char *argv[])
         return 1;
       }
 
-      printf("card %i: %s [%s], device %i: %s [%s]\n",
-                        card_index,
-                        snd_ctl_card_info_get_id(card_info),
-                        snd_ctl_card_info_get_name(card_info),
-                        device_index,
-                        snd_pcm_info_get_id(pcm_info),
-                        snd_pcm_info_get_name(pcm_info));
+      const char* device_name = snd_pcm_info_get_name(pcm_info);
+      const char* device_id = snd_pcm_info_get_id(pcm_info);
+      std::cout << " Device: " << device_index
+          << ", Name: \"" << device_name
+          << "\", ID: " << device_id
+          << std::endl;
 
       err = snd_ctl_pcm_next_device(card_handle, &device_index);
-    } ;
-    
-
+    }
 
     snd_ctl_close(card_handle);
-    free(card_name);
-    
     err = snd_card_next(&card_index);
   }
+  // free resources
+  snd_ctl_card_info_free(card_info);
+  snd_pcm_info_free(pcm_info);
 
-  std::cout << "----Devices --------------------------------------------------" << std::endl;
+  std::cout << "----PCMs --------------------------------------------------" << std::endl;
   char** hints;
 
   err = snd_device_name_hint(-1, "pcm",(void***)&hints);
@@ -109,7 +108,7 @@ int main(int argc, char *argv[])
   snd_device_name_free_hint((void**)hints);
 
   for(auto device : devices) {
-    std::cout << device << std::endl;
+    std::cout << std::string{device} << std::endl;
   }
 
   snd_pcm_t *capture_handle;
