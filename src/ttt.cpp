@@ -97,7 +97,6 @@ int main(int argc, char *argv[])
   }
 
 
-  std::cout << "success" << std::endl;
   std::cout << "----testing PCMs----------------------------------------------" << std::endl;
 
   snd_pcm_t *playback_handle;
@@ -165,24 +164,26 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  snd_pcm_uframes_t frame_size;
+  snd_pcm_uframes_t period_size;
   // is supposed to return size of one period (necessary buffer size)
-  snd_pcm_hw_params_get_period_size(hw_params, &frame_size, 0);
+  snd_pcm_hw_params_get_period_size(hw_params, &period_size, 0);
+
+  // how long a period takes in us
+  unsigned frame_time;
+  snd_pcm_hw_params_get_period_time(hw_params, &frame_time, 0);
 
   // 8 * sample_format_bits * num_channels
   unsigned buffer_size = 8 * 32 * num_channels;
-  short buf[frame_size * num_channels * 2];
-  unsigned seconds = 4;
-  for(unsigned loop = (seconds * 1000000) / frame_rate; loop > 0; --loop) {
-    err = snd_pcm_readi(capture_handle, buf, frame_size);
-    if(err != frame_size) {
+  short buf[period_size * num_channels * 2];
+  unsigned seconds = 1;
+  for(unsigned loop = (seconds * 1000000) / frame_time; loop > 0; --loop) {
+    err = snd_pcm_readi(capture_handle, buf, period_size);
+    if(err != period_size) {
       std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
       return 1;
     }
-  }
 
-  for(unsigned loop = (seconds * 1000000) / frame_rate; loop > 0; --loop) {
-    err = snd_pcm_writei(playback_handle, buf, frame_size);
+    err = snd_pcm_writei(playback_handle, buf, period_size);
     if(err == -EPIPE) {
       snd_pcm_prepare(playback_handle);
     }
