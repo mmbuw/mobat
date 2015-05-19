@@ -58,12 +58,17 @@ int main(int argc, char *argv[])
       // configure info struct
       snd_pcm_info_set_device(pcm_info, device_index);
       snd_pcm_info_set_subdevice(pcm_info, 0);
-      snd_pcm_info_set_stream(pcm_info, SND_PCM_STREAM_CAPTURE);
+      // snd_pcm_info_set_stream(pcm_info, SND_PCM_STREAM_PLAYBACK);
       
       err = snd_ctl_pcm_info(card_handle, pcm_info);
       if(err < 0) {
-        std::cerr << "cannot get control digital audio info (" << card_index << "," << device_index << "):" << snd_strerror(err) << std::endl;
-        return 1;
+        if(err != -ENOENT) {
+          std::cerr << "cannot get control digital audio info (" << card_index << "," << device_index << "):" << snd_strerror(err) << std::endl;
+          return 1;
+        }
+        snd_ctl_close(card_handle);
+        err = snd_card_next(&card_index);
+        continue;
       }
 
       const char* device_name = snd_pcm_info_get_name(pcm_info);
@@ -124,13 +129,12 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  std::vector<std::string> correct_devices{};
-  // for(auto const& device : devices) {
-  std::string device = devices[0];
+  std::vector<std::string> capture_devices{};
+  for(auto const& device : devices) {
     err = snd_pcm_open(&capture_handle, device.c_str(), SND_PCM_STREAM_CAPTURE, 0);
     if(err < 0) {
       std::cerr << "cannot open audio device " << device<< " " << snd_strerror(err) << std::endl;
-      // continue;
+      continue;
     }
     else {
       std::cout << "Starting configuration on " << device << std::endl;
@@ -139,25 +143,25 @@ int main(int argc, char *argv[])
     err = snd_pcm_hw_params_any(capture_handle, hw_params);
     if(err < 0) {
       std::cerr << "cannot initialize hardware parameter structure " << snd_strerror(err) << std::endl;
-      // continue;
+      continue;
     }
 
     err = snd_pcm_hw_params_set_access(capture_handle, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED);
     if(err < 0) {
       std::cerr << "cannot set access type " << snd_strerror(err) << std::endl;
-      // continue;
+      continue;
     }
 
     err = snd_pcm_hw_params_set_format(capture_handle, hw_params, SND_PCM_FORMAT_S32_LE);
     if(err < 0) {
       std::cerr << "cannot set sample format " << snd_strerror(err) << std::endl;
-      // continue;
+      continue;
     }
 
     err = snd_pcm_hw_params_set_rate_near(capture_handle, hw_params, &frame_rate, 0);
     if(err < 0) {
       std::cerr << "cannot set sample rate " << snd_strerror(err) << std::endl;
-      // continue;
+      continue;
     }
     else {
       std::cout << "Rate set to " << frame_rate << std::endl;
@@ -166,22 +170,31 @@ int main(int argc, char *argv[])
     err = snd_pcm_hw_params_set_channels(capture_handle, hw_params, num_channels);
     if(err < 0) {
       std::cerr << "cannot set channel count " << snd_strerror(err) << std::endl;
-      // continue;
+      continue;
     }
 
-  //   correct_devices.push_back(device);
-  // }
+    capture_devices.push_back(device);
+  }
 
   std::cout << "----recording PCMs----------------------------------------------" << std::endl;
-  for(auto device : correct_devices) {
+  for(auto device : capture_devices) {
     std::cout << device << std::endl;
   }
+  // open chosen device
+  std::string capture_device{capture_devices[0]};
+  err = snd_pcm_open(&capture_handle, capture_device.c_str(), SND_PCM_STREAM_CAPTURE, 0);
+  if(err < 0) {
+    std::cerr << "cannot open audio device " << capture_device<< " " << snd_strerror(err) << std::endl;
+    return 1;
+  }
+
   // install configuration, calls "snd_pcm_prepare" on handle automatically
   err = snd_pcm_hw_params(capture_handle, hw_params);
   if(err < 0) {
     std::cerr << "cannot set parameters " << snd_strerror(err) << std::endl;
     return 1;
   }
+
 
   std::cout << "success" << std::endl;
   std::cout << "----testing PCMs----------------------------------------------" << std::endl;
@@ -236,6 +249,13 @@ int main(int argc, char *argv[])
   for(auto device : playback_devices) {
     std::cout << device << std::endl;
   }
+  // open chosen device
+  std::string playback_device{devices[0]};
+  err = snd_pcm_open(&playback_handle, playback_device.c_str(), SND_PCM_STREAM_PLAYBACK, 0);
+  if(err < 0) {
+    std::cerr << "cannot open audio device " << playback_device<< " " << snd_strerror(err) << std::endl;
+    return 1;
+  }
 
   // install configuration, calls "snd_pcm_prepare" on handle automatically
   err = snd_pcm_hw_params(playback_handle, hw_params);
@@ -258,13 +278,17 @@ int main(int argc, char *argv[])
       std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
       return 1;
     }
+  }
 
+  for(unsigned loop = (seconds * 1000000) / frame_rate; loop > 0; --loop) {
     err = snd_pcm_writei(playback_handle, buf, frame_size);
-    if(err != frame_size) {
+    if(err == -EPIPE) {
+      snd_pcm_prepare(playback_handle);
+    }
+    else {
       std::cerr << "write to audio interface failed " << snd_strerror(err) << std::endl;
       return 1;
     }
-
   }
 
   snd_pcm_close(capture_handle);
