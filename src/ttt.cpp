@@ -37,7 +37,7 @@ class config {
     return hw_params;
   }
 
-  bool supports_params(snd_pcm_t* pcm_handle) {
+  bool configure(snd_pcm_t* pcm_handle) {
 
     // err = snd_pcm_open(&capture_handle, device.c_str(), SND_PCM_STREAM_CAPTURE, 0);
     // if(err < 0) {
@@ -137,6 +137,7 @@ int main(int argc, char *argv[])
 
   std::vector<std::string> capture_devices{};
   for(auto const& device : devices) {
+    config test_config{2, 48000};
     err = snd_pcm_open(&capture_handle, device.c_str(), SND_PCM_STREAM_CAPTURE, 0);
     if(err < 0) {
       std::cerr << "cannot open audio device " << device<< " " << snd_strerror(err) << std::endl;
@@ -146,7 +147,7 @@ int main(int argc, char *argv[])
       std::cout << "Starting configuration on " << device << std::endl;
     }
          
-    if(capture_config.supports_params(capture_handle)) {
+    if(test_config.configure(capture_handle)) {
      capture_devices.push_back(device);  
     }
   }
@@ -162,7 +163,7 @@ int main(int argc, char *argv[])
     std::cerr << "cannot open audio device " << capture_device<< " " << snd_strerror(err) << std::endl;
     return 1;
   }
-
+  capture_config.configure(capture_handle);
   capture_config.install(capture_handle);
 
 
@@ -171,6 +172,7 @@ int main(int argc, char *argv[])
   snd_pcm_t *playback_handle;
   std::vector<std::string> playback_devices{};
   for(auto const& device : devices) {
+    config test_config{2, 48000};
     err = snd_pcm_open(&playback_handle, device.c_str(), SND_PCM_STREAM_PLAYBACK, 0);
     if(err < 0) {
       std::cerr << "cannot open audio device " << device<< " " << snd_strerror(err) << std::endl;
@@ -180,7 +182,7 @@ int main(int argc, char *argv[])
       std::cout << "Starting configuration on " << device << std::endl;
     }
          
-    if(playback_config.supports_params(playback_handle)) {
+    if(test_config.configure(playback_handle)) {
       playback_devices.push_back(device);
     }
   }
@@ -197,25 +199,25 @@ int main(int argc, char *argv[])
     return 1;
   }
 
+  playback_config.configure(playback_handle);
   playback_config.install(playback_handle);
   snd_pcm_start(playback_handle);
 
-  char* buf;
-  buf = (char*)malloc(capture_config.get_period_bytes());
+  char* buffer = (char*)malloc(capture_config.get_period_bytes());
   unsigned seconds = 2;
   for(int loop = seconds * 1000000 / capture_config.get_period_time(); loop > 0; --loop) {
   std::cout << loop << std::endl;
-  //   err = snd_pcm_readi(capture_handle, buf, capture_config.get_period_bytes());
+  //   err = snd_pcm_readi(capture_handle, buffer, capture_config.get_period_bytes());
   //   if(err != capture_config.get_period_bytes()) {
   //     std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
   //     return 1;
   //   }
   // std::cout << "finish record" << std::endl;
-    if (err = read(0, buf, capture_config.get_period_bytes()) == 0) {
+    if (err = read(0, buffer, capture_config.get_period_bytes()) == 0) {
       printf("Early end of file.\n");
       return 0;
     }
-    err = snd_pcm_writei(playback_handle, buf, playback_config.get_period_frames());
+    err = snd_pcm_writei(playback_handle, buffer, playback_config.get_period_frames());
     if(err == -EPIPE) {
       snd_pcm_prepare(playback_handle);
     }
@@ -229,7 +231,7 @@ int main(int argc, char *argv[])
   snd_pcm_drain(playback_handle);
   snd_pcm_close(playback_handle);
 
-  free(buf);
+  free(buffer);
   return 0;
 }
 
