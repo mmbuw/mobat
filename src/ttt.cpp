@@ -6,6 +6,90 @@
 void output_cards();
 std::vector<std::string> get_pcms();
 
+struct config {
+  unsigned channels;
+  unsigned framerate;
+  snd_pcm_format_t format;
+  snd_pcm_access_t access;
+  snd_pcm_stream_t stream;
+  snd_pcm_hw_params_t* hw_params;
+
+  config(unsigned chan = 2, unsigned frames = 44000, snd_pcm_stream_t stream = SND_PCM_STREAM_PLAYBACK) :
+    channels{chan},
+    framerate{frames},
+    access{SND_PCM_ACCESS_RW_INTERLEAVED},
+    format{SND_PCM_FORMAT_S16_LE}
+  {
+    int err = snd_pcm_hw_params_malloc(&hw_params);
+    if(err < 0) {
+      std::cerr << "cannot allocate hardware parameter structure " << snd_strerror(err) << std::endl;
+    }
+  }
+
+  ~config() {
+    snd_pcm_hw_params_free(hw_params);
+  }
+
+  void install_params(snd_pcm_t* pcm_handle) {
+    // install configuration, calls "snd_pcm_prepare" on handle automatically
+    int err = snd_pcm_hw_params(pcm_handle, hw_params);
+    if(err < 0) {
+      std::cerr << "cannot set parameters " << snd_strerror(err) << std::endl;
+    }
+  }
+
+  snd_pcm_hw_params_t* get_params() {
+    return hw_params;
+  }
+
+  bool supports_params(snd_pcm_t* pcm_handle) {
+
+    // err = snd_pcm_open(&capture_handle, device.c_str(), SND_PCM_STREAM_CAPTURE, 0);
+    // if(err < 0) {
+    //   std::cerr << "cannot open audio device " << device<< " " << snd_strerror(err) << std::endl;
+    //   return false;
+    // }
+    // else {
+    //   std::cout << "Starting configuration on " << device << std::endl;
+    // }
+         
+    int err = snd_pcm_hw_params_any(pcm_handle, hw_params);
+    if(err < 0) {
+      std::cerr << "cannot initialize hardware parameter structure " << snd_strerror(err) << std::endl;
+      return false;
+    }
+
+    err = snd_pcm_hw_params_set_access(pcm_handle, hw_params, access);
+    if(err < 0) {
+      std::cerr << "cannot set access type " << snd_strerror(err) << std::endl;
+      return false;
+    }
+
+    err = snd_pcm_hw_params_set_format(pcm_handle, hw_params, format);
+    if(err < 0) {
+      std::cerr << "cannot set sample format " << snd_strerror(err) << std::endl;
+      return false;
+    }
+    unsigned new_framerate = framerate;
+    err = snd_pcm_hw_params_set_rate_near(pcm_handle, hw_params, &new_framerate, 0);
+    if(err < 0) {
+      std::cerr << "cannot set sample rate " << snd_strerror(err) << std::endl;
+      return false;
+    }
+    // else {
+    //   std::cout << "Rate set to " << new_framerate << std::endl;
+    // }
+
+    err = snd_pcm_hw_params_set_channels(pcm_handle, hw_params, channels);
+    if(err < 0) {
+      std::cerr << "cannot set channel count " << snd_strerror(err) << std::endl;
+      return false;
+    }
+
+    return true;
+  }
+};
+
 int main(int argc, char *argv[])
 {
   output_cards();
@@ -19,16 +103,8 @@ int main(int argc, char *argv[])
   }
 
   std::cout << "----testing PCMs----------------------------------------------" << std::endl;
-  unsigned num_channels = 1;
   snd_pcm_t *capture_handle;
-  snd_pcm_hw_params_t *hw_params;
-  unsigned frame_rate = 48000;
-
-  err = snd_pcm_hw_params_malloc(&hw_params);
-  if(err < 0) {
-    std::cerr << "cannot allocate hardware parameter structure " << snd_strerror(err) << std::endl;
-    return 1;
-  }
+  config capture_config{2, 48000};
 
   std::vector<std::string> capture_devices{};
   for(auto const& device : devices) {
@@ -41,40 +117,9 @@ int main(int argc, char *argv[])
       std::cout << "Starting configuration on " << device << std::endl;
     }
          
-    err = snd_pcm_hw_params_any(capture_handle, hw_params);
-    if(err < 0) {
-      std::cerr << "cannot initialize hardware parameter structure " << snd_strerror(err) << std::endl;
-      continue;
+    if(capture_config.supports_params(capture_handle)) {
+     capture_devices.push_back(device);  
     }
-
-    err = snd_pcm_hw_params_set_access(capture_handle, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED);
-    if(err < 0) {
-      std::cerr << "cannot set access type " << snd_strerror(err) << std::endl;
-      continue;
-    }
-
-    err = snd_pcm_hw_params_set_format(capture_handle, hw_params, SND_PCM_FORMAT_S32_LE);
-    if(err < 0) {
-      std::cerr << "cannot set sample format " << snd_strerror(err) << std::endl;
-      continue;
-    }
-
-    err = snd_pcm_hw_params_set_rate_near(capture_handle, hw_params, &frame_rate, 0);
-    if(err < 0) {
-      std::cerr << "cannot set sample rate " << snd_strerror(err) << std::endl;
-      continue;
-    }
-    else {
-      std::cout << "Rate set to " << frame_rate << std::endl;
-    }
-
-    err = snd_pcm_hw_params_set_channels(capture_handle, hw_params, num_channels);
-    if(err < 0) {
-      std::cerr << "cannot set channel count " << snd_strerror(err) << std::endl;
-      continue;
-    }
-
-    capture_devices.push_back(device);
   }
 
   std::cout << "----recording PCMs----------------------------------------------" << std::endl;
@@ -89,16 +134,11 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  // install configuration, calls "snd_pcm_prepare" on handle automatically
-  err = snd_pcm_hw_params(capture_handle, hw_params);
-  if(err < 0) {
-    std::cerr << "cannot set parameters " << snd_strerror(err) << std::endl;
-    return 1;
-  }
+  capture_config.install_params(capture_handle);
 
 
   std::cout << "----testing PCMs----------------------------------------------" << std::endl;
-
+  config playback_config{2, 48000};
   snd_pcm_t *playback_handle;
   std::vector<std::string> playback_devices{};
   for(auto const& device : devices) {
@@ -111,38 +151,9 @@ int main(int argc, char *argv[])
       std::cout << "Starting configuration on " << device << std::endl;
     }
          
-    err = snd_pcm_hw_params_any(playback_handle, hw_params);
-    if(err < 0) {
-      std::cerr << "cannot initialize hardware parameter structure " << snd_strerror(err) << std::endl;
-      continue;
+    if(playback_config.supports_params(playback_handle)) {
+      playback_devices.push_back(device);
     }
-
-    err = snd_pcm_hw_params_set_access(playback_handle, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED);
-    if(err < 0) {
-      std::cerr << "cannot set access type " << snd_strerror(err) << std::endl;
-      continue;
-    }
-
-    err = snd_pcm_hw_params_set_format(playback_handle, hw_params, SND_PCM_FORMAT_S32_LE);
-    if(err < 0) {
-      std::cerr << "cannot set sample format " << snd_strerror(err) << std::endl;
-      continue;
-    }
-
-    // force recording framerate 
-    err = snd_pcm_hw_params_set_rate(playback_handle, hw_params, frame_rate, 0);
-    if(err < 0) {
-      std::cerr << "cannot set sample rate " << snd_strerror(err) << std::endl;
-      continue;
-    }
-
-    err = snd_pcm_hw_params_set_channels(playback_handle, hw_params, num_channels);
-    if(err < 0) {
-      std::cerr << "cannot set channel count " << snd_strerror(err) << std::endl;
-      continue;
-    }
-
-    playback_devices.push_back(device);
   }
 
   std::cout << "----playback PCMs----------------------------------------------" << std::endl;
@@ -157,48 +168,49 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  // install configuration, calls "snd_pcm_prepare" on handle automatically
-  err = snd_pcm_hw_params(playback_handle, hw_params);
-  if(err < 0) {
-    std::cerr << "cannot set parameters " << snd_strerror(err) << std::endl;
-    return 1;
-  }
+  playback_config.install_params(playback_handle);
+  snd_pcm_start(playback_handle);
 
   snd_pcm_uframes_t period_size;
   // is supposed to return size of one period (necessary buffer size)
-  snd_pcm_hw_params_get_period_size(hw_params, &period_size, 0);
+  snd_pcm_hw_params_get_period_size(capture_config.get_params(), &period_size, 0);
 
   // how long a period takes in us
-  unsigned frame_time;
-  snd_pcm_hw_params_get_period_time(hw_params, &frame_time, 0);
+  unsigned period_time;
+  snd_pcm_hw_params_get_period_time(capture_config.get_params(), &period_time, 0);
 
-  // 8 * sample_format_bits * num_channels
-  unsigned buffer_size = 8 * 32 * num_channels;
-  short buf[period_size * num_channels * 2];
-  unsigned seconds = 1;
-  for(unsigned loop = (seconds * 1000000) / frame_time; loop > 0; --loop) {
-    err = snd_pcm_readi(capture_handle, buf, period_size);
-    if(err != period_size) {
-      std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
-      return 1;
+  // frames per sample * channels * samplesize(2 Byte)
+  char* buf;
+  buf = (char*)malloc(period_size * num_channels * 2);
+  unsigned seconds = 2;
+  for(int loop = seconds * 1000000 / period_time; loop > 0; --loop) {
+  std::cout << loop << std::endl;
+  //   err = snd_pcm_readi(capture_handle, buf, period_size);
+  //   if(err != period_size) {
+  //     std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
+  //     return 1;
+  //   }
+  // std::cout << "finish record" << std::endl;
+    if (err = read(0, buf, period_size * num_channels * 2) == 0) {
+      printf("Early end of file.\n");
+      return 0;
     }
-
     err = snd_pcm_writei(playback_handle, buf, period_size);
     if(err == -EPIPE) {
       snd_pcm_prepare(playback_handle);
     }
-    else {
+    else if (err != period_size) {
       std::cerr << "write to audio interface failed " << snd_strerror(err) << std::endl;
       return 1;
     }
   }
 
-  snd_pcm_close(capture_handle);
+  // snd_pcm_close(capture_handle);
   snd_pcm_drain(playback_handle);
-  snd_pcm_close(playback_handle);
+  // snd_pcm_close(playback_handle);
 
-  snd_pcm_hw_params_free(hw_params);
-
+  // snd_pcm_hw_params_free(hw_params);
+  free(buf);
   return 0;
 }
 
