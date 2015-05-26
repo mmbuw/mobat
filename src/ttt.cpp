@@ -6,13 +6,8 @@
 void output_cards();
 std::vector<std::string> get_pcms();
 
-struct config {
-  unsigned channels;
-  unsigned framerate;
-  snd_pcm_format_t format;
-  snd_pcm_access_t access;
-  snd_pcm_stream_t stream;
-  snd_pcm_hw_params_t* hw_params;
+class config {
+ public:
 
   config(unsigned chan = 2, unsigned frames = 44000, snd_pcm_stream_t stream = SND_PCM_STREAM_PLAYBACK) :
     channels{chan},
@@ -30,7 +25,7 @@ struct config {
     snd_pcm_hw_params_free(hw_params);
   }
 
-  void install_params(snd_pcm_t* pcm_handle) {
+  void install(snd_pcm_t* pcm_handle) {
     // install configuration, calls "snd_pcm_prepare" on handle automatically
     int err = snd_pcm_hw_params(pcm_handle, hw_params);
     if(err < 0) {
@@ -88,6 +83,40 @@ struct config {
 
     return true;
   }
+
+  unsigned get_channels() {
+    return channels;
+  }
+
+  unsigned get_period_bytes() {
+    snd_pcm_uframes_t num_frames;
+    // number of frames per period
+    snd_pcm_hw_params_get_period_size(hw_params, &num_frames, 0);
+    // frames per period * channels * samplesize(2 Byte)
+    return num_frames * channels * 2;
+  }
+
+  unsigned get_period_time() {
+    // how long a period takes in us
+    unsigned period_time;
+    snd_pcm_hw_params_get_period_time(hw_params, &period_time, 0);
+    return period_time;
+  }
+
+  unsigned get_period_frames() {
+    snd_pcm_uframes_t num_frames;
+    // number of frames per period
+    snd_pcm_hw_params_get_period_size(hw_params, &num_frames, 0);
+    return num_frames;
+  }
+
+ private:
+  unsigned channels;
+  unsigned framerate;
+  snd_pcm_format_t format;
+  snd_pcm_access_t access;
+  snd_pcm_stream_t stream;
+  snd_pcm_hw_params_t* hw_params;
 };
 
 int main(int argc, char *argv[])
@@ -134,7 +163,7 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  capture_config.install_params(capture_handle);
+  capture_config.install(capture_handle);
 
 
   std::cout << "----testing PCMs----------------------------------------------" << std::endl;
@@ -168,48 +197,38 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  playback_config.install_params(playback_handle);
+  playback_config.install(playback_handle);
   snd_pcm_start(playback_handle);
 
-  snd_pcm_uframes_t period_size;
-  // is supposed to return size of one period (necessary buffer size)
-  snd_pcm_hw_params_get_period_size(capture_config.get_params(), &period_size, 0);
-
-  // how long a period takes in us
-  unsigned period_time;
-  snd_pcm_hw_params_get_period_time(capture_config.get_params(), &period_time, 0);
-
-  // frames per sample * channels * samplesize(2 Byte)
   char* buf;
-  buf = (char*)malloc(period_size * num_channels * 2);
+  buf = (char*)malloc(capture_config.get_period_bytes());
   unsigned seconds = 2;
-  for(int loop = seconds * 1000000 / period_time; loop > 0; --loop) {
+  for(int loop = seconds * 1000000 / capture_config.get_period_time(); loop > 0; --loop) {
   std::cout << loop << std::endl;
-  //   err = snd_pcm_readi(capture_handle, buf, period_size);
-  //   if(err != period_size) {
+  //   err = snd_pcm_readi(capture_handle, buf, capture_config.get_period_bytes());
+  //   if(err != capture_config.get_period_bytes()) {
   //     std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
   //     return 1;
   //   }
   // std::cout << "finish record" << std::endl;
-    if (err = read(0, buf, period_size * num_channels * 2) == 0) {
+    if (err = read(0, buf, capture_config.get_period_bytes()) == 0) {
       printf("Early end of file.\n");
       return 0;
     }
-    err = snd_pcm_writei(playback_handle, buf, period_size);
+    err = snd_pcm_writei(playback_handle, buf, playback_config.get_period_frames());
     if(err == -EPIPE) {
       snd_pcm_prepare(playback_handle);
     }
-    else if (err != period_size) {
+    else if (err != capture_config.get_period_frames()) {
       std::cerr << "write to audio interface failed " << snd_strerror(err) << std::endl;
       return 1;
     }
   }
 
-  // snd_pcm_close(capture_handle);
+  snd_pcm_close(capture_handle);
   snd_pcm_drain(playback_handle);
-  // snd_pcm_close(playback_handle);
+  snd_pcm_close(playback_handle);
 
-  // snd_pcm_hw_params_free(hw_params);
   free(buf);
   return 0;
 }
