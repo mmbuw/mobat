@@ -18,8 +18,7 @@ unsigned windowWidth  = 1900;
 unsigned windowHeight = 600;
 
 double* sample;
-unsigned char* generatedSnd; 
-
+unsigned char* generatedSnd;
 
 double processingTimeMicroSeconds = 0.0;
 void genTone(double freqOfTone, double sampleRate);
@@ -27,57 +26,47 @@ void genTone(double freqOfTone, double sampleRate);
 int main(int argc, char** argv) {
 
 	sf::VideoMode fullScreenMode = sf::VideoMode::getDesktopMode();
-	sf::Font arialFont;
-	arialFont.loadFromFile("../fonts/arial.ttf");
-	sf::RenderWindow window(fullScreenMode, "Fourier Vis", sf::Style::Fullscreen);
-	sf::RectangleShape fourierSampleRect_(sf::Vector2f(50,100));
+sf::Font arialFont;
+arialFont.loadFromFile("../fonts/arial.ttf");
+sf::RenderWindow window(fullScreenMode, "Fourier Vis", sf::Style::Fullscreen);
+sf::RectangleShape fourierSampleRect_(sf::Vector2f(50,100));
+sample = new double[currentNumSamples_];
+generatedSnd = new unsigned char[2*currentNumSamples_];
+genTone(currentFrequency_, currentSampleRate_);
+double *in;
+fftw_complex *out;
+fftw_plan fftw_exec_plan;
+fftw_plan fftw_exec_plan_reverse;
+in = (double*) fftw_malloc(sizeof(double) * N);
+out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * N);
+fftw_exec_plan = fftw_plan_dft_r2c_1d(N, in, out, FFTW_MEASURE);
+//fftw_exec_plan_reverse = fftw_plan_dft_c2r_1d(N, out, in, FFTW_MEASURE);
+for(unsigned signal_it = 0; signal_it < N; ++signal_it) {
+in[signal_it] = sample[signal_it];
+}
+std::chrono::system_clock::time_point before_fft = std::chrono::system_clock::now();
+fftw_execute(fftw_exec_plan);
+//fftw_execute(fftw_exec_plan_reverse);
+std::chrono::system_clock::time_point after_fft = std::chrono::system_clock::now();
+for(unsigned signal_it = 0; signal_it < N/2; ++signal_it) {
+//std::cout << "In: " << in[signal_it]/float(N) << " Out: " << out[signal_it][0] << "\n";
+}
+double maxAmplitude = -1.0f;
+for(unsigned signal_it = 0; signal_it < 100 - 1; ++signal_it) {
+//std::cout << "Freq: " << (signal_it * currentSampleRate_)/N<<"\n";//_Ampli: "<<
+double currentAmplitude = std::sqrt(out[signal_it][0]*out[signal_it][0] + out[signal_it][1]*out[signal_it][1]);
+//std::cout << "In: " << in[signal_it]/float(N) << " Out: "
+//<< currentAmplitude << "\n";
+maxAmplitude = maxAmplitude > currentAmplitude ? maxAmplitude : currentAmplitude;
+}
+std::cout << "fftw execution time: " <<
+std::chrono::duration_cast<std::chrono::microseconds>(after_fft - before_fft).count() << "\n";
+processingTimeMicroSeconds = std::chrono::duration_cast<std::chrono::microseconds>(after_fft - before_fft).count();
 
-	sample = new double[currentNumSamples_];
-	generatedSnd = new unsigned char[2*currentNumSamples_];
-
-	genTone(currentFrequency_, currentSampleRate_);
-	double *in;
-	fftw_complex *out;
-	fftw_plan fftw_exec_plan;
-	fftw_plan fftw_exec_plan_reverse;
-
-	in = (double*) fftw_malloc(sizeof(double) * N);
-	out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * N);
-
-
-	fftw_exec_plan = fftw_plan_dft_r2c_1d(N, in, out, FFTW_MEASURE);
-
-	//fftw_exec_plan_reverse = fftw_plan_dft_c2r_1d(N, out, in, FFTW_MEASURE);
-
-	for(unsigned signal_it = 0; signal_it < N; ++signal_it) {
-		in[signal_it] = sample[signal_it];
-	}
-    std::chrono::system_clock::time_point before_fft = std::chrono::system_clock::now();
-	fftw_execute(fftw_exec_plan);
-	//fftw_execute(fftw_exec_plan_reverse);
-	std::chrono::system_clock::time_point after_fft = std::chrono::system_clock::now();
-
-	for(unsigned signal_it = 0; signal_it < N/2; ++signal_it) {
-		//std::cout << "In: " << in[signal_it]/float(N) << "   Out: " << out[signal_it][0] << "\n";
-	}
-
-	double maxAmplitude = -1.0f;
-	for(unsigned signal_it = 0; signal_it < 100 - 1; ++signal_it) {
-		//std::cout << "Freq: " << (signal_it * currentSampleRate_)/N<<"\n";//_Ampli: "<<
-
-		double currentAmplitude = std::sqrt(out[signal_it][0]*out[signal_it][0] + out[signal_it][1]*out[signal_it][1]);
-		//std::cout << "In: " << in[signal_it]/float(N) << "   Out: " 
-		//<< currentAmplitude << "\n";
-
-		maxAmplitude = maxAmplitude > currentAmplitude ? maxAmplitude : currentAmplitude;
-	}
-
-	std::cout << "fftw execution time: " << 
-	std::chrono::duration_cast<std::chrono::microseconds>(after_fft - before_fft).count() << "\n";
-	processingTimeMicroSeconds = std::chrono::duration_cast<std::chrono::microseconds>(after_fft - before_fft).count();
 
     while (window.isOpen())
     {
+
         sf::Event event;
         while (window.pollEvent(event))
         {
@@ -132,7 +121,7 @@ int main(int argc, char** argv) {
 						in[signal_it] = sample[signal_it];
 					}
 					 before_fft = std::chrono::system_clock::now();
-					fftw_execute(fftw_exec_plan);
+					 fftw_execute(fftw_exec_plan);
 					 after_fft = std::chrono::system_clock::now();
 					 processingTimeMicroSeconds = std::chrono::duration_cast<std::chrono::microseconds>(after_fft - before_fft).count();
 
@@ -160,7 +149,14 @@ int main(int argc, char** argv) {
         sf::Text frequencyLabel("0",arialFont);
         frequencyLabel.setCharacterSize(20);
         frequencyLabel.setPosition(0,windowHeight - frequencyLabel.getCharacterSize());
-        frequencyLabel.setColor(sf::Color::Red);
+
+        if(frequencyLabel.getColor() == sf::Color::Red) {
+             frequencyLabel.setColor(sf::Color::Green);  	
+        } else {
+       		frequencyLabel.setColor(sf::Color::Green);  	
+        }
+
+
 
         sf::Text fourierWindowSizeLabel("",arialFont);
         	fourierWindowSizeLabel.setCharacterSize(20);
@@ -192,7 +188,7 @@ int main(int argc, char** argv) {
 
 			moved_width += windowWidth/(N/2-1); 
 
-			if(moved_width == 0.0) {
+			if(moved_width > 7 * fourierWindowSizeLabel.getCharacterSize()) {
 				frequencyLabel.setString( std::to_string((signal_it * currentSampleRate_)/N ) );
 		    	window.draw(frequencyLabel);
 		       moved_width = 0.0;
@@ -210,27 +206,25 @@ int main(int argc, char** argv) {
 	fftw_free(out);
 
 	delete sample;
-	delete generatedSnd;
 	return 0;
 }
 
 
+
 void genTone(double freqOfTone, double sampleRate){
-    // fill out the array
-    for (int i = 0; i < currentNumSamples_; ++i) {
-        sample[i] = std::sin(2 * M_PI * i / (sampleRate/freqOfTone));
-    }
-
-    // convert to 16 bit pcm sound array
-    // assumes the sample buffer is normalised.
-    int idx = 0;
-    for (int sample_idx = 0; sample_idx < currentNumSamples_; ++sample_idx) {
-        // scale to maximum amplitude
-        double dVal = sample[sample_idx];
-        short val = (short) ((dVal * 32767));
-        // in 16 bit wav PCM, first byte is the low order byte
-        generatedSnd[idx++] = (unsigned char) (val & 0x00ff);
-        generatedSnd[idx++] = (unsigned char) ((val & 0xff00) >> 8);
-
-    }
+// fill out the array
+for (int i = 0; i < currentNumSamples_; ++i) {
+sample[i] = std::sin(2 * M_PI * i / (sampleRate/freqOfTone));
+}
+// convert to 16 bit pcm sound array
+// assumes the sample buffer is normalised.
+int idx = 0;
+for (int sample_idx = 0; sample_idx < currentNumSamples_; ++sample_idx) {
+// scale to maximum amplitude
+double dVal = sample[sample_idx];
+short val = (short) ((dVal * 32767));
+// in 16 bit wav PCM, first byte is the low order byte
+generatedSnd[idx++] = (unsigned char) (val & 0x00ff);
+generatedSnd[idx++] = (unsigned char) ((val & 0xff00) >> 8);
+}
 }
