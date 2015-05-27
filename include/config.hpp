@@ -17,12 +17,18 @@ class Config {
   bool is_supported(snd_pcm_t* pcm_handle) const;
 
   unsigned channels() const;
-
+  
+  // return size of buffer required to record one period
   unsigned period_bytes() const;
 
+  // return time a period takes in us
   unsigned period_time() const;
 
+  // return number of samples during one period
   unsigned period_frames() const;
+
+  // returns size of buffer required to record time of useconds
+  unsigned buffer_bytes(unsigned useconds) const;
 
  private:
   bool configure(snd_pcm_t* pcm_handle);

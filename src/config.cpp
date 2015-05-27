@@ -134,11 +134,8 @@ unsigned Config::channels() const {
 }
 
 unsigned Config::period_bytes() const {
-  snd_pcm_uframes_t num_frames;
-  // number of frames per period
-  snd_pcm_hw_params_get_period_size(params_, &num_frames, 0);
   // frames per period * channels * samplesize(2 Byte)
-  return num_frames * channels_ * 2;
+  return period_frames() * channels_ * 2;
 }
 
 unsigned Config::period_time() const {
@@ -153,4 +150,8 @@ unsigned Config::period_frames() const {
   // number of frames per period
   snd_pcm_hw_params_get_period_size(params_, &num_frames, 0);
   return num_frames;
+}
+
+unsigned Config::buffer_bytes(unsigned useconds) const {
+  return period_bytes() * useconds / period_time();
 }
