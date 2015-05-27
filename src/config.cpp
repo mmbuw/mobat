@@ -17,11 +17,13 @@ Config::~Config() {
   snd_pcm_hw_params_free(params);
 }
 
-void Config::install(snd_pcm_t* pcm_handle) const {
-  // install configuration, calls "snd_pcm_prepare" on handle automatically
-  int err = snd_pcm_hw_params(pcm_handle, params);
-  if(err < 0) {
-    std::cerr << "cannot set parameters - " << snd_strerror(err) << std::endl;
+void Config::install(snd_pcm_t* pcm_handle) {
+  if(configure(pcm_handle)) {
+    // install configuration, calls "snd_pcm_prepare" on handle automatically
+    int err = snd_pcm_hw_params(pcm_handle, params);
+    if(err < 0) {
+      std::cerr << "cannot set parameters - " << snd_strerror(err) << std::endl;
+    }
   }
 }
 
@@ -72,6 +74,54 @@ bool Config::configure(snd_pcm_t* pcm_handle) {
   // }
 
   err = snd_pcm_hw_params_set_channels(pcm_handle, params, channels);
+  if(err < 0) {
+    std::cerr << "cannot set channel count - " << snd_strerror(err) << std::endl;
+    return false;
+  }
+  std::cout << std::endl;
+  return true;
+}
+
+bool Config::test(snd_pcm_t* pcm_handle) const{
+
+  // err = snd_pcm_open(&capture_handle, device.c_str(), SND_PCM_STREAM_CAPTURE, 0);
+  // if(err < 0) {
+  //   std::cerr << "cannot open audio device " << device<< " - " << snd_strerror(err) << std::endl;
+  //   return false;
+  // }
+  // else {
+  //   std::cout << "Starting configuration on " << device << std::endl;
+  // }
+  std::cout << snd_pcm_name(pcm_handle) << ": ";
+       
+  int err = snd_pcm_hw_params_any(pcm_handle, params);
+  if(err < 0) {
+    std::cerr << "cannot initialize hardware parameter structure - " << snd_strerror(err) << std::endl;
+    return false;
+  }
+
+  err = snd_pcm_hw_params_test_access(pcm_handle, params, access);
+  if(err < 0) {
+    std::cerr << "cannot set access type - " << snd_strerror(err) << std::endl;
+    return false;
+  }
+
+  err = snd_pcm_hw_params_test_format(pcm_handle, params, format);
+  if(err < 0) {
+    std::cerr << "cannot set sample format - " << snd_strerror(err) << std::endl;
+    return false;
+  }
+
+  err = snd_pcm_hw_params_test_rate(pcm_handle, params, framerate, 0);
+  if(err < 0) {
+    std::cerr << "cannot set sample rate - " << snd_strerror(err) << std::endl;
+    return false;
+  }
+  // else {
+  //   std::cout << "Rate set to " << new_framerate << std::endl;
+  // }
+
+  err = snd_pcm_hw_params_test_channels(pcm_handle, params, channels);
   if(err < 0) {
     std::cerr << "cannot set channel count - " << snd_strerror(err) << std::endl;
     return false;

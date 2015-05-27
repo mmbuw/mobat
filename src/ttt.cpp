@@ -20,14 +20,13 @@ int main(int argc, char *argv[])
 
   std::cout << "----testing PCMs----------------------------------------------" << std::endl;
   // snd_pcm_t *capture_handle;
-  Config capture_config{2, 48000};
+  Config capture_config{1, 48000};
 
   std::vector<std::string> capture_devices{};
   for(auto const& device : devices) {
-    Config test_config{2, 48000};
     snd_pcm_t* test_handle = open_device(device, SND_PCM_STREAM_CAPTURE);
     if(test_handle) {
-      if(test_config.configure(test_handle)) {
+      if(capture_config.test(test_handle)) {
        capture_devices.push_back(device);  
       }
       snd_pcm_close(test_handle);
@@ -50,18 +49,17 @@ int main(int argc, char *argv[])
   snd_pcm_t* capture_handle = open_device(capture_device, SND_PCM_STREAM_CAPTURE);
   if(!capture_handle) return 1;
 
-  capture_config.configure(capture_handle);
   capture_config.install(capture_handle);
 
 
   std::cout << "----testing PCMs----------------------------------------------" << std::endl;
-  Config playback_config{2, 48000};
+  Config playback_config{1, 48000};
   snd_pcm_t* playback_handle;
   std::vector<std::string> playback_devices{};
   for(auto const& device : devices) {
     playback_handle = open_device(device, SND_PCM_STREAM_PLAYBACK);
     if(playback_handle) {
-      if(playback_config.configure(playback_handle)) {
+      if(playback_config.test(playback_handle)) {
         playback_devices.push_back(device);
       }
       snd_pcm_close(playback_handle);
@@ -77,18 +75,37 @@ int main(int argc, char *argv[])
   playback_handle = open_device(playback_device, SND_PCM_STREAM_PLAYBACK);
   if(!playback_handle) return 1;
 
-  playback_config.configure(playback_handle);
   playback_config.install(playback_handle);
 
   char* buffer = (char*)malloc(capture_config.get_period_bytes());
   unsigned seconds = 2;
   for(int loop = seconds * 1000000 / capture_config.get_period_time(); loop > 0; --loop) {
-  std::cout << loop << std::endl;
     err = snd_pcm_readi(capture_handle, buffer, capture_config.get_period_frames());
     if(err != capture_config.get_period_frames()) {
       std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
       return 1;
     }
+
+    // if (err = read(0, buffer, capture_config.get_period_bytes()) == 0) {
+    //   printf("Early end of file.\n");
+    //   return 0;
+    // }
+
+    // err = snd_pcm_writei(playback_handle, buffer, playback_config.get_period_frames());
+    // if(err == -EPIPE) {
+    //   snd_pcm_prepare(playback_handle);
+    // }
+    // else if (err != capture_config.get_period_frames()) {
+    //   std::cerr << "write to audio interface failed " << snd_strerror(err) << std::endl;
+    //   return 1;
+    // }
+  }  
+  for(int loop = seconds * 1000000 / capture_config.get_period_time(); loop > 0; --loop) {
+    // err = snd_pcm_readi(capture_handle, buffer, capture_config.get_period_frames());
+    // if(err != capture_config.get_period_frames()) {
+    //   std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
+    //   return 1;
+    // }
 
     // if (err = read(0, buffer, capture_config.get_period_bytes()) == 0) {
     //   printf("Early end of file.\n");
@@ -104,7 +121,6 @@ int main(int argc, char *argv[])
     //   return 1;
     // }
   }
-
   snd_pcm_close(capture_handle);
 
   snd_pcm_drain(playback_handle);

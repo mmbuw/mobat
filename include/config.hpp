@@ -7,11 +7,11 @@ class Config {
 
   ~Config();
 
-  void install(snd_pcm_t* pcm_handle) const;
+  void install(snd_pcm_t* pcm_handle);
 
   snd_pcm_hw_params_t* get_params();
 
-  bool configure(snd_pcm_t* pcm_handle);
+  bool test(snd_pcm_t* pcm_handle) const;
 
   unsigned get_channels() const;
 
@@ -22,6 +22,8 @@ class Config {
   unsigned get_period_frames() const;
 
  private:
+  bool configure(snd_pcm_t* pcm_handle);
+  
   unsigned channels;
   unsigned framerate;
   snd_pcm_format_t format;
