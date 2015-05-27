@@ -9,24 +9,24 @@ class Config {
 
   void install(snd_pcm_t* pcm_handle);
 
-  snd_pcm_hw_params_t* get_params();
+  snd_pcm_hw_params_t* params();
 
   bool test(snd_pcm_t* pcm_handle) const;
 
-  unsigned get_channels() const;
+  unsigned channels() const;
 
-  unsigned get_period_bytes() const;
+  unsigned period_bytes() const;
 
-  unsigned get_period_time() const;
+  unsigned period_time() const;
 
-  unsigned get_period_frames() const;
+  unsigned period_frames() const;
 
  private:
   bool configure(snd_pcm_t* pcm_handle);
   
-  unsigned channels;
-  unsigned framerate;
-  snd_pcm_format_t format;
-  snd_pcm_access_t access;
-  snd_pcm_hw_params_t* params;
+  unsigned channels_;
+  unsigned framerate_;
+  snd_pcm_format_t format_;
+  snd_pcm_access_t access_;
+  snd_pcm_hw_params_t* params_;
 };

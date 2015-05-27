@@ -77,50 +77,30 @@ int main(int argc, char *argv[])
 
   playback_config.install(playback_handle);
 
-  char* buffer = (char*)malloc(capture_config.get_period_bytes());
+  char* buffer = (char*)malloc(capture_config.period_bytes());
   unsigned seconds = 2;
-  for(int loop = seconds * 1000000 / capture_config.get_period_time(); loop > 0; --loop) {
-    err = snd_pcm_readi(capture_handle, buffer, capture_config.get_period_frames());
-    if(err != capture_config.get_period_frames()) {
+  for(int loop = seconds * 1000000 / capture_config.period_time(); loop > 0; --loop) {
+    err = snd_pcm_readi(capture_handle, buffer, capture_config.period_frames());
+    if(err != capture_config.period_frames()) {
       std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
       return 1;
     }
 
-    // if (err = read(0, buffer, capture_config.get_period_bytes()) == 0) {
+    // if (err = read(0, buffer, capture_config.period_bytes()) == 0) {
     //   printf("Early end of file.\n");
     //   return 0;
     // }
 
-    // err = snd_pcm_writei(playback_handle, buffer, playback_config.get_period_frames());
-    // if(err == -EPIPE) {
-    //   snd_pcm_prepare(playback_handle);
-    // }
-    // else if (err != capture_config.get_period_frames()) {
-    //   std::cerr << "write to audio interface failed " << snd_strerror(err) << std::endl;
-    //   return 1;
-    // }
-  }  
-  for(int loop = seconds * 1000000 / capture_config.get_period_time(); loop > 0; --loop) {
-    // err = snd_pcm_readi(capture_handle, buffer, capture_config.get_period_frames());
-    // if(err != capture_config.get_period_frames()) {
-    //   std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
-    //   return 1;
-    // }
-
-    // if (err = read(0, buffer, capture_config.get_period_bytes()) == 0) {
-    //   printf("Early end of file.\n");
-    //   return 0;
-    // }
-
-    err = snd_pcm_writei(playback_handle, buffer, playback_config.get_period_frames());
+    err = snd_pcm_writei(playback_handle, buffer, playback_config.period_frames());
     if(err == -EPIPE) {
       snd_pcm_prepare(playback_handle);
     }
-    // else if (err != capture_config.get_period_frames()) {
-    //   std::cerr << "write to audio interface failed " << snd_strerror(err) << std::endl;
-    //   return 1;
-    // }
-  }
+    else if (err != capture_config.period_frames()) {
+      std::cerr << "write to audio interface failed " << snd_strerror(err) << std::endl;
+      return 1;
+    }
+  }  
+
   snd_pcm_close(capture_handle);
 
   snd_pcm_drain(playback_handle);
