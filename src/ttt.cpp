@@ -6,6 +6,7 @@
 void output_cards();
 std::vector<std::string> get_pcms();
 snd_pcm_t* open_device(std::string const&, snd_pcm_stream_t);
+std::vector<std::string> get_supporting_devices(std::vector<std::string> const&, Config const&, snd_pcm_stream_t);
 
 int main(int argc, char *argv[])
 {
@@ -14,22 +15,13 @@ int main(int argc, char *argv[])
   int err;
 
   std::vector<std::string> devices{get_pcms()};
-
   for(auto device : devices) {
     std::cout << std::string{device} << std::endl;
   }
 
   std::cout << "----testing PCMs----------------------------------------------" << std::endl;
   Config capture_config{1, 48000};
-  std::vector<std::string> capture_devices{};
-  for(auto const& curr_device : devices) {
-    device test_handle{curr_device, SND_PCM_STREAM_CAPTURE};
-    if(test_handle) {
-      if(capture_config.is_supported(test_handle)) {
-       capture_devices.push_back(curr_device);  
-      }
-    }
-  }
+  std::vector<std::string> capture_devices{get_supporting_devices(devices, capture_config, SND_PCM_STREAM_CAPTURE)};
 
   std::cout << "----recording PCMs----------------------------------------------" << std::endl;
   std::string capture_name{capture_devices[0]};
@@ -44,7 +36,7 @@ int main(int argc, char *argv[])
   }
 
   // open chosen device
-  device capture_device {capture_name, SND_PCM_STREAM_CAPTURE};
+  device capture_device{capture_name, SND_PCM_STREAM_CAPTURE};
   if(!capture_device) return 1;
 
   capture_config.install(capture_device);
@@ -52,22 +44,14 @@ int main(int argc, char *argv[])
 
   std::cout << "----testing PCMs----------------------------------------------" << std::endl;
   Config playback_config{1, 48000};
-  std::vector<std::string> playback_devices{};
-  for(auto const& curr_device : devices) {
-    device playback_device {curr_device, SND_PCM_STREAM_PLAYBACK};
-    if(playback_device) {
-      if(playback_config.is_supported(playback_device)) {
-        playback_devices.push_back(curr_device);
-      }
-    }
-  }
+  std::vector<std::string> playback_devices{get_supporting_devices(devices, playback_config, SND_PCM_STREAM_PLAYBACK)};
 
   std::cout << "----playback PCMs----------------------------------------------" << std::endl;
   for(auto device : playback_devices) {
     std::cout << device << std::endl;
   }
   // open chosen device
-  device playback_device {playback_devices[0], SND_PCM_STREAM_PLAYBACK};
+  device playback_device{playback_devices[0], SND_PCM_STREAM_PLAYBACK};
   if(!playback_device) return 1;
 
   playback_config.install(playback_device);
@@ -100,6 +84,19 @@ int main(int argc, char *argv[])
 
   free(buffer);
   return 0;
+}
+
+std::vector<std::string> get_supporting_devices(std::vector<std::string> const& devices, Config const& config, snd_pcm_stream_t type) {
+  std::vector<std::string> supporting_devices{};
+  for(auto const& curr_device : devices) {
+    device test_handle{curr_device, type};
+    if(test_handle) {
+      if(config.is_supported(test_handle)) {
+       supporting_devices.push_back(curr_device);  
+      }
+    }
+  }
+  return supporting_devices;
 }
 
 std::vector<std::string> get_pcms() {
