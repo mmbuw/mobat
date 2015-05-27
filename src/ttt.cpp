@@ -9,7 +9,7 @@ snd_pcm_t* open_device(std::string const&, snd_pcm_stream_t);
 
 int main(int argc, char *argv[])
 {
-  output_cards();
+  // output_cards();
 
   int err;
 
@@ -48,27 +48,27 @@ int main(int argc, char *argv[])
   capture_config.install(capture_handle);
 
 
-  // std::cout << "----testing PCMs----------------------------------------------" << std::endl;
+  std::cout << "----testing PCMs----------------------------------------------" << std::endl;
   Config playback_config{2, 48000};
+  snd_pcm_t* playback_handle;
   std::vector<std::string> playback_devices{};
   for(auto const& device : devices) {
-    Config test_config{2, 48000};
-    snd_pcm_t* test_handle = open_device(device, SND_PCM_STREAM_PLAYBACK);
-    if(test_handle) {
-      if(test_config.configure(test_handle)) {
+    playback_handle = open_device(device, SND_PCM_STREAM_PLAYBACK);
+    if(playback_handle) {
+      if(playback_config.configure(playback_handle)) {
         playback_devices.push_back(device);
       }
-      snd_pcm_close(test_handle);
+      snd_pcm_close(playback_handle);
     }
   }
 
-  // std::cout << "----playback PCMs----------------------------------------------" << std::endl;
-  // for(auto device : playback_devices) {
-  //   std::cout << device << std::endl;
-  // }
+  std::cout << "----playback PCMs----------------------------------------------" << std::endl;
+  for(auto device : playback_devices) {
+    std::cout << device << std::endl;
+  }
   // open chosen device
   std::string playback_device{devices[0]};
-  snd_pcm_t* playback_handle = open_device(playback_device, SND_PCM_STREAM_PLAYBACK);
+  playback_handle = open_device(playback_device, SND_PCM_STREAM_PLAYBACK);
   if(!playback_handle) return 1;
 
   playback_config.configure(playback_handle);
@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
       printf("Early end of file.\n");
       return 0;
     }
-    
+
     err = snd_pcm_writei(playback_handle, buffer, playback_config.get_period_frames());
     if(err == -EPIPE) {
       snd_pcm_prepare(playback_handle);
