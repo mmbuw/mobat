@@ -1,3 +1,6 @@
+#ifndef CONFIG_HPP
+#define CONFIG_HPP
+
 // requires libasound2-dev
 #include </usr/include/alsa/asoundlib.h>
 
@@ -11,7 +14,7 @@ class Config {
 
   snd_pcm_hw_params_t* params();
 
-  bool test(snd_pcm_t* pcm_handle) const;
+  bool is_supported(snd_pcm_t* pcm_handle) const;
 
   unsigned channels() const;
 
@@ -30,3 +33,5 @@ class Config {
   snd_pcm_access_t access_;
   snd_pcm_hw_params_t* params_;
 };
+
+#endif //CONFIG_HPP 

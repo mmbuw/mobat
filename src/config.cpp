@@ -32,7 +32,10 @@ snd_pcm_hw_params_t* Config::params() {
 }
 
 bool Config::configure(snd_pcm_t* pcm_handle) {
-
+  if(!pcm_handle) {
+    std::cerr << "Config::is_supported - device not initialized" << std::endl;
+    return false;
+  }
   // err = snd_pcm_open(&capture_handle, device.c_str(), SND_PCM_STREAM_CAPTURE, 0);
   // if(err < 0) {
   //   std::cerr << "cannot open audio device " << device<< " - " << snd_strerror(err) << std::endl;
@@ -82,16 +85,12 @@ bool Config::configure(snd_pcm_t* pcm_handle) {
   return true;
 }
 
-bool Config::test(snd_pcm_t* pcm_handle) const{
+bool Config::is_supported(snd_pcm_t* pcm_handle) const{
+  if(!pcm_handle) {
+    std::cerr << "Config::is_supported - device not initialized" << std::endl;
+    return false;
+  }
 
-  // err = snd_pcm_open(&capture_handle, device.c_str(), SND_PCM_STREAM_CAPTURE, 0);
-  // if(err < 0) {
-  //   std::cerr << "cannot open audio device " << device<< " - " << snd_strerror(err) << std::endl;
-  //   return false;
-  // }
-  // else {
-  //   std::cout << "Starting configuration on " << device << std::endl;
-  // }
   std::cout << snd_pcm_name(pcm_handle) << ": ";
        
   int err = snd_pcm_hw_params_any(pcm_handle, params_);

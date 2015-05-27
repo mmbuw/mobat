@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include "config.hpp"
+#include "device.hpp"
 
 void output_cards();
 std::vector<std::string> get_pcms();
@@ -19,50 +20,45 @@ int main(int argc, char *argv[])
   }
 
   std::cout << "----testing PCMs----------------------------------------------" << std::endl;
-  // snd_pcm_t *capture_handle;
   Config capture_config{1, 48000};
-
   std::vector<std::string> capture_devices{};
-  for(auto const& device : devices) {
-    snd_pcm_t* test_handle = open_device(device, SND_PCM_STREAM_CAPTURE);
+  for(auto const& curr_device : devices) {
+    device test_handle{curr_device, SND_PCM_STREAM_CAPTURE};
     if(test_handle) {
-      if(capture_config.test(test_handle)) {
-       capture_devices.push_back(device);  
+      if(capture_config.is_supported(test_handle)) {
+       capture_devices.push_back(curr_device);  
       }
-      snd_pcm_close(test_handle);
     }
   }
 
   std::cout << "----recording PCMs----------------------------------------------" << std::endl;
-  std::string capture_device{capture_devices[0]};
+  std::string capture_name{capture_devices[0]};
   for(auto device : capture_devices) {
     if(device == "sysdefault:CARD=UMC404") {
-      capture_device = device;
+      capture_name = device;
       break;
     }
   }
-  if(capture_device == capture_devices[0]) {
+  if(capture_name == capture_devices[0]) {
     std::cerr << "Behringer UMC not found, using default recording device" << std::endl;
   }
 
   // open chosen device
-  snd_pcm_t* capture_handle = open_device(capture_device, SND_PCM_STREAM_CAPTURE);
-  if(!capture_handle) return 1;
+  device capture_device {capture_name, SND_PCM_STREAM_CAPTURE};
+  if(!capture_device) return 1;
 
-  capture_config.install(capture_handle);
+  capture_config.install(capture_device);
 
 
   std::cout << "----testing PCMs----------------------------------------------" << std::endl;
   Config playback_config{1, 48000};
-  snd_pcm_t* playback_handle;
   std::vector<std::string> playback_devices{};
-  for(auto const& device : devices) {
-    playback_handle = open_device(device, SND_PCM_STREAM_PLAYBACK);
-    if(playback_handle) {
-      if(playback_config.test(playback_handle)) {
-        playback_devices.push_back(device);
+  for(auto const& curr_device : devices) {
+    device playback_device {curr_device, SND_PCM_STREAM_PLAYBACK};
+    if(playback_device) {
+      if(playback_config.is_supported(playback_device)) {
+        playback_devices.push_back(curr_device);
       }
-      snd_pcm_close(playback_handle);
     }
   }
 
@@ -71,16 +67,15 @@ int main(int argc, char *argv[])
     std::cout << device << std::endl;
   }
   // open chosen device
-  std::string playback_device{devices[0]};
-  playback_handle = open_device(playback_device, SND_PCM_STREAM_PLAYBACK);
-  if(!playback_handle) return 1;
+  device playback_device {playback_devices[0], SND_PCM_STREAM_PLAYBACK};
+  if(!playback_device) return 1;
 
-  playback_config.install(playback_handle);
+  playback_config.install(playback_device);
 
   char* buffer = (char*)malloc(capture_config.period_bytes());
   unsigned seconds = 2;
   for(int loop = seconds * 1000000 / capture_config.period_time(); loop > 0; --loop) {
-    err = snd_pcm_readi(capture_handle, buffer, capture_config.period_frames());
+    err = snd_pcm_readi(capture_device, buffer, capture_config.period_frames());
     if(err != capture_config.period_frames()) {
       std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
       return 1;
@@ -91,9 +86,9 @@ int main(int argc, char *argv[])
     //   return 0;
     // }
 
-    err = snd_pcm_writei(playback_handle, buffer, playback_config.period_frames());
+    err = snd_pcm_writei(playback_device, buffer, playback_config.period_frames());
     if(err == -EPIPE) {
-      snd_pcm_prepare(playback_handle);
+      snd_pcm_prepare(playback_device);
     }
     else if (err != capture_config.period_frames()) {
       std::cerr << "write to audio interface failed " << snd_strerror(err) << std::endl;
@@ -101,23 +96,10 @@ int main(int argc, char *argv[])
     }
   }  
 
-  snd_pcm_close(capture_handle);
-
-  snd_pcm_drain(playback_handle);
-  snd_pcm_close(playback_handle);
+  snd_pcm_drain(playback_device);
 
   free(buffer);
   return 0;
-}
-
-snd_pcm_t* open_device(std::string const& device_name, snd_pcm_stream_t type) {
-  snd_pcm_t* handle;
-  int err = snd_pcm_open(&handle, device_name.c_str(), type, 0);
-  if(err < 0) {
-    std::cerr << "cannot open audio device " << device_name << " " << snd_strerror(err) << std::endl;
-    return NULL;
-  }
-  return handle;
 }
 
 std::vector<std::string> get_pcms() {
@@ -133,14 +115,14 @@ std::vector<std::string> get_pcms() {
     return devices;
   }
 
-  for(char** n = hints; *n != NULL; ++n) {
+  for(char** n = hints; *n != nullptr; ++n) {
     char* name = snd_device_name_get_hint(*n, "NAME");
     char* io = snd_device_name_get_hint(*n, "IOID");
 
-    if(name != NULL && strcmp("null", name) != 0 && strcmp("null", name)) {
-      if(io == NULL || strcmp("Output", io) != 0) {
+    if(name != nullptr && strcmp("null", name) != 0 && strcmp("null", name)) {
+      if(io == nullptr || strcmp("Output", io) != 0) {
         devices.push_back(name);
-        if(io != NULL)std::cout << name << " " << std::string{io} << std::endl;
+        if(io != nullptr)std::cout << name << " " << std::string{io} << std::endl;
       }
       free(name);
       free(io);
