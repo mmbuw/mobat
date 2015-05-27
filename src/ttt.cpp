@@ -5,6 +5,8 @@
 void output_cards();
 std::vector<std::string> get_pcms();
 
+snd_pcm_t* open_device(std::string const&, snd_pcm_stream_t);
+
 int main(int argc, char *argv[])
 {
   output_cards();
@@ -24,17 +26,11 @@ int main(int argc, char *argv[])
   std::vector<std::string> capture_devices{};
   for(auto const& device : devices) {
     Config test_config{2, 48000};
-    err = snd_pcm_open(&capture_handle, device.c_str(), SND_PCM_STREAM_CAPTURE, 0);
-    if(err < 0) {
-      std::cerr << "cannot open audio device " << device<< " " << snd_strerror(err) << std::endl;
-      continue;
-    }
-    else {
-      std::cout << "Starting configuration on " << device << std::endl;
-    }
-         
-    if(test_config.configure(capture_handle)) {
-     capture_devices.push_back(device);  
+    capture_handle = open_device(device, SND_PCM_STREAM_CAPTURE);
+    if(capture_handle) {
+      if(test_config.configure(capture_handle)) {
+       capture_devices.push_back(device);  
+      }
     }
   }
 
@@ -44,11 +40,9 @@ int main(int argc, char *argv[])
   }
   // open chosen device
   std::string capture_device{capture_devices[0]};
-  err = snd_pcm_open(&capture_handle, capture_device.c_str(), SND_PCM_STREAM_CAPTURE, 0);
-  if(err < 0) {
-    std::cerr << "cannot open audio device " << capture_device<< " " << snd_strerror(err) << std::endl;
-    return 1;
-  }
+  capture_handle = open_device(capture_device, SND_PCM_STREAM_CAPTURE);
+  if(!capture_handle) return 1;
+
   capture_config.configure(capture_handle);
   capture_config.install(capture_handle);
 
@@ -59,17 +53,11 @@ int main(int argc, char *argv[])
   std::vector<std::string> playback_devices{};
   for(auto const& device : devices) {
     Config test_config{2, 48000};
-    err = snd_pcm_open(&playback_handle, device.c_str(), SND_PCM_STREAM_PLAYBACK, 0);
-    if(err < 0) {
-      std::cerr << "cannot open audio device " << device<< " " << snd_strerror(err) << std::endl;
-      continue;
-    }
-    else {
-      std::cout << "Starting configuration on " << device << std::endl;
-    }
-         
-    if(test_config.configure(playback_handle)) {
-      playback_devices.push_back(device);
+    playback_handle = open_device(device, SND_PCM_STREAM_PLAYBACK);
+    if(playback_handle) {
+      if(test_config.configure(playback_handle)) {
+        playback_devices.push_back(device);
+      }
     }
   }
 
@@ -79,11 +67,8 @@ int main(int argc, char *argv[])
   }
   // open chosen device
   std::string playback_device{devices[0]};
-  err = snd_pcm_open(&playback_handle, playback_device.c_str(), SND_PCM_STREAM_PLAYBACK, 0);
-  if(err < 0) {
-    std::cerr << "cannot open audio device " << playback_device<< " " << snd_strerror(err) << std::endl;
-    return 1;
-  }
+  playback_handle = open_device(playback_device, SND_PCM_STREAM_PLAYBACK);
+  if(!playback_handle) return 1;
 
   playback_config.configure(playback_handle);
   playback_config.install(playback_handle);
@@ -119,6 +104,16 @@ int main(int argc, char *argv[])
 
   free(buffer);
   return 0;
+}
+
+snd_pcm_t* open_device(std::string const& device_name, snd_pcm_stream_t type) {
+  snd_pcm_t* handle;
+  int err = snd_pcm_open(&handle, device_name.c_str(), type, 0);
+  if(err < 0) {
+    std::cerr << "cannot open audio device " << device_name << " " << snd_strerror(err) << std::endl;
+    return NULL;
+  }
+  return handle;
 }
 
 std::vector<std::string> get_pcms() {

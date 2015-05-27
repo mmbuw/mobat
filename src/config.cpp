@@ -45,7 +45,6 @@ bool Config::configure(snd_pcm_t* pcm_handle) {
     std::cerr << "cannot initialize hardware parameter structure " << snd_strerror(err) << std::endl;
     return false;
   }
-
   err = snd_pcm_hw_params_set_access(pcm_handle, params, access);
   if(err < 0) {
     std::cerr << "cannot set access type " << snd_strerror(err) << std::endl;

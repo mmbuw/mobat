@@ -26,6 +26,5 @@ class Config {
   unsigned framerate;
   snd_pcm_format_t format;
   snd_pcm_access_t access;
-  snd_pcm_stream_t stream;
   snd_pcm_hw_params_t* params;
 };
