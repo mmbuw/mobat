@@ -4,7 +4,6 @@
 
 void output_cards();
 std::vector<std::string> get_pcms();
-
 snd_pcm_t* open_device(std::string const&, snd_pcm_stream_t);
 
 int main(int argc, char *argv[])
@@ -36,11 +35,18 @@ int main(int argc, char *argv[])
   }
 
   std::cout << "----recording PCMs----------------------------------------------" << std::endl;
-  for(auto device : capture_devices) {
-    std::cout << device << std::endl;
-  }
-  // open chosen device
   std::string capture_device{capture_devices[0]};
+  for(auto device : capture_devices) {
+    if(device == "sysdefault:CARD=UMC404") {
+      capture_device = device;
+      break;
+    }
+  }
+  if(capture_device == capture_devices[0]) {
+    std::cerr << "Behringer UMC not found, using default recording device" << std::endl;
+  }
+
+  // open chosen device
   snd_pcm_t* capture_handle = open_device(capture_device, SND_PCM_STREAM_CAPTURE);
   if(!capture_handle) return 1;
 
@@ -73,34 +79,34 @@ int main(int argc, char *argv[])
 
   playback_config.configure(playback_handle);
   playback_config.install(playback_handle);
-  snd_pcm_start(playback_handle);
 
   char* buffer = (char*)malloc(capture_config.get_period_bytes());
   unsigned seconds = 2;
   for(int loop = seconds * 1000000 / capture_config.get_period_time(); loop > 0; --loop) {
   std::cout << loop << std::endl;
-    // err = snd_pcm_readi(capture_handle, buffer, capture_config.get_period_bytes());
-    // if(err != capture_config.get_period_bytes()) {
-    //   std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
-    //   return 1;
-    // }
-
-    if (err = read(0, buffer, capture_config.get_period_bytes()) == 0) {
-      printf("Early end of file.\n");
-      return 0;
+    err = snd_pcm_readi(capture_handle, buffer, capture_config.get_period_frames());
+    if(err != capture_config.get_period_frames()) {
+      std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
+      return 1;
     }
+
+    // if (err = read(0, buffer, capture_config.get_period_bytes()) == 0) {
+    //   printf("Early end of file.\n");
+    //   return 0;
+    // }
 
     err = snd_pcm_writei(playback_handle, buffer, playback_config.get_period_frames());
     if(err == -EPIPE) {
       snd_pcm_prepare(playback_handle);
     }
-    else if (err != capture_config.get_period_frames()) {
-      std::cerr << "write to audio interface failed " << snd_strerror(err) << std::endl;
-      return 1;
-    }
+    // else if (err != capture_config.get_period_frames()) {
+    //   std::cerr << "write to audio interface failed " << snd_strerror(err) << std::endl;
+    //   return 1;
+    // }
   }
 
   snd_pcm_close(capture_handle);
+
   snd_pcm_drain(playback_handle);
   snd_pcm_close(playback_handle);
 
