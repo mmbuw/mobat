@@ -2,8 +2,14 @@ cmake_minimum_required (VERSION 2.8)
 # allows access to environment variables with the name 
 project (TTT)
 
-# outputs an executable
-add_executable(ttt src/ttt.cpp)
+#add include folder
+include_directories(include)
+
+# collect source files
+file(GLOB TTT_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/*.cpp)
+
+# output executable
+add_executable(ttt ${TTT_SOURCES})
 
 #request C++11 if on unix
 if(UNIX)
