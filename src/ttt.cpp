@@ -7,6 +7,7 @@ void output_cards();
 std::vector<std::string> get_pcms();
 snd_pcm_t* open_device(std::string const&, snd_pcm_stream_t);
 std::vector<std::string> get_supporting_devices(std::vector<std::string> const&, Config const&, snd_pcm_stream_t);
+void stream_buffer(std::ostream&, unsigned char[], unsigned size);
 
 int main(int argc, char *argv[])
 {
@@ -15,18 +16,17 @@ int main(int argc, char *argv[])
   int err;
 
   std::vector<std::string> devices{get_pcms()};
-  for(auto device : devices) {
-    std::cout << std::string{device} << std::endl;
-  }
+  // for(auto device : devices) {
+  //   std::cout << std::string{device} << std::endl;
+  // }
 
-  std::cout << "----testing PCMs----------------------------------------------" << std::endl;
+  // std::cout << "----testing PCMs----------------------------------------------" << std::endl;
   Config capture_config{1};
   std::vector<std::string> capture_devices{get_supporting_devices(devices, capture_config, SND_PCM_STREAM_CAPTURE)};
 
-  std::cout << "----recording PCMs----------------------------------------------" << std::endl;
+  // std::cout << "----recording PCMs----------------------------------------------" << std::endl;
   std::string capture_name{capture_devices[0]};
   for(auto device : capture_devices) {
-    std::cout << device << std::endl;
     if(device == "hw:CARD=UMC404,DEV=0") {
       capture_name = device;
       break;
@@ -43,14 +43,14 @@ int main(int argc, char *argv[])
   capture_config.install(capture_device);
 
 
-  std::cout << "----testing PCMs----------------------------------------------" << std::endl;
+  // std::cout << "----testing PCMs----------------------------------------------" << std::endl;
   Config playback_config{1};
   std::vector<std::string> playback_devices{get_supporting_devices(devices, playback_config, SND_PCM_STREAM_PLAYBACK)};
 
-  std::cout << "----playback PCMs----------------------------------------------" << std::endl;
-  for(auto device : playback_devices) {
-    std::cout << device << std::endl;
-  }
+  // std::cout << "----playback PCMs----------------------------------------------" << std::endl;
+  // for(auto device : playback_devices) {
+  //   std::cout << device << std::endl;
+  // }
   // open chosen device
   device playback_device{playback_devices[0], SND_PCM_STREAM_PLAYBACK};
   if(!playback_device) return 1;
@@ -70,9 +70,8 @@ int main(int argc, char *argv[])
   else if(loops * capture_config.period_bytes() < sizeof(buffer)) {
     std::cerr << "buffer size too large" << std::endl;
   }
-  
+
   for(unsigned char* start = &buffer[0]; start < &buffer[sizeof(buffer) / sizeof(*buffer)]; start += capture_config.period_bytes()) {
-  
     err = snd_pcm_readi(capture_device, start, capture_config.period_frames());
     if(err != capture_config.period_frames()) {
       std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
@@ -80,8 +79,9 @@ int main(int argc, char *argv[])
     }
   }  
 
-  for(unsigned char* start = &buffer[0]; start < &buffer[sizeof(buffer) / sizeof(*buffer)]; start += capture_config.period_bytes()) {
+  stream_buffer(std::cout, buffer, sizeof(buffer) / sizeof(*buffer));
 
+  for(unsigned char* start = &buffer[0]; start < &buffer[sizeof(buffer) / sizeof(*buffer)]; start += capture_config.period_bytes()) {
     err = snd_pcm_writei(playback_device, start, playback_config.period_frames());
     if(err == -EPIPE) {
       snd_pcm_prepare(playback_device);
@@ -95,6 +95,12 @@ int main(int argc, char *argv[])
   snd_pcm_drain(playback_device);
 
   return 0;
+}
+
+void stream_buffer(std::ostream& os, unsigned char buffer[], unsigned size) {
+  for(unsigned i = 0; i < size; ++i) {
+    os << buffer[i];
+  }
 }
 
 std::vector<std::string> get_supporting_devices(std::vector<std::string> const& devices, Config const& config, snd_pcm_stream_t type) {
@@ -114,7 +120,7 @@ std::vector<std::string> get_pcms() {
   int err;
   std::vector<std::string> devices{};
 
-  std::cout << "----PCMs --------------------------------------------------" << std::endl;
+  // std::cout << "----PCMs --------------------------------------------------" << std::endl;
   char** hints;
 
   err = snd_device_name_hint(-1, "pcm",(void***)&hints);
@@ -144,7 +150,7 @@ std::vector<std::string> get_pcms() {
 void output_cards() {
   int err;
 
-  std::cout << "----Cards --------------------------------------------------" << std::endl;
+  // std::cout << "----Cards --------------------------------------------------" << std::endl;
   int card_index = -1;
   char card_ctl_id[32];
 
@@ -180,10 +186,10 @@ void output_cards() {
 
     const char* card_name = snd_ctl_card_info_get_name(card_info);
     const char* card_id = snd_ctl_card_info_get_id(card_info);
-    std::cout << "Card: " << card_index
-              << ", Name: \"" << card_name
-              << "\", ID: " << card_id
-              << std::endl;
+    // std::cout << "Card: " << card_index
+    //           << ", Name: \"" << card_name
+    //           << "\", ID: " << card_id
+    //           << std::endl;
 
     int device_index = -1;
     err = snd_ctl_pcm_next_device(card_handle, &device_index);
@@ -210,10 +216,10 @@ void output_cards() {
 
       const char* device_name = snd_pcm_info_get_name(pcm_info);
       const char* device_id = snd_pcm_info_get_id(pcm_info);
-      std::cout << " Device: " << device_index
-          << ", Name: \"" << device_name
-          << "\", ID: " << device_id
-          << std::endl;
+      // std::cout << " Device: " << device_index
+      //     << ", Name: \"" << device_name
+      //     << "\", ID: " << device_id
+      //     << std::endl;
 
       err = snd_ctl_pcm_next_device(card_handle, &device_index);
     }

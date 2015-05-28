@@ -36,15 +36,6 @@ bool Config::configure(snd_pcm_t* pcm_handle) {
     std::cerr << "Config::is_supported - device not initialized" << std::endl;
     return false;
   }
-  // err = snd_pcm_open(&capture_handle, device.c_str(), SND_PCM_STREAM_CAPTURE, 0);
-  // if(err < 0) {
-  //   std::cerr << "cannot open audio device " << device<< " - " << snd_strerror(err) << std::endl;
-  //   return false;
-  // }
-  // else {
-  //   std::cout << "Starting configuration on " << device << std::endl;
-  // }
-  std::cout << snd_pcm_name(pcm_handle) << ": ";
        
   int err = snd_pcm_hw_params_any(pcm_handle, params_);
   if(err < 0) {
@@ -81,7 +72,6 @@ bool Config::configure(snd_pcm_t* pcm_handle) {
     std::cerr << "cannot set channel count - " << snd_strerror(err) << std::endl;
     return false;
   }
-  std::cout << std::endl;
   return true;
 }
 
@@ -90,8 +80,6 @@ bool Config::is_supported(snd_pcm_t* pcm_handle) const{
     std::cerr << "Config::is_supported - device not initialized" << std::endl;
     return false;
   }
-
-  std::cout << snd_pcm_name(pcm_handle) << ": ";
        
   int err = snd_pcm_hw_params_any(pcm_handle, params_);
   if(err < 0) {
@@ -125,7 +113,6 @@ bool Config::is_supported(snd_pcm_t* pcm_handle) const{
     std::cerr << "cannot set channel count - " << snd_strerror(err) << std::endl;
     return false;
   }
-  std::cout << std::endl;
   return true;
 }
 
