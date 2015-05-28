@@ -5,7 +5,7 @@ Config::Config(unsigned chan, unsigned frames) :
   channels_{chan},
   framerate_{frames},
   access_{SND_PCM_ACCESS_RW_INTERLEAVED},
-  format_{SND_PCM_FORMAT_S16_LE}
+  format_{SND_PCM_FORMAT_S32_LE}
 {
   int err = snd_pcm_hw_params_malloc(&params_);
   if(err < 0) {
@@ -134,8 +134,12 @@ unsigned Config::channels() const {
 }
 
 unsigned Config::period_bytes() const {
-  // frames per period * channels * samplesize(2 Byte)
-  return period_frames() * channels_ * 2;
+  // frames per period * channels * samplesize(depending on format)
+  int sample_bits = snd_pcm_hw_params_get_sbits(params_);
+  if(sample_bits < 0) {
+    std::cerr << "no format specified, cant computer period size - " << snd_strerror(sample_bits) << std::endl;
+  }
+  return period_frames() * channels_ * sample_bits;
 }
 
 unsigned Config::period_time() const {

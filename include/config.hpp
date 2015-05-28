@@ -6,7 +6,7 @@
 
 class Config {
  public:
-  Config(unsigned chan = 2, unsigned frames = 44000);
+  Config(unsigned chan = 2, unsigned frames = 44100);
 
   ~Config();
 

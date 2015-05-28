@@ -20,13 +20,14 @@ int main(int argc, char *argv[])
   }
 
   std::cout << "----testing PCMs----------------------------------------------" << std::endl;
-  Config capture_config{1, 48000};
+  Config capture_config{1};
   std::vector<std::string> capture_devices{get_supporting_devices(devices, capture_config, SND_PCM_STREAM_CAPTURE)};
 
   std::cout << "----recording PCMs----------------------------------------------" << std::endl;
   std::string capture_name{capture_devices[0]};
   for(auto device : capture_devices) {
-    if(device == "sysdefault:CARD=UMC404") {
+    std::cout << device << std::endl;
+    if(device == "hw:CARD=UMC404,DEV=0") {
       capture_name = device;
       break;
     }
@@ -43,7 +44,7 @@ int main(int argc, char *argv[])
 
 
   std::cout << "----testing PCMs----------------------------------------------" << std::endl;
-  Config playback_config{1, 48000};
+  Config playback_config{1};
   std::vector<std::string> playback_devices{get_supporting_devices(devices, playback_config, SND_PCM_STREAM_PLAYBACK)};
 
   std::cout << "----playback PCMs----------------------------------------------" << std::endl;
@@ -74,7 +75,7 @@ int main(int argc, char *argv[])
     if(err == -EPIPE) {
       snd_pcm_prepare(playback_device);
     }
-    else if (err != capture_config.period_frames()) {
+    else if(err != capture_config.period_frames()) {
       std::cerr << "write to audio interface failed " << snd_strerror(err) << std::endl;
       return 1;
     }
