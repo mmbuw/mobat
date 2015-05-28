@@ -10,6 +10,7 @@ class FFT_Transformer {
 	private:
 		//std::map<unsigned int, fftw_plan> fftw_execution_plans_map_;
 
+		float normalization_value;
 		bool found_freq_;
 		fftw_plan fftw_execution_plan_;
 		unsigned int fft_window_size_;
@@ -20,9 +21,11 @@ class FFT_Transformer {
 		fftw_complex* fft_result_;
 		double* accumulated_result_;
 
-		double* hamming_window_;
+		double* window_;
 
 		void create_hamming_window();
+		void create_hann_window();
+		void create_blackmann_harris_window();
 
 	public:
 		FFT_Transformer(unsigned short fft_frame_size);

@@ -7,7 +7,7 @@
 #include <cmath>
 #include <chrono>
 
-unsigned int N = 2048;
+unsigned int N = 256;
 
 int* load_WAV_to_buffer(std::string const& in_wav_file,
 						SF_INFO& info) {
@@ -48,27 +48,33 @@ int* load_WAV_to_buffer(std::string const& in_wav_file,
 
 int main(int argc, char** argv) {
 
-    if(argc < 2) {
-    	std::cout << "Program Usage: program <filename.wav>\n\n";
+    if(argc < 5) {
+    	std::cout << "Program Usage: program <filename1.wav> <filename2.wav> <filename3.wav> <filename4.wav>\n\n";
 
     	return -1;
     }
 
     FFT_Transformer fft_transf(N);
 
-    SF_INFO info;
+    SF_INFO info1, info2, info3, info4;
 
-    int *buf = load_WAV_to_buffer(argv[1], info);;
+    int *buf1 = load_WAV_to_buffer(argv[1], info1);
+    int *buf2 = load_WAV_to_buffer(argv[2], info2);
+    int *buf3 = load_WAV_to_buffer(argv[3], info3);
+    int *buf4 = load_WAV_to_buffer(argv[4], info4);
 
     int **buffer_collector = 0;
 
     buffer_collector 
-        = (int **) malloc(1*sizeof(int*));
+        = (int **) malloc(4*sizeof(int*));
 
 
     fft_transf.initialize_execution_plan();
 
-    buffer_collector[0] = buf;
+    buffer_collector[0] = buf1;
+    buffer_collector[1] = buf2;
+    buffer_collector[2] = buf3;
+    buffer_collector[3] = buf4;
 
     std::cout << "Before setting input\n";
 
@@ -79,8 +85,8 @@ std::chrono::system_clock::time_point before_fft = std::chrono::system_clock::no
         if(offset > 200000)
             break;
 
-        fft_transf.set_FFT_input(1, 
-                                 info.frames,
+        fft_transf.set_FFT_input(4, 
+                                 info1.frames,
                                  buffer_collector,
                                  offset);
         fft_transf.perform_FFT();
