@@ -156,6 +156,7 @@ unsigned Config::period_frames() const {
   return num_frames;
 }
 
-unsigned Config::buffer_bytes(unsigned useconds) const {
-  return period_bytes() * useconds / period_time();
+unsigned long Config::buffer_bytes(unsigned long useconds) const {
+  // extra brackets necessary, otherwise result is totally wrong
+  return period_bytes() * (useconds / period_time());
 }

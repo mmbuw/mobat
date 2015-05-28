@@ -57,21 +57,32 @@ int main(int argc, char *argv[])
 
   playback_config.install(playback_device);
 
-  char* buffer = (char*)malloc(capture_config.period_bytes());
   unsigned seconds = 2;
-  for(int loop = seconds * 1000000 / capture_config.period_time(); loop > 0; --loop) {
-    err = snd_pcm_readi(capture_device, buffer, capture_config.period_frames());
+  // use char array for easy iteration over data
+  unsigned char buffer[capture_config.buffer_bytes(seconds * 1000000)];
+  
+  // prevent under- or overruns
+  unsigned loops = seconds * 1000000 / capture_config.period_time();
+  if(loops * capture_config.period_bytes() > sizeof(buffer)) {
+    std::cerr << "buffer size to small" << std::endl;
+    return 1;
+  }
+  else if(loops * capture_config.period_bytes() < sizeof(buffer)) {
+    std::cerr << "buffer size too large" << std::endl;
+  }
+  
+  for(unsigned char* start = &buffer[0]; start < &buffer[sizeof(buffer) / sizeof(*buffer)]; start += capture_config.period_bytes()) {
+  
+    err = snd_pcm_readi(capture_device, start, capture_config.period_frames());
     if(err != capture_config.period_frames()) {
       std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
       return 1;
     }
+  }  
 
-    // if (err = read(0, buffer, capture_config.period_bytes()) == 0) {
-    //   printf("Early end of file.\n");
-    //   return 0;
-    // }
+  for(unsigned char* start = &buffer[0]; start < &buffer[sizeof(buffer) / sizeof(*buffer)]; start += capture_config.period_bytes()) {
 
-    err = snd_pcm_writei(playback_device, buffer, playback_config.period_frames());
+    err = snd_pcm_writei(playback_device, start, playback_config.period_frames());
     if(err == -EPIPE) {
       snd_pcm_prepare(playback_device);
     }
@@ -79,11 +90,10 @@ int main(int argc, char *argv[])
       std::cerr << "write to audio interface failed " << snd_strerror(err) << std::endl;
       return 1;
     }
-  }  
+  } 
 
   snd_pcm_drain(playback_device);
 
-  free(buffer);
   return 0;
 }
 

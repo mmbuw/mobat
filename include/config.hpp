@@ -28,7 +28,7 @@ class Config {
   unsigned period_frames() const;
 
   // returns size of buffer required to record time of useconds
-  unsigned buffer_bytes(unsigned useconds) const;
+  unsigned long buffer_bytes(unsigned long useconds) const;
 
  private:
   bool configure(snd_pcm_t* pcm_handle);
