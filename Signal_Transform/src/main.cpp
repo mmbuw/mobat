@@ -7,7 +7,7 @@
 #include <cmath>
 #include <chrono>
 
-unsigned int N = 256;
+unsigned int N = 1024 ;
 
 int* load_WAV_to_buffer(std::string const& in_wav_file,
 						SF_INFO& info) {
@@ -78,17 +78,21 @@ int main(int argc, char** argv) {
 
     std::cout << "Before setting input\n";
 
+        fft_transf.set_FFT_buffers(4, 
+                                   info1.frames,
+                                   buffer_collector);
+
 std::chrono::system_clock::time_point before_fft = std::chrono::system_clock::now();
-    for(unsigned int i = 0; i < 200000; ++i) {
+    for(unsigned int i = 100000; i < 200000; ++i) {
 
         unsigned offset = 1 * i;
         if(offset > 200000)
             break;
 
-        fft_transf.set_FFT_input(4, 
-                                 info1.frames,
-                                 buffer_collector,
-                                 offset);
+
+      //  fft_transf.set_FFT_input(
+        //                         offset);
+        fft_transf.set_analyzation_range(0+offset, 2*N + offset);
         fft_transf.perform_FFT();
 
         fft_transf.print_FFT_result(i);
