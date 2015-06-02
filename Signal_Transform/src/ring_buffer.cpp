@@ -105,4 +105,5 @@ void Ring_Buffer<DATA_TYPE>::Reset_Buffer(unsigned new_buffer_size) {
 	capacity_ = new_buffer_size;
 	is_allocated_ = true;
 	num_filled_elements_ = 0;
+
 };

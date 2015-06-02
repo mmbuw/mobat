@@ -2,13 +2,17 @@
 #ifndef FFT_TRANSFORMER_H
 #define FFT_TRANSFORMER_H
 
+#include "../include/ring_buffer.h"
+
 #include <fftw3.h>
 #include <iostream>
 #include <cmath>
 
+
 class FFT_Transformer {
 	private:
 		//std::map<unsigned int, fftw_plan> fftw_execution_plans_map_;
+
 
 		float normalization_value;
 		bool found_freq_;
