@@ -19,4 +19,101 @@
         android:text="@string/hello_world" android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
+    <LinearLayout
+        android:id="@+id/spinner1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/FrequencySineWaveSeekBar"
+        android:orientation="horizontal" >
+
+
+        <TextView
+            android:id="@+id/sine_wavelength_spinner_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sine Length: " />
+
+        <Spinner
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/Sound_Length_Spinner"
+            android:layout_below="@+id/FrequencySineWaveSeekBar"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:spinnerMode="dropdown" />
+        <TextView
+            android:id="@+id/ms_label_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" ms " />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/spinner2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/spinner1"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:id="@+id/pause_length_spinner_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pause Length: " />
+    <Spinner
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/Pause_Length_Spinner"
+        android:spinnerMode="dropdown"
+        android:layout_below="@+id/Sound_Length_Spinner"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+        <TextView
+            android:id="@+id/ms_label_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" ms" />
+    </LinearLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No_Status_Set"
+        android:id="@+id/status_label"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Apply Sine Settings"
+        android:id="@+id/sine_setting_apply_button"
+        android:layout_below="@+id/spinner2"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="67dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Play"
+        android:id="@+id/play_button"
+        android:layout_below="@+id/sine_setting_apply_button"
+        android:layout_marginTop="30dp"
+        android:layout_alignRight="@+id/sine_setting_apply_button"
+        android:layout_alignEnd="@+id/sine_setting_apply_button"
+        android:layout_alignLeft="@+id/sine_setting_apply_button"
+        android:layout_alignStart="@+id/sine_setting_apply_button" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pause"
+        android:id="@+id/pause_button"
+        android:layout_below="@+id/play_button"
+        android:layout_alignLeft="@+id/play_button"
+        android:layout_alignStart="@+id/play_button"
+        android:layout_alignRight="@+id/play_button"
+        android:layout_alignEnd="@+id/play_button" />
+
+
 </RelativeLayout>
