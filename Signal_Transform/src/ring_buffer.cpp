@@ -107,3 +107,8 @@ void Ring_Buffer<DATA_TYPE>::Reset_Buffer(unsigned new_buffer_size) {
 	num_filled_elements_ = 0;
 
 };
+
+template <class DATA_TYPE>
+void Ring_Buffer<DATA_TYPE>::Get_Capacity() const {
+	return capacity_;
+}

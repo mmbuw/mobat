@@ -36,7 +36,6 @@ class FFT_Transformer {
 
 		double eighteen_khz_sum_;
 
-		//double ring_buffer
 
 		void create_hamming_window();
 		void create_hann_window();

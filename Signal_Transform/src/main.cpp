@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
                                    buffer_collector);
 
 std::chrono::system_clock::time_point before_fft = std::chrono::system_clock::now();
-    for(unsigned int i = 50000; i < 200000; ++i) {
+    for(unsigned int i = 90000; i < 200000; ++i) {
 
         unsigned offset = 1 * i;
         if(offset > 200000)

@@ -21,6 +21,8 @@ class Ring_Buffer {
 
 		void Reset_Buffer(unsigned new_buffer_size);
 
+		void Get_Capacity() const;
+
 	private:
 		unsigned int capacity_;
 		unsigned int num_filled_elements_;
