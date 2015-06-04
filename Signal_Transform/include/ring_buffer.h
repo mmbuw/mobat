@@ -21,11 +21,11 @@ class Ring_Buffer {
 
 		void Reset_Buffer(unsigned new_buffer_size);
 
-		void Get_Capacity() const;
+		unsigned Get_Capacity() const;
 
 	private:
-		unsigned int capacity_;
-		unsigned int num_filled_elements_;
+		unsigned capacity_;
+		unsigned num_filled_elements_;
 
 		DATA_TYPE* ring_data_;
 

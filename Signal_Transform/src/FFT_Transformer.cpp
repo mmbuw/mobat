@@ -47,7 +47,9 @@ void FFT_Transformer::create_blackmann_harris_window() {
 }
 
 FFT_Transformer::FFT_Transformer(unsigned short fft_window_size) : start_sample_( std::numeric_limits<unsigned int>::max() ),
-																  end_sample_( std::numeric_limits<unsigned int>::max() ) {
+																  end_sample_( std::numeric_limits<unsigned int>::max() ),
+																  stabilization_counter_(0),
+																  fft_frame_count_(0) {
 	int fftw_thread_success = fftw_init_threads();
 
 	if(fftw_thread_success == 0) {
@@ -72,8 +74,9 @@ FFT_Transformer::FFT_Transformer(unsigned short fft_window_size) : start_sample_
 		std::cout << "Failed to allocate memory for FFT input buffer\n";
 	}
 
-
-
+	for(int i = 0; i < 10; ++i) {
+		last_x_sample_[i] = 0.0;
+	}
 	initialize_execution_plan();
 	create_hamming_window();
 	//create_blackmann_harris_window();
@@ -138,7 +141,7 @@ void FFT_Transformer::set_FFT_input( unsigned int offset ) {
  
 }
 
-void FFT_Transformer::perform_FFT() {
+bool FFT_Transformer::perform_FFT() {
 
 	eighteen_khz_sum_ = 0.0;
 
@@ -150,39 +153,70 @@ void FFT_Transformer::perform_FFT() {
 	//std::cin.get();
 	for(unsigned int offset = start_sample_; offset <= end_sample_ - (fft_window_size_ - 1) ; ++offset ) {
 		//std::cout << "Trying offset " << offset <<"\n";
-		set_FFT_input(offset);
-		fftw_execute(fftw_execution_plan_);
 
-		double temp_accum_18khz = 0.0;
-		double normalization_range_value = 0.0;
-		
-		for(unsigned int signal_it = 0;
-			signal_it < (unsigned int) (fft_window_size_ / 2 - 1);
-			++signal_it) {
-				float current_frequency = (signal_it * 44100) / fft_window_size_;
+		if(fft_cached_results_.find(start_sample_) == fft_cached_results_.end() ) {
 
-					if(current_frequency > 12000.0 && current_frequency < 18002.0 ) {
-						normalization_range_value += std::sqrt( (fft_result_[signal_it][0]*fft_result_[signal_it][0]) + 
-							  	(fft_result_[signal_it][1]*fft_result_[signal_it][1]) );
-					}
 
-					if(current_frequency > 18000.0 && current_frequency < 18002.0 ) {
-					    temp_accum_18khz += std::sqrt( (fft_result_[signal_it][0]*fft_result_[signal_it][0]) + 
-							  	(fft_result_[signal_it][1]*fft_result_[signal_it][1]) );
-					}
+			set_FFT_input(offset);
+			fftw_execute(fftw_execution_plan_);
+
+			double temp_accum_18khz = 0.0;
+			double normalization_range_value = 0.0;
+			
+			for(unsigned int signal_it = 0;
+				signal_it < (unsigned int) (fft_window_size_ / 2 - 1);
+				++signal_it) {
+					float current_frequency = (signal_it * 44100) / fft_window_size_;
+
+						if(current_frequency > 12000.0 && current_frequency < 18002.0 ) {
+							normalization_range_value +=  std::sqrt(fft_result_[signal_it][0]*fft_result_[signal_it][0]) + 
+								  	(fft_result_[signal_it][1]*fft_result_[signal_it][1]) ;
+						}
+
+						if(current_frequency > 18000.0 && current_frequency < 18002.0 ) {
+						    temp_accum_18khz += std::sqrt(fft_result_[signal_it][0]*fft_result_[signal_it][0]) + 
+								  	(fft_result_[signal_it][1]*fft_result_[signal_it][1]) ;
+						}
+			}
+
+			double current_iteration_khz_sum = temp_accum_18khz / normalization_range_value;
+			fft_cached_results_[start_sample_] =  current_iteration_khz_sum;
+
+			eighteen_khz_sum_ += current_iteration_khz_sum;
+			//std::cout << "Uncached result\n";
+		} else {
+			eighteen_khz_sum_ += fft_cached_results_[start_sample_];
+			//std::cout << "Cached result\n";		
 		}
 
-				eighteen_khz_sum_ += temp_accum_18khz / normalization_range_value;
 	
 		++taken_normalization_samples;
 	}
 
 		eighteen_khz_sum_ /= taken_normalization_samples;
 
-		if(start_sample_ % 100 == 0)
-		std::cout << "Value: " <<eighteen_khz_sum_ << "\n";
-	//fftw_execute(fftw_execution_plan_);
-	
+
+		last_x_sample_[(fft_frame_count_%10)] = eighteen_khz_sum_;
+
+		++fft_frame_count_;
+
+		double avg = 0.0;
+		for(int i = 0; i < 10; ++i) {
+			avg += last_x_sample_[i];
+		}
+		avg /= 10.0;
+
+		if(avg > 0.05)
+			++stabilization_counter_;
+		else
+			stabilization_counter_ = 0;
+
+		if(stabilization_counter_ >= 10) {
+			std::cout << "18khz at sample: " << start_sample_ <<"\n"; 
+			return true;
+		}
+
+		return false;
 }
 
 void FFT_Transformer::print_FFT_result(unsigned int call_idx) {
@@ -200,8 +234,8 @@ void FFT_Transformer::print_FFT_result(unsigned int call_idx) {
 		//if( (signal_it * 44100) / fft_window_size_ > 15000.0)
 		if(signal_it >= 59 && signal_it <= 109) {
 			if(signal_it != 0 && signal_it != fft_window_size_/2)
-			freq_sum += std::sqrt( (fft_result_[signal_it][0]*fft_result_[signal_it][0]) + 
-					  	(fft_result_[signal_it][1]*fft_result_[signal_it][1]) );
+			freq_sum +=  (fft_result_[signal_it][0]*fft_result_[signal_it][0]) + 
+					  	(fft_result_[signal_it][1]*fft_result_[signal_it][1]) ;
 		}
 
 	}
@@ -216,43 +250,17 @@ void FFT_Transformer::print_FFT_result(unsigned int call_idx) {
 		float current_frequency = (signal_it * 44100) / fft_window_size_;
 		//if(current_frequency > 18000.0 && current_frequency < 18002.0) {
 			float current_amplitude 
-				= std::sqrt( (fft_result_[signal_it][0]*fft_result_[signal_it][0]) + 
-				  (fft_result_[signal_it][1]*fft_result_[signal_it][1]) ) / freq_sum;
-			//freq_sum += current_amplitude;
-			//if(++counter % 100 == 0)
-			//if(call_idx % 100 == 0)
-			//if(current_amplitude > 8000) {
-/*if(signal_it == 0 || signal_it == fft_window_size_/2)
-	current_amplitude /= 2.0;
+				= (fft_result_[signal_it][0]*fft_result_[signal_it][0]) + 
+				  (fft_result_[signal_it][1]*fft_result_[signal_it][1])  / freq_sum;
 
-	current_amplitude = ((current_amplitude/(fft_window_size_/2)))/fft_window_size_;
-*/
-				//if(!found_freq_) {
-		//			std::cout << "it num: " << call_idx<<"  ";
 				if(current_frequency > 17000.0 && current_frequency < 18500.0 ) {
-										//if(call_idx % 100 == 0)
-					//			eighteen_khz_area += /*10*log10*/current_amplitude; /// normalization_divident;
-								//if(20*log10(current_amplitude) > -42.0)
-					eighteen_khz_area += current_amplitude;
-//								if(call_idx % 1000 == 0)
-//								std::cout << "it: " << call_idx << "   signal_it: "<< signal_it << "   " << current_frequency << "Hz : " << /*20*log10(*/current_amplitude/*)*/ << "\n"; 
 
-				//if(current_frequency > 15000.0)
-					//freq_sum += current_amplitude;
+					eighteen_khz_area += current_amplitude;
+
 				}
 					found_freq_ = true;
-				//}
-			//}
-		//}	
 
 	}
 
-								//	if(call_idx % 1000 == 0)
-								//std::cout << "it: " << call_idx << "   "  << "Hz : " << /*20*log10(*/eighteen_khz_area/*)*/ << "\n"; 
-	//if(call_idx % 1000 == 0)
-	//	std::cout << "sum: " << freq_sum << "\n";
-	//std::cout << eighteen_khz_area << "\n";
-//std::cout << "norm val:" << normalization_value << "\n";
-	//					std::cout << "Frequency_Sum = " << freq_sum << "\n";
-	//std::cout << "\n";
+
 }

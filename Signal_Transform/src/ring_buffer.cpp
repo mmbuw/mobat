@@ -109,6 +109,6 @@ void Ring_Buffer<DATA_TYPE>::Reset_Buffer(unsigned new_buffer_size) {
 };
 
 template <class DATA_TYPE>
-void Ring_Buffer<DATA_TYPE>::Get_Capacity() const {
+unsigned Ring_Buffer<DATA_TYPE>::Get_Capacity() const {
 	return capacity_;
 }

@@ -8,7 +8,7 @@
 #include <cmath>
 #include <chrono>
 
-unsigned int N = 1024 ;
+unsigned int N = 2048;
 
 int* load_WAV_to_buffer(std::string const& in_wav_file,
 						SF_INFO& info) {
@@ -85,19 +85,22 @@ int main(int argc, char** argv) {
                                    buffer_collector);
 
 std::chrono::system_clock::time_point before_fft = std::chrono::system_clock::now();
-    for(unsigned int i = 90000; i < 200000; ++i) {
+    for(unsigned int i = 0; i < 200000; ++i) {
 
-        unsigned offset = 1 * i;
+        unsigned offset = 10 * i;
         if(offset > 200000)
             break;
 
 
       //  fft_transf.set_FFT_input(
         //                         offset);
-        fft_transf.set_analyzation_range(0+offset, N+100 + offset);
-        fft_transf.perform_FFT();
+        fft_transf.set_analyzation_range(0+offset, N+50 + offset);
+        
+        if(fft_transf.perform_FFT() ) {
+            break;
+        }
 
-        fft_transf.print_FFT_result(i);
+        //fft_transf.print_FFT_result(i);
 
      
     } 

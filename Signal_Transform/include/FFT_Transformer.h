@@ -8,11 +8,10 @@
 #include <iostream>
 #include <cmath>
 
+#include <map>
 
 class FFT_Transformer {
 	private:
-		//std::map<unsigned int, fftw_plan> fftw_execution_plans_map_;
-
 
 		float normalization_value;
 		bool found_freq_;
@@ -36,7 +35,12 @@ class FFT_Transformer {
 
 		double eighteen_khz_sum_;
 
+		std::map<unsigned, double> fft_cached_results_;
 
+		unsigned stabilization_counter_;
+
+		double last_x_sample_[10];
+		unsigned int fft_frame_count_;
 		void create_hamming_window();
 		void create_hann_window();
 		void create_blackmann_harris_window();
@@ -47,7 +51,7 @@ class FFT_Transformer {
 
 		void initialize_execution_plan();
 		void set_FFT_input( unsigned int offset);
-		void perform_FFT();
+		bool perform_FFT();
 		void print_FFT_result(unsigned int call_idx);
 
 		void set_analyzation_range(unsigned int start_sample,
