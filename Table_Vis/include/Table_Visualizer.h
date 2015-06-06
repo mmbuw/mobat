@@ -23,7 +23,9 @@ class Table_Visualizer : Drawable_Object {
 
 		Table_Visualizer();
 		Table_Visualizer(sf::Vector2f const& table_dims, 
-						 std::vector<sf::Vector2f> const& microphone_positions );
+						 std::vector<sf::Vector2f> const& microphone_positions,
+						 sf::Color const& in_table_fill_color 
+						 	= sf::Color(82,159,153));
 		~Table_Visualizer();
 
 		virtual void Draw(sf::RenderWindow& canvas) const;

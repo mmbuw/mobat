@@ -4,7 +4,6 @@ namespace TTT {
 
 Table_Visualizer::
 Table_Visualizer() {
-
 	std::vector<sf::Vector2f> default_microphone_positions_;
 		default_microphone_positions_.push_back(sf::Vector2f(0.0,0.0));
 		default_microphone_positions_.push_back(sf::Vector2f(0.0,1.0));
@@ -16,13 +15,23 @@ Table_Visualizer() {
 		microphones_.push_back(Microphone_Object(id_counter++, pos) );
 	}
 
-	Resize_Physical_Table(sf::Vector2f(2.0f, 1.0f) ); 
+	Resize_Physical_Table( sf::Vector2f(2.0f, 1.0f) );
+	Set_Table_Fill_Color( sf::Color(82,159,153) );
 }
 
 Table_Visualizer::
-Table_Visualizer( sf::Vector2f const& Table_Dims,
-				  std::vector<sf::Vector2f> const& microphone_positions ) {
+Table_Visualizer( sf::Vector2f const& table_dims,
+				  std::vector<sf::Vector2f> const& microphone_positions,
+				  sf::Color const& in_table_fill_color )
+				  {
 
+	unsigned int id_counter = 0;
+	for(auto const& pos : microphone_positions ) {
+		microphones_.push_back(Microphone_Object(id_counter++, pos) );
+	}
+
+	Resize_Physical_Table( table_dims ); 
+	Set_Table_Fill_Color( in_table_fill_color );
 }
 
 Table_Visualizer::
@@ -43,6 +52,7 @@ void Table_Visualizer::
 Resize_Physical_Table(sf::Vector2f const& Table_Dims ) {
 	table_.Set_Physical_Size(Table_Dims);
 }
+
 
 void Table_Visualizer::
 Reset_Microphones(std::vector<Microphone_Object> const& microphones) {

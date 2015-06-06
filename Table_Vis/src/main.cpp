@@ -13,10 +13,16 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
 						, "Table_Vis");
 //window.setSize(windowResolution);
 
+	std::vector<sf::Vector2f> default_microphone_positions_;
+		default_microphone_positions_.push_back(sf::Vector2f(0.0,0.0));
+		default_microphone_positions_.push_back(sf::Vector2f(0.0,8.0));
+		default_microphone_positions_.push_back(sf::Vector2f(4.0,0.0));
+		default_microphone_positions_.push_back(sf::Vector2f(4.0,8.0));
+
 TTT::Table_Visualizer table_visualizer;
 
-table_visualizer.Set_Table_Fill_Color(sf::Color(82,159,153));
-table_visualizer.Recalculate_Geometry((sf::Vector2f)window.getSize());
+//table_visualizer.Set_Table_Fill_Color(sf::Color(82,159,153));
+//table_visualizer.Recalculate_Geometry((sf::Vector2f)window.getSize());
 
     while (window.isOpen())
     {

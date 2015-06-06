@@ -30,10 +30,6 @@ Recalculate_Geometry(sf::Vector2f const& resolution) {
 									    (resolution.y - table_dims_in_px.y)/2.0
 									 );
 
-	/*std::cout << "Size is: " << table_dims_in_px.x << ", " << table_dims_in_px.y <<"\n";
-	std::cout << "Setting position to " <<  (resolution.x - table_dims_in_px.x)/2.0 
-			  <<", " << (resolution.y - table_dims_in_px.y)/2.0<<"\n";
-	*/
 }
 
 void Table_Object::
