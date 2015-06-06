@@ -1,7 +1,6 @@
 #ifndef TTT_TABLE_OBJECT_H
 #define TTT_TABLE_OBJECT_H
 
-#include "Structs.h"
 #include "Drawable_Object.h"
 
 namespace TTT {
@@ -14,11 +13,11 @@ class Table_Object : Drawable_Object {
 
 	public:
 		virtual void Draw(sf::RenderWindow& canvas) const;
+		virtual void Recalculate_Geometry(sf::Vector2f const& resolution);
+		void Set_Fill_Color(sf::Color const& in_fill_color);
 
 		void Set_Physical_Size(sf::Vector2f const& in_dimensions);
-		void Recalculate_Table_Geometry(sf::Vector2f const& resolution);
-
-		sf::Vector2f Physical_Table_Size() const;
+		sf::Vector2f Physical_Size() const;
 
 };
 

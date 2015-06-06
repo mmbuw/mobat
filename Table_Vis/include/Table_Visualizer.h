@@ -1,6 +1,7 @@
 #ifndef TABLE_VISUALIZER_H
 #define TABLE_VISUALIZER_H
 
+#include "Structs.h"
 #include "Table_Object.h"
 #include "Microphone_Object.h"
 
@@ -20,6 +21,7 @@ class Table_Visualizer : Drawable_Object {
 
 	public:
 
+		Table_Visualizer();
 		Table_Visualizer(sf::Vector2f const& table_dims, 
 						 std::vector<sf::Vector2f> const& microphone_positions );
 		~Table_Visualizer();
@@ -30,8 +32,9 @@ class Table_Visualizer : Drawable_Object {
 
 		void Reset_Microphones(std::vector<Microphone_Object> const& microphones);
 
-		void Recalculate_Component_Geometry(sf::Vector2f const& resolution_);
+		void Recalculate_Geometry(sf::Vector2f const& resolution_);
 
+		void Set_Table_Fill_Color(sf::Color const& in_table_fill_color);
 
 
 };

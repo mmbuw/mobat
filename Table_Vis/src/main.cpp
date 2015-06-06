@@ -1,15 +1,60 @@
-#include "../include/Microphone_Object.h"
+#include "../include/Table_Visualizer.h"
 
-#include "../include/Structs.h"
+#include <SFML/Graphics.hpp>
 
 #include <iostream>
 
+
+sf::Vector2u windowResolution(800, 800);
 int main(int argc, char** argv) {
 
-TTT::Microphone_Object test_microphone_object;
+//sf::VideoMode fullScreenMode = sf::VideoMode::getDesktopMode();
+sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
+						, "Table_Vis");
+//window.setSize(windowResolution);
 
-sf::Vector2f mic_pos = test_microphone_object.Position();
-std::cout << mic_pos.x;
+TTT::Table_Visualizer table_visualizer;
+
+table_visualizer.Set_Table_Fill_Color(sf::Color(82,159,153));
+table_visualizer.Recalculate_Geometry((sf::Vector2f)window.getSize());
+
+    while (window.isOpen())
+    {
+
+        sf::Event event;
+        while (window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+                window.close();
+
+            if (event.type == sf::Event::KeyPressed) {
+
+            	if(event.key.code == sf::Keyboard::Escape)
+            		window.close();
+
+            	if(event.key.code == sf::Keyboard::Up 
+            		|| event.key.code == sf::Keyboard::Down
+            		|| event.key.code == sf::Keyboard::Left 
+            		|| event.key.code == sf::Keyboard::Right) {
+	            	if (event.key.code == sf::Keyboard::Up) {
+	            	}
+	            	if (event.key.code == sf::Keyboard::Down) {
+	            	}
+	            	if (event.key.code == sf::Keyboard::Left) {
+	            	} 
+	            	if (event.key.code == sf::Keyboard::Right) {
+	            	}
+
+                }
+               
+            }
+       }
+       std::cout << window.getSize().x << ", " << window.getSize().y << "\n";
+        window.clear();
+table_visualizer.Recalculate_Geometry((sf::Vector2f)window.getSize());
+        table_visualizer.Draw(window);
+        window.display();
+    }
 
 return 0;
 }
