@@ -20,12 +20,14 @@ class Table_Visualizer : Drawable_Object {
 		std::vector<Frequency_Position_Pair> recognized_positions_;
 
 	public:
-
-		Table_Visualizer();
-		Table_Visualizer(sf::Vector2f const& table_dims, 
-						 std::vector<sf::Vector2f> const& microphone_positions,
+		Table_Visualizer(sf::Vector2f const& table_dims = sf::Vector2f(2.0,1.0), 
+						 std::vector<sf::Vector2f> const& microphone_positions
+						 	= std::vector<sf::Vector2f>(),
 						 sf::Color const& in_table_fill_color 
-						 	= sf::Color(82,159,153));
+						 	= sf::Color(82,159,153),
+						 sf::Color const& in_microphone_fill_color 
+						 	= sf::Color(0,255,0)
+						 	);
 		~Table_Visualizer();
 
 		virtual void Draw(sf::RenderWindow& canvas) const;
@@ -38,7 +40,7 @@ class Table_Visualizer : Drawable_Object {
 
 		void Set_Table_Fill_Color(sf::Color const& in_table_fill_color);
 
-
+		void Set_Microphone_Fill_Color( sf::Color const& in_microphone_fill_color );
 };
 
 };

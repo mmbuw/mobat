@@ -37,15 +37,19 @@ Recalculate_Geometry(sf::Vector2f const& resolution,
 						 ((resolution.y - table_dims_in_px.y)/2.0) );
 
 
-	float microphone_radius = 10.0f;
+	float microphone_radius 
+		= (std::min(physical_table_size.x, 
+				   physical_table_size.y) / 50.0f) * pixel_per_meter;  
 	microphone_circle_shape_
 		.setPosition(coordinate_system_origin_in_px.x + physical_position_.x*pixel_per_meter - microphone_radius,
 					 coordinate_system_origin_in_px.y - (physical_position_.y*pixel_per_meter+microphone_radius) );
 
-	microphone_circle_shape_.setRadius(10.0f);
-	microphone_circle_shape_.setFillColor(sf::Color(255,0,0));
+	microphone_circle_shape_.setRadius( microphone_radius );
+}
 
-
+void Microphone_Object::
+Set_Fill_Color(sf::Color const& in_fill_color) {
+	microphone_circle_shape_.setFillColor(in_fill_color);
 }
 
 

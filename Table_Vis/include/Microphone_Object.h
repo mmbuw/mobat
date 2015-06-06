@@ -20,6 +20,8 @@ class Microphone_Object : Drawable_Object {
 		virtual void Recalculate_Geometry(sf::Vector2f const& resolution,
 										  sf::Vector2f const& physical_table_size);
 
+		void Set_Fill_Color(sf::Color const& in_fill_color);
+
 };
 
 
