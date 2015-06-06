@@ -12,14 +12,14 @@ namespace TTT {
 class Microphone_Object : Drawable_Object {
 
 	private:
-		Vec2f pos_;
+		sf::Vector2f pos_;
 		sf::CircleShape microphone_circle_shape_;
 
 	public:
 		virtual void Draw(sf::RenderWindow& canvas) const;
 
-		void Set_Position(Vec2f const& in_pos);
-		Vec2f Position() const;
+		void Set_Position(sf::Vector2f const& in_pos);
+		sf::Vector2f Position() const;
 
 
 };

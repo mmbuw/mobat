@@ -8,15 +8,14 @@ Draw(sf::RenderWindow& canvas) const {
 }
 
 void Microphone_Object::
-Set_Position(Vec2f const& in_pos) {
+Set_Position(sf::Vector2f const& in_pos) {
 	pos_ = in_pos;
 }
 
-Vec2f Microphone_Object::
+sf::Vector2f Microphone_Object::
 Position() const {
 	return pos_;
 }
-
 
 
 };
