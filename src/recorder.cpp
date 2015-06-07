@@ -112,7 +112,7 @@ std::vector<std::string> Recorder::get_pcms() {
     if(name != nullptr && strcmp("null", name) != 0 && strcmp("null", name)) {
       if(io == nullptr || strcmp("Output", io) != 0) {
         devices.push_back(name);
-        if(io != nullptr)std::cout << name << " " << std::string{io} << std::endl;
+        // if(io != nullptr)std::cout << name << " " << std::string{io} << std::endl;
       }
       free(name);
       free(io);

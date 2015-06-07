@@ -28,7 +28,7 @@ struct device {
   {
 	  int err = snd_pcm_open(&handle, device_name.c_str(), typ, 0);
 	  if(err < 0) {
-	    std::cerr << "cannot open audio device " << device_name << " " << snd_strerror(err) << std::endl;
+	    // std::cerr << "cannot open audio device " << device_name << " " << snd_strerror(err) << std::endl;
       handle = nullptr;
     }
 	}

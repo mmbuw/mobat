@@ -2,6 +2,7 @@
 #include <vector>
 #include "recorder.hpp"
 
+snd_pcm_t* open_device(std::string const&, snd_pcm_stream_t);
 void stream_buffer(std::ostream&, unsigned char[], unsigned size);
 
 int main(int argc, char *argv[])

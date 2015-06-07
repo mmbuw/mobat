@@ -1,20 +1,31 @@
 {
-    "folders":
-    [
-        {
-            "follow_symlinks": true,
-            "path": ".",
-            "folder_exclude_patterns": ["install", "build", "bin"],
-            "file_exclude_patterns": ["*.nfs*"]
-        }
-    ],
-    "build_systems":
-    [
-      {
-        "name": "ttt",
-        "file_regex": "^(..[^:]*):(.*)$",
-        "working_dir": "${project_path}/build",
-        "cmd":  ["make"]
-      }
-    ]
+	"build_systems":
+	[
+		{
+			"cmd":
+			[
+				"make"
+			],
+			"file_regex": "^(..[^:]*):(.*)$",
+			"name": "ttt",
+			"working_dir": "${project_path}/build"
+		}
+	],
+	"folders":
+	[
+		{
+			"file_exclude_patterns":
+			[
+				"*.nfs*"
+			],
+			"folder_exclude_patterns":
+			[
+				"install",
+				"build",
+				"bin"
+			],
+			"follow_symlinks": true,
+			"path": "."
+		}
+	]
 }
