@@ -111,51 +111,49 @@ bool Config::configure(snd_pcm_t* pcm_handle) {
 
 bool Config::is_supported(snd_pcm_t* pcm_handle) const{
   if(!pcm_handle) {
-    std::cerr << "Config::is_supported - device not initialized" << std::endl;
+    // std::cerr << "Config::is_supported - device not initialized" << std::endl;
     return false;
   }
    
   // necessary to prevent failed `!snd_interval_empty(i)' assertion when calling "snd_pcm_hw_params_test_period_time"
   if(strncmp(snd_pcm_name(pcm_handle), "plughw", strlen("plughw")) == 0) {
-    std::cerr << "Device is plughw, skipping" << std::endl;
+    // std::cerr << "Device is plughw, skipping" << std::endl;
     return false;
   }
 
   int err = snd_pcm_hw_params_any(pcm_handle, params_);
   if(err < 0) {
-    std::cerr << "cannot initialize hardware parameter structure - " << snd_strerror(err) << std::endl;
+    // std::cerr << "cannot initialize hardware parameter structure - " << snd_strerror(err) << std::endl;
     return false;
   }
 
   err = snd_pcm_hw_params_test_access(pcm_handle, params_, access_);
   if(err < 0) {
-    std::cerr << "cannot set access type - " << snd_strerror(err) << std::endl;
+    // std::cerr << "cannot set access type - " << snd_strerror(err) << std::endl;
     return false;
   }
 
   err = snd_pcm_hw_params_test_format(pcm_handle, params_, format_);
   if(err < 0) {
-    std::cerr << "cannot set sample format - " << snd_strerror(err) << std::endl;
+    // std::cerr << "cannot set sample format - " << snd_strerror(err) << std::endl;
     return false;
   }
 
   err = snd_pcm_hw_params_test_rate(pcm_handle, params_, framerate_, 0);
   if(err < 0) {
-    std::cerr << "cannot set sample rate - " << snd_strerror(err) << std::endl;
+    // std::cerr << "cannot set sample rate - " << snd_strerror(err) << std::endl;
     return false;
   }
 
   err = snd_pcm_hw_params_test_channels(pcm_handle, params_, channels_);
   if(err < 0) {
-    std::cerr << "cannot set channel count - " << snd_strerror(err) << std::endl;
+    // std::cerr << "cannot set channel count - " << snd_strerror(err) << std::endl;
     return false;
   }
 
-  std::cerr << "testing " << std::string{snd_pcm_name(pcm_handle)} << std::endl;
-
   err = snd_pcm_hw_params_test_period_time(pcm_handle, params_, period_time_, 0);
   if(err < 0) {
-    std::cerr << "cannot set period time - " << snd_strerror(err) << std::endl;
+    // std::cerr << "cannot set period time - " << snd_strerror(err) << std::endl;
     return false;
   }
 

@@ -21,15 +21,15 @@ class Recorder {
   void record();
 
   static std::vector<std::string> get_pcms();
+  static std::vector<std::string> get_supporting_devices(std::vector<std::string> const&, Config const&, snd_pcm_stream_t);
  private:
-  std::vector<std::string> get_supporting_devices(std::vector<std::string> const&, Config const&, snd_pcm_stream_t);
 
   Config config_;
   device device_;
   unsigned long recording_time_;
   unsigned long buffer_length_;
   // use char array for easy iteration over data
-  unsigned char buffer_[];
+  unsigned char* buffer_;
 };
 
 #endif //RECORDER_HPP 
