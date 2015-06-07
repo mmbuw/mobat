@@ -71,7 +71,7 @@ void Recorder::record() {
   }  
 }
 
-unsigned long Recorder::buffer_length() const {
+unsigned long Recorder::buffer_bytes() const {
   return buffer_length_;
 }
 

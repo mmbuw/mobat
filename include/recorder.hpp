@@ -13,7 +13,7 @@ class Recorder {
   ~Recorder();
 
   static void output_cards();
-  unsigned long buffer_length() const;
+  unsigned long buffer_bytes() const;
   unsigned char* buffer();
 
   std::string const& device_name() const;

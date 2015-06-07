@@ -31,8 +31,7 @@ int main(int argc, char *argv[])
   // stream_buffer(std::cout, buffer, sizeof(buffer) / sizeof(*buffer));
 
   unsigned char* buffer = recorder.buffer(); 
-  for(unsigned char* start = &buffer[0]; start < &buffer[recorder.buffer_length()]; start += playback_config.period_bytes()) {
-    // std::cout << --loops << std::endl;
+  for(unsigned char* start = &buffer[0]; start < &buffer[recorder.buffer_bytes()]; start += playback_config.period_bytes()) {
     err = snd_pcm_writei(playback_device, start, playback_config.period_frames());
     if(err == -EPIPE) {
       snd_pcm_prepare(playback_device);
