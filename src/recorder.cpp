@@ -27,15 +27,13 @@ Recorder::Recorder(unsigned chan, unsigned frames, unsigned recording_time) :
   if(capture_name == capture_devices[0]) {
     std::cerr << "Behringer UMC not found, using default recording device" << std::endl;
   }
-  std::cout << "recorder " << capture_name << std::endl;
   // open chosen device
   device_ =  device{"default", SND_PCM_STREAM_CAPTURE};
   if(!device_) {
     std::cerr << "no usable device found" << std::endl;
     return;
   }
-  // std::cout << "set recorder construct" << std::endl;
-//   std::cerr << "done";
+
   config_.install(device_);
   buffer_length_ = config_.buffer_bytes(recording_time_);
   buffer_[buffer_length_];
@@ -54,15 +52,17 @@ void Recorder::record() {
 
   // prevent under- or overruns
   unsigned loops = recording_time_ / config_.period_time();
-  if(loops * config_.period_bytes() > sizeof(buffer_)) {
-    std::cerr << "buffer size to small" << std::endl;
+  std::cout << sizeof(buffer_) << " " << buffer_length_ << std::endl;
+  if(loops * config_.period_bytes() > buffer_length_) {
+    std::cerr << "Recorder::record - buffer size to small" << std::endl;
     return;
   }
-  else if(loops * config_.period_bytes() < sizeof(buffer_)) {
-    std::cerr << "buffer size too large" << std::endl;
+  else if(loops * config_.period_bytes() < buffer_length_) {
+    std::cerr << "Recorder::record - buffer size too large" << std::endl;
   }
-
-  for(unsigned char* start = &buffer_[0]; start < &buffer_[sizeof(buffer_) / sizeof(*buffer_)]; start += config_.period_bytes()) {
+  std::cout << "end " << long(&buffer_[buffer_length_ / sizeof(*buffer_)]) << std::endl;
+  for(unsigned char* start = &buffer_[0]; start < &buffer_[buffer_length_ / sizeof(*buffer_)]; start += config_.period_bytes()) {
+    std::cout << long(start) << std::endl; 
     int err = snd_pcm_readi(device_, start, config_.period_frames());
     if(err != config_.period_frames()) {
       std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;

@@ -66,7 +66,7 @@ bool Config::configure(snd_pcm_t* pcm_handle) {
     std::cerr << "Config::configure - device not initialized" << std::endl;
     return false;
   }
-  std::cerr << pcm_handle << " param " << params_ << std::endl;
+
   int err = snd_pcm_hw_params_any(pcm_handle, params_);
   if(err < 0) {
     std::cerr << "cannot initialize hardware parameter structure - " << snd_strerror(err) << std::endl;
