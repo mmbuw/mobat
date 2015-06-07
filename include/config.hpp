@@ -6,9 +6,15 @@
 
 class Config {
  public:
-  Config(unsigned chan = 2, unsigned frames = 44100);
+  Config(unsigned chan = 2, unsigned frames = 44100, unsigned period_time = 23219);
+
+  Config();
+  Config(Config&& c);
+  Config(Config const& c);
 
   ~Config();
+
+  Config& operator=(Config c);
 
   void install(snd_pcm_t* pcm_handle);
 
@@ -30,11 +36,14 @@ class Config {
   // returns size of buffer required to record time of useconds
   unsigned long buffer_bytes(unsigned long useconds) const;
 
+  friend void swap(Config& a, Config& b);
+
  private:
   bool configure(snd_pcm_t* pcm_handle);
   
   unsigned channels_;
   unsigned framerate_;
+  unsigned period_time_;
   snd_pcm_format_t format_;
   snd_pcm_access_t access_;
   snd_pcm_hw_params_t* params_;

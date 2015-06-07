@@ -6,7 +6,6 @@
 
 struct device {
   device() :
-
    handle{nullptr},
    name{""},
    type{SND_PCM_STREAM_PLAYBACK}
@@ -15,6 +14,12 @@ struct device {
   device(device const& d):
    device{d.name, d.type}
   {}
+
+  device(device&& d) :
+   device{}
+  {
+    swap(*this, d);
+  }
 
 	device(std::string const& device_name, snd_pcm_stream_t typ) : 
    handle{nullptr},
@@ -41,6 +46,16 @@ struct device {
   operator snd_pcm_t*() const {
     if(!handle) std::cerr << "device \"" << name << "\" not initialized" << std::endl;
     return handle;
+  }
+
+  friend void swap(device& a, device& b) {
+    std::swap(a.handle, b.handle);
+    std::swap(a.name, b.name);
+    std::swap(a.type, b.type);
+  }
+
+  device& operator=(device d) {
+    swap(*this, d);
   }
 
 	snd_pcm_t* handle;
