@@ -13,7 +13,7 @@ add_executable(ttt ${TTT_SOURCES})
 
 #request C++11 if on unix
 if(UNIX)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g")
 endif(UNIX)
 
 # link the exe with the sound library
