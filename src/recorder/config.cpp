@@ -45,6 +45,7 @@ Config::~Config() {
 
 Config& Config::operator=(Config c) {
   swap(*this, c);
+  return *this;
 }
 
 void Config::install(snd_pcm_t* pcm_handle) {

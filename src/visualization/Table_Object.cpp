@@ -1,4 +1,4 @@
-#include "../include/Table_Object.h"
+#include "Table_Object.h"
 #include <iostream>
 namespace TTT {
 

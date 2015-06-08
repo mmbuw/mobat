@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
     if(err == -EPIPE) {
       snd_pcm_prepare(playback_device);
     }
-    else if(err != playback_config.period_frames()) {
+    else if(err != int(playback_config.period_frames())) {
       std::cerr << "write to audio interface failed " << snd_strerror(err) << std::endl;
       return 1;
     }

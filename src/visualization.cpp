@@ -1,4 +1,4 @@
-#include "../include/Table_Visualizer.h"
+#include "Table_Visualizer.h"
 
 #include <SFML/Graphics.hpp>
 

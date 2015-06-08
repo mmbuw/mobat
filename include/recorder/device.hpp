@@ -56,6 +56,7 @@ struct device {
 
   device& operator=(device d) {
     swap(*this, d);
+    return *this;
   }
 
 	snd_pcm_t* handle;

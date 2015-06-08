@@ -3,18 +3,28 @@ cmake_minimum_required (VERSION 2.8)
 project (TTT)
 
 #add include folder
-include_directories(include/recorder
-					include/signaltransform)
 
 # recorder
 file(GLOB RECORDER_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/recorder/*.cpp)
 add_library(recorder STATIC ${RECORDER_SOURCES})
+target_include_directories(recorder PUBLIC include/recorder)
 target_link_libraries(recorder -lasound)
+
+# visualization
+file(GLOB RECORDER_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/visualization/*.cpp)
+add_library(visualization STATIC ${RECORDER_SOURCES})
+target_include_directories(visualization PUBLIC include/visualization)
+target_link_libraries(visualization -lm -lsfml-graphics -lsfml-window -lsfml-system)
 
 # output executable
 add_executable(ttt src/ttt.cpp)
-target_link_libraries(ttt -lasound)
-target_link_libraries(ttt recorder)
+# requires libasound2-dev
+target_link_libraries(ttt recorder -lasound)
+
+add_executable(visualizer src/visualization.cpp)
+target_include_directories(visualizer PUBLIC include/visualization)
+# requires libsfml-dev
+target_link_libraries(visualizer visualization -lm -lsfml-graphics -lsfml-window -lsfml-system)
 
 #request C++11 if on unix
 if(UNIX)

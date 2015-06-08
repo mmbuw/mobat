@@ -1,4 +1,4 @@
-#include "../include/Recognized_Token_Object.h"
+#include "Recognized_Token_Object.h"
 
 #include <iostream>
 namespace TTT {

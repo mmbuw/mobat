@@ -1,13 +1,11 @@
 #include "recorder.hpp"
 
 Recorder::Recorder(unsigned chan, unsigned frames, unsigned recording_time) :
-  device_{},
   config_{chan, frames, 23219},
-  buffer_length_{0},
-  recording_time_{recording_time}
+  device_{},
+  recording_time_{recording_time},
+  buffer_length_{0}
 {
-	int err;
-
   std::vector<std::string> devices{get_pcms()};
   // for(auto device : devices) {
   //   std::cout << std::string{device} << std::endl;
@@ -64,7 +62,7 @@ void Recorder::record() {
 
   for(unsigned char* start = &buffer_[0]; start < &buffer_[buffer_length_ / sizeof(*buffer_)]; start += config_.period_bytes()) {
     int err = snd_pcm_readi(device_, start, config_.period_frames());
-    if(err != config_.period_frames()) {
+    if(err != int(config_.period_frames())) {
       std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
       return;
     }
@@ -160,8 +158,8 @@ void Recorder::output_cards() {
       return;
     }
 
-    const char* card_name = snd_ctl_card_info_get_name(card_info);
-    const char* card_id = snd_ctl_card_info_get_id(card_info);
+    // const char* card_name = snd_ctl_card_info_get_name(card_info);
+    // const char* card_id = snd_ctl_card_info_get_id(card_info);
     // std::cout << "Card: " << card_index
     //           << ", Name: \"" << card_name
     //           << "\", ID: " << card_id
@@ -190,8 +188,8 @@ void Recorder::output_cards() {
         continue;
       }
 
-      const char* device_name = snd_pcm_info_get_name(pcm_info);
-      const char* device_id = snd_pcm_info_get_id(pcm_info);
+      // const char* device_name = snd_pcm_info_get_name(pcm_info);
+      // const char* device_id = snd_pcm_info_get_id(pcm_info);
       // std::cout << " Device: " << device_index
       //     << ", Name: \"" << device_name
       //     << "\", ID: " << device_id

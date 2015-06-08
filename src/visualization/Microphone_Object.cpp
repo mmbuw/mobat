@@ -1,4 +1,4 @@
-#include "../include/Microphone_Object.h"
+#include "Microphone_Object.h"
 
 namespace TTT {
 
