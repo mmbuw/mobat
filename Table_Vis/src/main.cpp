@@ -19,7 +19,7 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
 		default_microphone_positions_.push_back(sf::Vector2f(4.0,0.0));
 		default_microphone_positions_.push_back(sf::Vector2f(4.0,8.0));
 
-TTT::Table_Visualizer table_visualizer;
+TTT::Table_Visualizer table_visualizer(windowResolution);
 
 //table_visualizer.Set_Table_Fill_Color(sf::Color(82,159,153));
 //table_visualizer.Recalculate_Geometry((sf::Vector2f)window.getSize());
@@ -57,7 +57,7 @@ TTT::Table_Visualizer table_visualizer;
        }
        std::cout << window.getSize().x << ", " << window.getSize().y << "\n";
         window.clear();
-table_visualizer.Recalculate_Geometry((sf::Vector2f)window.getSize());
+table_visualizer.Recalculate_Geometry();
         table_visualizer.Draw(window);
         window.display();
     }

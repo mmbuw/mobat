@@ -1,0 +1,48 @@
+#ifndef TTT_RECOGNIZED_TOKEN_OBJECT_H
+#define TTT_RECOGNIZED_TOKEN_OBJECT_H
+
+#include "Drawable_Object.h"
+
+namespace TTT {
+
+class Recognized_Token_Object : Drawable_Object {
+
+	private:
+		//the id is in this case the frequency
+		unsigned id_;
+
+		sf::Vector2f physical_position_;
+		sf::CircleShape token_circle_shape_;
+
+		//how long the object will life before we discard it
+		unsigned life_time_in_ms_;
+		unsigned remaining_life_time_in_ms_;
+
+
+		//helper functions
+		void Update_Alpha_Value(float in_alpha) ;
+
+	public:
+		Recognized_Token_Object(unsigned in_id, 
+								sf::Vector2f in_position ,
+								unsigned in_life_time_in_ms = 3000);
+		virtual void Draw(sf::RenderWindow& canvas) const;
+		virtual void Recalculate_Geometry(sf::Vector2f const& resolution,
+										  sf::Vector2f const& physical_table_size);
+
+		void Set_Fill_Color(sf::Color const& in_fill_color);
+		void Set_Life_Time(unsigned in_life_time_in_ms = 3000);
+
+		//update remaining_life_time
+		//returns "true", if the object is still alive
+		//returns "false", if the object shall be deleted
+		bool Update_Life_Time(bool in_was_recognized, 
+							  unsigned in_passed_time_in_ms);
+
+		unsigned Get_Id() const;
+
+}; //end class Recognized_Token_Object
+
+
+}; //namespace TTT
+#endif 
