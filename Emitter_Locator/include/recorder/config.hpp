@@ -1,8 +1,8 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 
-// requires libasound2-dev
 #include </usr/include/alsa/asoundlib.h>
+#include <utility>
 
 class Config {
  public:
@@ -21,6 +21,11 @@ class Config {
   snd_pcm_hw_params_t* params();
 
   bool is_supported(snd_pcm_t* pcm_handle) const;
+
+  void set_period_time(unsigned time);
+  
+  // returns the min and max time of a period in us
+  std::pair<unsigned, unsigned> period_time_extremes() const;
 
   unsigned channels() const;
   

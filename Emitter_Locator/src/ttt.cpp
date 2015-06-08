@@ -7,12 +7,13 @@ void stream_buffer(std::ostream&, unsigned char[], unsigned size);
 
 int main(int argc, char *argv[])
 {
-  int err;
+  Recorder recorder{1, 44100, 2000000};
+  recorder.record();
 
   std::vector<std::string> devices{Recorder::get_pcms()};
  
   // std::cout << "----testing PCMs----------------------------------------------" << std::endl;
-  Config playback_config{1, 44100, 23219};
+  Config playback_config{1, 44100, recorder.config().period_time()};
   std::vector<std::string> playback_devices{Recorder::get_supporting_devices(devices, playback_config, SND_PCM_STREAM_PLAYBACK)};
 
   // std::cout << "----playback PCMs----------------------------------------------" << std::endl;
@@ -25,14 +26,11 @@ int main(int argc, char *argv[])
 
   playback_config.install(playback_device);
 
-  Recorder recorder{1, 44100, 2000000};
-  recorder.record();
-
   // stream_buffer(std::cout, buffer, sizeof(buffer) / sizeof(*buffer));
 
   unsigned char* buffer = recorder.buffer(); 
   for(unsigned char* start = &buffer[0]; start < &buffer[recorder.buffer_bytes()]; start += playback_config.period_bytes()) {
-    err = snd_pcm_writei(playback_device, start, playback_config.period_frames());
+    int err = snd_pcm_writei(playback_device, start, playback_config.period_frames());
     if(err == -EPIPE) {
       snd_pcm_prepare(playback_device);
     }

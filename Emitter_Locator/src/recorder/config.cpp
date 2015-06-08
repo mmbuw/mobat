@@ -115,12 +115,6 @@ bool Config::is_supported(snd_pcm_t* pcm_handle) const{
     // std::cerr << "Config::is_supported - device not initialized" << std::endl;
     return false;
   }
-   
-  // necessary to prevent failed `!snd_interval_empty(i)' assertion when calling "snd_pcm_hw_params_test_period_time"
-  if(strncmp(snd_pcm_name(pcm_handle), "plughw", strlen("plughw")) == 0) {
-    // std::cerr << "Device is plughw, skipping" << std::endl;
-    return false;
-  }
 
   int err = snd_pcm_hw_params_any(pcm_handle, params_);
   if(err < 0) {
@@ -152,13 +146,29 @@ bool Config::is_supported(snd_pcm_t* pcm_handle) const{
     return false;
   }
 
-  err = snd_pcm_hw_params_test_period_time(pcm_handle, params_, period_time_, 0);
+  return true;
+}
+
+void Config::set_period_time(unsigned time) {
+  period_time_ = time;
+}
+
+std::pair<unsigned, unsigned> Config::period_time_extremes() const {
+  unsigned int min = 0;
+  int err = snd_pcm_hw_params_get_period_time_min(params_, &min, 0);
   if(err < 0) {
-    // std::cerr << "cannot set period time - " << snd_strerror(err) << std::endl;
-    return false;
+    std::cerr << "cannot get min period time - " << snd_strerror(err) << std::endl;
+    return std::make_pair(0, 0);
   }
 
-  return true;
+  unsigned int max = 0;
+  err = snd_pcm_hw_params_get_period_time_max(params_, &max, 0);
+  if(err < 0) {
+    std::cerr << "cannot get max period time - " << snd_strerror(err) << std::endl;
+    return std::make_pair(0, 0);
+  }
+
+  return std::make_pair(min, max);
 }
 
 unsigned Config::channels() const {

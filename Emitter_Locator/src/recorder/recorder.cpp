@@ -1,20 +1,15 @@
 #include "recorder.hpp"
 
 Recorder::Recorder(unsigned chan, unsigned frames, unsigned recording_time) :
-  config_{chan, frames, 23219},
+  config_{chan, frames, 0},
   device_{},
   recording_time_{recording_time},
   buffer_length_{0}
 {
   std::vector<std::string> devices{get_pcms()};
-  // for(auto device : devices) {
-  //   std::cout << std::string{device} << std::endl;
-  // }
-  // config_ = Config{1, 44100, 23219};
-  // std::cout << "----testing PCMs----------------------------------------------" << std::endl;device_
+
   std::vector<std::string> capture_devices{get_supporting_devices(devices, config_, SND_PCM_STREAM_CAPTURE)};
 
-  // std::cout << "----recording PCMs----------------------------------------------" << std::endl;
   std::string capture_name{capture_devices[0]};
   for(auto device : capture_devices) {
     if(device == "hw:CARD=UMC404,DEV=0") {
@@ -32,6 +27,24 @@ Recorder::Recorder(unsigned chan, unsigned frames, unsigned recording_time) :
     return;
   }
 
+  auto extremes = config_.period_time_extremes();
+  unsigned period_time = extremes.second;
+  // find largest period size fitting in recording buffer
+  if(recording_time_ < period_time) {
+    period_time = recording_time_;
+  }
+  else {
+    while(recording_time_ % period_time != 0) {
+      --period_time; 
+    }
+  }
+  // is no usable time was found recoding is impossible
+  if(period_time < extremes.first) {
+    std::cerr << "could not find period matching recording time" << std::endl;
+    return;
+  }
+  config_.set_period_time(period_time);
+  // install configuration and allocate buffer
   config_.install(device_);
   buffer_length_ = config_.buffer_bytes(recording_time_);
   buffer_ = new unsigned char[buffer_length_];
