@@ -2,6 +2,12 @@ cmake_minimum_required (VERSION 2.8)
 # allows access to environment variables with the name 
 project (TTT)
 
+# locator
+file(GLOB LOCATOR_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/locator/*.cpp)
+add_library(locator STATIC ${LOCATOR_SOURCES})
+target_include_directories(locator PUBLIC include/locator)
+
+
 # recorder
 file(GLOB RECORDER_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/recorder/*.cpp)
 add_library(recorder STATIC ${RECORDER_SOURCES})
@@ -34,6 +40,11 @@ target_link_libraries(sigtrans_example signaltrans)
 add_executable(visualizer_example src/visualization.cpp)
 target_include_directories(visualizer_example PUBLIC include/recorder include/signaltrans include/visualization)
 target_link_libraries(visualizer_example recorder signaltrans visualization)
+
+add_executable(locator_example src/locate.cpp)
+target_link_libraries(locator_example locator)
+
+
 
 #request C++11 if on unix, generate debug symbols and output all errors
 if(UNIX)
