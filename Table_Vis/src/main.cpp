@@ -5,6 +5,7 @@
 #include <iostream>
 
 
+sf::Vector2f smartphonePosition(1.0f,0.5f);
 sf::Vector2u windowResolution(800, 800);
 int main(int argc, char** argv) {
 
@@ -23,6 +24,7 @@ TTT::Table_Visualizer table_visualizer(windowResolution);
 
 //table_visualizer.Set_Table_Fill_Color(sf::Color(82,159,153));
 //table_visualizer.Recalculate_Geometry((sf::Vector2f)window.getSize());
+unsigned signal_counter = 0;
 
     while (window.isOpen())
     {
@@ -59,6 +61,19 @@ TTT::Table_Visualizer table_visualizer(windowResolution);
         window.clear();
 table_visualizer.Recalculate_Geometry();
         table_visualizer.Draw(window);
+
+		if(++signal_counter < 100 ) {
+			std::cout << "signaling\n";
+			        	smartphonePosition.x = 2.0* std::rand() / (float)(RAND_MAX);
+        	smartphonePosition.y = 1.0* std::rand() / (float)(RAND_MAX);
+        	table_visualizer.Signal_Token(18000, smartphonePosition);
+        } else {
+
+        	//table_visualizer.Signal_Token(18000, sf::Vector2f(1.0f, 0.5f));
+        	//std::rand()/RAND_MAX
+        }
+
+        table_visualizer.Finalize_Visualization_Frame();
         window.display();
     }
 

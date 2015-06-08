@@ -1,5 +1,7 @@
 #include "../include/Table_Visualizer.h"
 
+#include <iostream>
+
 namespace TTT {
 
 float Drawable_Object::pixel_per_meter_ = 0.0f;
@@ -53,6 +55,12 @@ Draw(sf::RenderWindow& canvas) const {
 	for(auto const& mic_obj : microphones_) {
 		mic_obj.Draw(canvas);
 	}
+
+	for( auto& id_token_pair : recognized_tokens_ ) {
+		id_token_pair.second.Draw(canvas);
+	}
+
+
 }
 
 void Table_Visualizer::
@@ -73,6 +81,10 @@ Recalculate_Geometry() {
 
 	for(auto& mic_obj : microphones_) {
 		mic_obj.Recalculate_Geometry();
+	}
+
+	for( auto& id_token_pair : recognized_tokens_ ) {
+		id_token_pair.second.Recalculate_Geometry();
 	}
 }
 
@@ -111,7 +123,14 @@ Set_Token_Recognition_Timeout( unsigned in_timeout_in_ms ) {
 
 void Table_Visualizer::
 Signal_Token(unsigned int in_id, sf::Vector2f const& in_position) {
-	tokens_to_refresh_.insert(in_id);
+
+	if( recognized_tokens_.end() != recognized_tokens_.find(in_id) ) {
+		std::cout << "Insert token id: " << in_id << "\n";
+		tokens_to_refresh_.insert(in_id);
+	} else {
+		std::cout << "Inserting new token with id: " << in_id << "\n";
+		recognized_tokens_[in_id] = Recognized_Token_Object(in_id, in_position); 
+	}
 
 }
 
@@ -120,15 +139,19 @@ Finalize_Visualization_Frame() {
 	std::set<unsigned> tokens_to_remove;
 
 	for( auto& id_token_pair : recognized_tokens_ ) {
-
+		std::cout << "lt: " << id_token_pair.second.remaining_life_time_in_ms_ << "\n";
 		bool refresh_token = false;
 		if(tokens_to_refresh_.end() != 
 		   tokens_to_refresh_.find(id_token_pair.first) ) {
 			refresh_token = true;
 		}
 
+		std::cout << "Before Update Token: " << refresh_token << "\n";
 		//token signaled lifetime zero -> register to remove it
-		if( ! id_token_pair.second.Update_Token(refresh_token, 16) ) {
+		if( ! id_token_pair.second
+			.Update_Token(refresh_token, 
+						  16, 
+						  id_token_pair.second.physical_position_) ) {
 			tokens_to_remove.insert(id_token_pair.first);
 		}
 
@@ -137,6 +160,8 @@ Finalize_Visualization_Frame() {
 	for(auto const& token_id : tokens_to_remove ) {
 		recognized_tokens_.erase(token_id);
 	}
+
+	tokens_to_refresh_.clear();
 }
 
 }; //namespace TTT

@@ -11,20 +11,23 @@ class Recognized_Token_Object : Drawable_Object {
 		//the id is in this case the frequency
 		unsigned id_;
 
-		sf::Vector2f physical_position_;
+
 		sf::CircleShape token_circle_shape_;
 
 		//how long the object will life before we discard it
-		unsigned life_time_in_ms_;
-		unsigned remaining_life_time_in_ms_;
 
 
 		//helper functions
 		void Update_Alpha_Value(float in_alpha) ;
 
 	public:
-		Recognized_Token_Object(unsigned in_id, 
-								sf::Vector2f in_position ,
+		unsigned life_time_in_ms_;
+		unsigned remaining_life_time_in_ms_;
+
+		sf::Vector2f physical_position_;
+		
+		Recognized_Token_Object(unsigned in_id = 0, 
+								sf::Vector2f in_position = sf::Vector2f(-500.0, -500.0),
 								unsigned in_life_time_in_ms = 3000);
 		virtual void Draw(sf::RenderWindow& canvas) const;
 		virtual void Recalculate_Geometry();

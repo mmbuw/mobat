@@ -1,5 +1,6 @@
 #include "../include/Recognized_Token_Object.h"
 
+#include <iostream>
 namespace TTT {
 
 Recognized_Token_Object::
@@ -7,14 +8,16 @@ Recognized_Token_Object(unsigned in_id,
 						sf::Vector2f in_position, 
 						unsigned in_life_time_in_ms ) 
 						: id_(in_id),
-						  physical_position_(in_position),
 						  life_time_in_ms_(in_life_time_in_ms),
-						  remaining_life_time_in_ms_(in_life_time_in_ms) {
+						  remaining_life_time_in_ms_(in_life_time_in_ms),
+						  physical_position_(in_position) {
 }
 
 void Recognized_Token_Object::
 Draw(sf::RenderWindow& canvas) const {
-
+	std::cout << "Drawing Token\n";
+	std::cout << token_circle_shape_.getPosition().x << " ";
+	std::cout << token_circle_shape_.getPosition().y << "\n";
 	canvas.draw(token_circle_shape_);
 }
 
@@ -27,7 +30,7 @@ Recalculate_Geometry() {
 
 
 	float token_radius 
-		= (std::min(physical_table_size_.x, 
+		= 2*(std::min(physical_table_size_.x, 
 				   physical_table_size_.y) / 50.0f) * pixel_per_meter_;  
 	token_circle_shape_
 		.setPosition(coordinate_system_origin_in_px.x + physical_position_.x*pixel_per_meter_  - token_radius,
@@ -44,7 +47,7 @@ Set_Fill_Color(sf::Color const& in_fill_color) {
 void Recognized_Token_Object::
 Update_Alpha_Value(float in_alpha) {
 	sf::Color new_color = token_circle_shape_.getFillColor();
-	new_color.a = sf::Uint8(255 * in_alpha);
+	new_color.a = sf::Uint8(255.0 * in_alpha);
 
 	token_circle_shape_.setFillColor(new_color);
 }
@@ -60,6 +63,8 @@ Update_Token(bool in_was_recognized,
 			 unsigned in_passed_time_in_ms, 
 			 sf::Vector2f const& in_position) {
 
+		std::cout << "Token Update, Decrease Life Time: " << !in_was_recognized << "\n";
+
 		//reset life time if token was recognized
 		if(in_was_recognized) {
 			remaining_life_time_in_ms_ = life_time_in_ms_;
@@ -74,7 +79,7 @@ Update_Token(bool in_was_recognized,
 		}
 
 		remaining_life_time_in_ms_-=in_passed_time_in_ms;
-		Update_Alpha_Value(remaining_life_time_in_ms_/life_time_in_ms_);
+		Update_Alpha_Value(remaining_life_time_in_ms_/(float)life_time_in_ms_);
 		return true;
 }
 
