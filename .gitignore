@@ -2,3 +2,4 @@ build
 install
 *.o
 *.sublime-workspace
+*~

@@ -3,21 +3,23 @@ cmake_minimum_required (VERSION 2.8)
 project (TTT)
 
 #add include folder
-include_directories(include)
+include_directories(include/recorder
+					include/signaltransform)
 
-# collect source files
-file(GLOB TTT_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/*.cpp)
+# recorder
+file(GLOB RECORDER_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/recorder/*.cpp)
+add_library(recorder STATIC ${RECORDER_SOURCES})
+target_link_libraries(recorder -lasound)
 
 # output executable
-add_executable(ttt ${TTT_SOURCES})
+add_executable(ttt src/ttt.cpp)
+target_link_libraries(ttt -lasound)
+target_link_libraries(ttt recorder)
 
 #request C++11 if on unix
 if(UNIX)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -Wall -Werror")
 endif(UNIX)
-
-# link the exe with the sound library
-target_link_libraries(ttt -lasound)
 
 #if user didnt set install dir, override it and write it to the cache -> Type and description necessary,
 #overwrite variable, not just write it to cache
