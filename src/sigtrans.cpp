@@ -1,5 +1,5 @@
-#include "../include/FFT_Transformer.h"
-#include "../include/ring_buffer.h"
+#include "FFT_Transformer.h"
+#include "ring_buffer.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -114,3 +114,4 @@ std::chrono::duration_cast<std::chrono::microseconds>(after_fft - before_fft).co
 
     return 0;
 }
+

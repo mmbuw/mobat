@@ -1,4 +1,4 @@
-#include "../include/FFT_Transformer.h"
+#include "FFT_Transformer.h"
 
 #include <limits>
 #include <iostream>

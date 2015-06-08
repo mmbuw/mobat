@@ -1,38 +1,8 @@
-#include "../include/ring_buffer.h"
+#include "ring_buffer.h"
 
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-
-
-template <class DATA_TYPE>
-Ring_Buffer<DATA_TYPE>::Ring_Buffer(unsigned num_elements) : num_filled_elements_(0) {
-	ring_data_ = (DATA_TYPE*) malloc(sizeof(DATA_TYPE) * num_elements);
-
-	if(!ring_data_) {
-		std::cout << "Unable to allocate data for ring buffer\n";
-
-		is_allocated_ = false;
-	} else {
-
-		capacity_ = num_elements;
-		is_allocated_  = true;
-	}
-}
-
-
-template <class DATA_TYPE>
-Ring_Buffer<DATA_TYPE>::~Ring_Buffer() {
-
-	if(!ring_data_) {
-		std::cout << "Can not destroy empty ring buffer\n";
-		return;
-	}
-
-	free(ring_data_); 
-}
-
-
 
 template <class DATA_TYPE>
 void Ring_Buffer<DATA_TYPE>::Read_Samples(unsigned const num_samples, 

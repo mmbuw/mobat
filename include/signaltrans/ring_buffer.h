@@ -1,13 +1,35 @@
 #ifndef RING_BUFFER_H
 #define RING_BUFFER_H
 
+#include <iostream>
 
 template <class DATA_TYPE>
 class Ring_Buffer {
 
 	public:
-		Ring_Buffer(unsigned buffer_size);
-		~Ring_Buffer();
+		Ring_Buffer(unsigned num_elements) : num_filled_elements_(0) {
+			ring_data_ = (DATA_TYPE*) malloc(sizeof(DATA_TYPE) * num_elements);
+
+			if(!ring_data_) {
+				std::cerr << "Unable to allocate data for ring buffer\n";
+
+				is_allocated_ = false;
+			} else {
+
+				capacity_ = num_elements;
+				is_allocated_  = true;
+			}
+		}
+
+		~Ring_Buffer() {
+
+			if(!ring_data_) {
+				std::cerr << "Can not destroy empty ring buffer\n";
+				return;
+			}
+
+			free(ring_data_); 
+		}
 
 		//reads num_samples from the current tail of the ringbuffer into the provided Buffer
 		void Read_Samples(unsigned const num_samples, 

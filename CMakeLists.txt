@@ -8,23 +8,34 @@ project (TTT)
 file(GLOB RECORDER_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/recorder/*.cpp)
 add_library(recorder STATIC ${RECORDER_SOURCES})
 target_include_directories(recorder PUBLIC include/recorder)
+# requires libasound2-dev
 target_link_libraries(recorder -lasound)
 
 # visualization
 file(GLOB RECORDER_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/visualization/*.cpp)
 add_library(visualization STATIC ${RECORDER_SOURCES})
 target_include_directories(visualization PUBLIC include/visualization)
-target_link_libraries(visualization -lm -lsfml-graphics -lsfml-window -lsfml-system)
+# requires libsfml-dev
+target_link_libraries(visualization -lsfml-graphics -lsfml-window -lsfml-system)
+
+# signaltransformation
+file(GLOB SIGNALTRANS_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/signaltrans/*.cpp)
+add_library(signaltrans STATIC ${SIGNALTRANS_SOURCES})
+target_include_directories(signaltrans PUBLIC include/signaltrans)
+# requires fftw3-dev and libsndfile1-dev
+target_link_libraries(signaltrans -lfftw3_threads -lfftw3 -lm -lsndfile)
 
 # output executable
 add_executable(ttt src/ttt.cpp)
-# requires libasound2-dev
 target_link_libraries(ttt recorder -lasound)
+
+add_executable(sigtrans src/sigtrans.cpp)
+target_include_directories(sigtrans PUBLIC include/signaltrans)
+target_link_libraries(sigtrans signaltrans)
 
 add_executable(visualizer src/visualization.cpp)
 target_include_directories(visualizer PUBLIC include/visualization)
-# requires libsfml-dev
-target_link_libraries(visualizer visualization -lm -lsfml-graphics -lsfml-window -lsfml-system)
+target_link_libraries(visualizer visualization -lsfml-graphics -lsfml-window -lsfml-system)
 
 #request C++11 if on unix
 if(UNIX)
