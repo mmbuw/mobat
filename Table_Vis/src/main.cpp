@@ -63,14 +63,22 @@ table_visualizer.Recalculate_Geometry();
         table_visualizer.Draw(window);
 
 		if(++signal_counter < 100 ) {
-			std::cout << "signaling\n";
-			        	smartphonePosition.x = 2.0* std::rand() / (float)(RAND_MAX);
-        	smartphonePosition.y = 1.0* std::rand() / (float)(RAND_MAX);
+			//std::cout << "signaling\n";
+
         	table_visualizer.Signal_Token(18000, smartphonePosition);
         } else {
 
+            if(signal_counter < 300) {
+
+            } else {
+                smartphonePosition.x = 2.0* std::rand() / (float)(RAND_MAX);
+                smartphonePosition.y = 1.0* std::rand() / (float)(RAND_MAX);
+                signal_counter = 0;
+            }
+
         	//table_visualizer.Signal_Token(18000, sf::Vector2f(1.0f, 0.5f));
         	//std::rand()/RAND_MAX
+        	//signal_counter = 0;
         }
 
         table_visualizer.Finalize_Visualization_Frame();

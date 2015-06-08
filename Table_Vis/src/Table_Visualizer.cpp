@@ -125,12 +125,12 @@ void Table_Visualizer::
 Signal_Token(unsigned int in_id, sf::Vector2f const& in_position) {
 
 	if( recognized_tokens_.end() != recognized_tokens_.find(in_id) ) {
-		std::cout << "Insert token id: " << in_id << "\n";
+		//std::cout << "Insert token id: " << in_id << "\n";
 		tokens_to_refresh_.insert(in_id);
-	} else {
-		std::cout << "Inserting new token with id: " << in_id << "\n";
-		recognized_tokens_[in_id] = Recognized_Token_Object(in_id, in_position); 
 	}
+		//std::cout << "Inserting new token with id: " << in_id << "\n";
+		recognized_tokens_[in_id] = Recognized_Token_Object(in_id, in_position); 
+	
 
 }
 
@@ -139,14 +139,14 @@ Finalize_Visualization_Frame() {
 	std::set<unsigned> tokens_to_remove;
 
 	for( auto& id_token_pair : recognized_tokens_ ) {
-		std::cout << "lt: " << id_token_pair.second.remaining_life_time_in_ms_ << "\n";
+		//std::cout << "lt: " << id_token_pair.second.remaining_life_time_in_ms_ << "\n";
 		bool refresh_token = false;
 		if(tokens_to_refresh_.end() != 
 		   tokens_to_refresh_.find(id_token_pair.first) ) {
 			refresh_token = true;
 		}
 
-		std::cout << "Before Update Token: " << refresh_token << "\n";
+		//std::cout << "Before Update Token: " << refresh_token << "\n";
 		//token signaled lifetime zero -> register to remove it
 		if( ! id_token_pair.second
 			.Update_Token(refresh_token, 

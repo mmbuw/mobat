@@ -63,7 +63,7 @@ Update_Token(bool in_was_recognized,
 			 unsigned in_passed_time_in_ms, 
 			 sf::Vector2f const& in_position) {
 
-		std::cout << "Token Update, Decrease Life Time: " << !in_was_recognized << "\n";
+		//std::cout << "Token Update, Decrease Life Time: " << !in_was_recognized << "\n";
 
 		//reset life time if token was recognized
 		if(in_was_recognized) {
