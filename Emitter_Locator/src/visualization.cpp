@@ -1,4 +1,9 @@
+#include "FFT_Transformer.h"
+
+#include "recorder.hpp"
+
 #include "Table_Visualizer.h"
+
 
 #include <SFML/Graphics.hpp>
 
@@ -24,10 +29,30 @@ TTT::Table_Visualizer table_visualizer(windowResolution);
 
 //table_visualizer.Set_Table_Fill_Color(sf::Color(82,159,153));
 //table_visualizer.Recalculate_Geometry((sf::Vector2f)window.getSize());
-unsigned signal_counter = 0;
 
+
+
+//recorder initialization code START
+//int err;
+
+std::vector<std::string> devices{Recorder::get_pcms()};
+ 
+Config playback_config{1, 44100, 23219};
+std::vector<std::string> playback_devices{Recorder::get_supporting_devices(devices, playback_config, SND_PCM_STREAM_PLAYBACK)};
+
+device playback_device{playback_devices[0], SND_PCM_STREAM_PLAYBACK};
+if(!playback_device) return 1;
+
+playback_config.install(playback_device);
+
+Recorder recorder{1, 44100, 2000000};
+//recorder initialization code END
+
+
+  unsigned signal_counter = 0;
     while (window.isOpen())
     {
+        recorder.record();
 
         sf::Event event;
         while (window.pollEvent(event))

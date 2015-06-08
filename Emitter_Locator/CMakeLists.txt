@@ -14,9 +14,9 @@ target_link_libraries(recorder -lasound)
 # visualization
 file(GLOB RECORDER_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/visualization/*.cpp)
 add_library(visualization STATIC ${RECORDER_SOURCES})
-target_include_directories(visualization PUBLIC include/visualization)
+target_include_directories(visualization PUBLIC include/visualization )
 # requires libsfml-dev
-target_link_libraries(visualization -lsfml-graphics -lsfml-window -lsfml-system)
+target_link_libraries(recorder -lasound signaltrans -lfftw3_threads -lfftw3 -lm visualization -lsfml-graphics -lsfml-window -lsfml-system)
 
 # signaltransformation
 file(GLOB SIGNALTRANS_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/signaltrans/*.cpp)
@@ -34,8 +34,8 @@ target_include_directories(sigtrans PUBLIC include/signaltrans)
 target_link_libraries(sigtrans signaltrans)
 
 add_executable(visualizer src/visualization.cpp)
-target_include_directories(visualizer PUBLIC include/visualization)
-target_link_libraries(visualizer visualization -lsfml-graphics -lsfml-window -lsfml-system)
+target_include_directories(visualizer PUBLIC include/recorder include/signaltrans include/visualization)
+target_link_libraries(recorder signaltrans visualization)
 
 #request C++11 if on unix
 if(UNIX)
