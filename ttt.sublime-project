@@ -1,0 +1,31 @@
+{
+	"build_systems":
+	[
+		{
+			"cmd":
+			[
+				"make"
+			],
+			"file_regex": "^(..[^:]*):(.*)$",
+			"name": "ttt",
+			"working_dir": "${project_path}/build"
+		}
+	],
+	"folders":
+	[
+		{
+			"file_exclude_patterns":
+			[
+				"*.nfs*"
+			],
+			"folder_exclude_patterns":
+			[
+				"install",
+				"build",
+				"bin"
+			],
+			"follow_symlinks": true,
+			"path": "."
+		}
+	]
+}
