@@ -19,30 +19,19 @@ Draw(sf::RenderWindow& canvas) const {
 }
 
 void Recognized_Token_Object::
-Recalculate_Geometry(sf::Vector2f const& resolution, 
-					 sf::Vector2f const& physical_table_size) {
-
-	sf::Vector2f res_with_margin = //resolution;
-				sf::Vector2f(resolution.x - 0.1*resolution.x,
-							 resolution.y - 0.1*resolution.y);
-
-	float pixel_per_meter = std::min(res_with_margin.x / physical_table_size.x, 
-									 res_with_margin.y / physical_table_size.y);
-
-	sf::Vector2f table_dims_in_px  = physical_table_size * pixel_per_meter;
-
+Recalculate_Geometry() {
 	sf::Vector2f coordinate_system_origin_in_px 
-		= sf::Vector2f( (resolution.x - table_dims_in_px.x)/2.0,
-						 resolution.y - 
-						 ((resolution.y - table_dims_in_px.y)/2.0) );
+		= sf::Vector2f( (resolution_.x - table_dims_in_px_.x)/2.0,
+						 resolution_.y - 
+						 ((resolution_.y - table_dims_in_px_.y)/2.0) );
 
 
 	float token_radius 
-		= (std::min(physical_table_size.x, 
-				   physical_table_size.y) / 50.0f) * pixel_per_meter;  
+		= (std::min(physical_table_size_.x, 
+				   physical_table_size_.y) / 50.0f) * pixel_per_meter_;  
 	token_circle_shape_
-		.setPosition(coordinate_system_origin_in_px.x + physical_position_.x*pixel_per_meter  - token_radius,
-					 coordinate_system_origin_in_px.y - (physical_position_.y*pixel_per_meter + token_radius) );
+		.setPosition(coordinate_system_origin_in_px.x + physical_position_.x*pixel_per_meter_  - token_radius,
+					 coordinate_system_origin_in_px.y - (physical_position_.y*pixel_per_meter_ + token_radius) );
 
 	token_circle_shape_.setRadius( token_radius );
 }
@@ -63,16 +52,19 @@ Update_Alpha_Value(float in_alpha) {
 
 void Recognized_Token_Object::
 Set_Life_Time(unsigned in_life_time_in_ms) {
-	remaining_life_time_in_ms_ = life_time_in_ms_ = in_life_time_in_ms;
+	life_time_in_ms_ = in_life_time_in_ms;
 }
 
 bool Recognized_Token_Object::
-Update_Life_Time(bool in_was_recognized, unsigned in_passed_time_in_ms) {
+Update_Token(bool in_was_recognized, 
+			 unsigned in_passed_time_in_ms, 
+			 sf::Vector2f const& in_position) {
 
 		//reset life time if token was recognized
 		if(in_was_recognized) {
 			remaining_life_time_in_ms_ = life_time_in_ms_;
 			Update_Alpha_Value(1.0);
+			physical_position_ = in_position;
 			return true;
 		}
 

@@ -27,17 +27,19 @@ class Recognized_Token_Object : Drawable_Object {
 								sf::Vector2f in_position ,
 								unsigned in_life_time_in_ms = 3000);
 		virtual void Draw(sf::RenderWindow& canvas) const;
-		virtual void Recalculate_Geometry(sf::Vector2f const& resolution,
-										  sf::Vector2f const& physical_table_size);
+		virtual void Recalculate_Geometry();
 
 		void Set_Fill_Color(sf::Color const& in_fill_color);
 		void Set_Life_Time(unsigned in_life_time_in_ms = 3000);
 
-		//update remaining_life_time
+		//update remaining_life_time_ and physical_position_
 		//returns "true", if the object is still alive
 		//returns "false", if the object shall be deleted
-		bool Update_Life_Time(bool in_was_recognized, 
-							  unsigned in_passed_time_in_ms);
+		bool 
+		Update_Token(bool in_was_recognized, 
+					 unsigned in_passed_time_in_ms, 
+					 sf::Vector2f const& in_position 
+					 	= sf::Vector2f(0.0f,0.0f));
 
 		unsigned Get_Id() const;
 

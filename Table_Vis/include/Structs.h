@@ -6,7 +6,7 @@
 namespace TTT {
 
 struct Frequency_Position_Pair {
-	float frequency_;
+	unsigned frequency_;
 	sf::Vector2f pos_;
 };
 
