@@ -4,6 +4,8 @@
 
 #include "Table_Visualizer.h"
 
+#include "FFT_Transformer.h"
+#include "ring_buffer.h"
 
 #include <SFML/Graphics.hpp>
 
@@ -12,6 +14,9 @@
 
 sf::Vector2f smartphonePosition(1.0f,0.5f);
 sf::Vector2u windowResolution(800, 800);
+
+unsigned int N = 2048;
+
 int main(int argc, char** argv) {
 
 //sf::VideoMode fullScreenMode = sf::VideoMode::getDesktopMode();
@@ -45,14 +50,44 @@ TTT::Table_Visualizer table_visualizer(windowResolution);
 
 //playback_config.install(playback_device);
 
-Recorder recorder{1, 44100, 400000};
+std::cout << "FFT Window Size: " << N << "\n";
+
+//FFT_Transformer fft_transformer(N);
+
+//fft_transformer.initialize_execution_plan();
+
+
+
+Recorder recorder{4, 44100, 400000};
 //recorder initialization code END
 
+
+unsigned int* int_buffer = (unsigned int*) malloc(recorder.buffer_bytes() );
+
+unsigned int **buffer_collector = 0;
+
+buffer_collector[0] = int_buffer;
+
+//fft_transformer.set_FFT_buffers(1, 
+//                            recorder.buffer_bytes()/4,
+//                            (int**)buffer_collector);
 
   unsigned signal_counter = 0;
     while (window.isOpen())
     {
         recorder.record();
+
+        std::cout << "Buffer Length: " << recorder.buffer_bytes() << "\n";
+
+        unsigned char* recorded_buffer = recorder.buffer();
+
+        
+        memcpy(int_buffer, recorded_buffer, recorder.buffer_bytes());
+
+        int first_int = *(reinterpret_cast<int *>(&recorded_buffer[4]));
+        std::cout << (char)recorded_buffer[2] <<"\n";
+        std::cout << "First int: " << first_int << "\n";
+
 
         sf::Event event;
         while (window.pollEvent(event))
