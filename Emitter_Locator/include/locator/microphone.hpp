@@ -3,22 +3,19 @@
 
 #include <iostream>
 
-class microphone
+class Microphone
 {
   public:
 
-
-
-	
-	microphone()	:
-		m_x{0},
-		m_y{0}
+	Microphone()	:
+		x_{0.0},
+		y_{0.0}
 	{}
 
 
-	microphone(double x, double y)	:
-		m_x{x},
-		m_y{y}
+	Microphone(double x, double y)	:
+		x_{x},
+		y_{y}
 	{}
 
 
@@ -30,9 +27,9 @@ class microphone
 
   //private not really necessary
 
-	double m_x;
-	double m_y;
-	double m_toa;		//time of arrival
+	double x_;
+	double y_;
+	double toa_;		//time of arrival
 
 
 

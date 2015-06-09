@@ -1,20 +1,15 @@
-#ifndef MIC_CPP
-#define MIC_CPP	
-
 
 #include "microphone.hpp"
 
 
-void microphone::set_toa(double t)
+void Microphone::set_toa(double in_time)
 {
-	m_toa = t;
+	toa_ = in_time;
 };
 
 
-void microphone::print() const
+void Microphone::print() const
 {
-	std::cout << "Microphone at (" << m_x << ", " << m_y << ")\n";
+	std::cout << "Microphone at (" << x_ << ", " << y_ << ")\n";
 };
 
-
-#endif
