@@ -35,17 +35,17 @@ TTT::Table_Visualizer table_visualizer(windowResolution);
 //recorder initialization code START
 //int err;
 
-std::vector<std::string> devices{Recorder::get_pcms()};
+//std::vector<std::string> devices{Recorder::get_pcms()};
  
-Config playback_config{1, 44100, 23219};
-std::vector<std::string> playback_devices{Recorder::get_supporting_devices(devices, playback_config, SND_PCM_STREAM_PLAYBACK)};
+//Config playback_config{1, 44100, 23219};
+//std::vector<std::string> playback_devices{Recorder::get_supporting_devices(devices, playback_config, SND_PCM_STREAM_PLAYBACK)};
 
-device playback_device{playback_devices[0], SND_PCM_STREAM_PLAYBACK};
-if(!playback_device) return 1;
+//device playback_device{playback_devices[0], SND_PCM_STREAM_PLAYBACK};
+//if(!playback_device) return 1;
 
-playback_config.install(playback_device);
+//playback_config.install(playback_device);
 
-Recorder recorder{1, 44100, 2000000};
+Recorder recorder{1, 44100, 400000};
 //recorder initialization code END
 
 
@@ -87,13 +87,13 @@ Recorder recorder{1, 44100, 2000000};
 table_visualizer.Recalculate_Geometry();
         table_visualizer.Draw(window);
 
-		if(++signal_counter < 100 ) {
+		if(++signal_counter < 3 ) {
 			//std::cout << "signaling\n";
 
         	table_visualizer.Signal_Token(18000, smartphonePosition);
         } else {
 
-            if(signal_counter < 300) {
+            if(signal_counter < 5) {
 
             } else {
                 smartphonePosition.x = 2.0* std::rand() / (float)(RAND_MAX);

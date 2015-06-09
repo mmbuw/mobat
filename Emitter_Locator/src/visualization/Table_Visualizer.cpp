@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+
 namespace TTT {
 
 float Drawable_Object::pixel_per_meter_ = 0.0f;
@@ -43,6 +44,8 @@ Table_Visualizer( sf::Vector2u const& in_canvas_resolution,
 	Set_Microphone_Fill_Color( in_microphone_fill_color );
 	Set_Token_Fill_Color( in_token_fill_color );
 
+	//get initial timestamp
+	last_time_stamp_ = std::chrono::high_resolution_clock::now();
 }
 
 Table_Visualizer::
@@ -148,9 +151,14 @@ Finalize_Visualization_Frame() {
 
 		//std::cout << "Before Update Token: " << refresh_token << "\n";
 		//token signaled lifetime zero -> register to remove it
+
+		unsigned int Elapsed_Milliseconds = Get_Elapsed_Milliseconds();
+
+		std::cout << "Elapsed Milliseconds: " << Elapsed_Milliseconds << "\n";
+		
 		if( ! id_token_pair.second
 			.Update_Token(refresh_token, 
-						  16, 
+						  Elapsed_Milliseconds, 
 						  id_token_pair.second.physical_position_) ) {
 			tokens_to_remove.insert(id_token_pair.first);
 		}
@@ -162,6 +170,21 @@ Finalize_Visualization_Frame() {
 	}
 
 	tokens_to_refresh_.clear();
+}
+
+
+unsigned Table_Visualizer::
+Get_Elapsed_Milliseconds(){
+	std::chrono::high_resolution_clock::time_point 
+		current_time_stamp = std::chrono::high_resolution_clock::now();
+
+	std::chrono::milliseconds elapsed_milliseconds 
+		= std::chrono::duration_cast<std::chrono::milliseconds>
+		(current_time_stamp - last_time_stamp_); 
+
+	last_time_stamp_ = current_time_stamp;
+
+	return elapsed_milliseconds.count();
 }
 
 }; //namespace TTT

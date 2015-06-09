@@ -9,6 +9,8 @@
 #include <map>
 #include <set>
 
+#include <chrono>
+
 namespace TTT {
 
 
@@ -26,6 +28,7 @@ class Table_Visualizer : Drawable_Object {
 
 		std::set<unsigned> tokens_to_refresh_;
 
+		std::chrono::high_resolution_clock::time_point last_time_stamp_;
 	public:
 		Table_Visualizer(sf::Vector2u const& in_canvas_resolution = sf::Vector2u(800, 600),
 						 sf::Vector2f const& table_dims = sf::Vector2f(2.0,1.0), 
@@ -61,6 +64,8 @@ class Table_Visualizer : Drawable_Object {
 		void Signal_Token(unsigned int in_id, sf::Vector2f const& in_position);
 
 		void Finalize_Visualization_Frame();
+
+		unsigned Get_Elapsed_Milliseconds();
 };
 
 }; //end TTT
