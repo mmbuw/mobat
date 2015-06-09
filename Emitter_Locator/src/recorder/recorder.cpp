@@ -10,9 +10,14 @@ Recorder::Recorder(unsigned chan, unsigned frames, unsigned recording_time) :
 
   std::vector<std::string> capture_devices{get_supporting_devices(devices, config_, SND_PCM_STREAM_CAPTURE)};
 
-  std::string capture_name{capture_devices[0]};
+  std::string capture_name{capture_devices[1]};
   for(auto device : capture_devices) {
-    if(device == "hw:CARD=UMC404,DEV=0") {
+
+    //check for strings that contain the behringer id string
+    //other device
+    std::string::size_type behringer_substring_pos 
+      = device.find("hw:CARD=UMC404,DEV=0");
+    if( std::string::npos != behringer_substring_pos ) {
       capture_name = device;
       break;
     }
