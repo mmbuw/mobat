@@ -56,7 +56,7 @@ FFT_Transformer fft_transformer(N);
 
 fft_transformer.initialize_execution_plan();
 
-#define NUM_RECORDED_CHANNELS 1
+#define NUM_RECORDED_CHANNELS 4
 
 Recorder recorder{NUM_RECORDED_CHANNELS, 44100, 200000};
 //recorder initialization code END
@@ -131,24 +131,25 @@ for(unsigned int streamed_buffer_iterator = 0; streamed_buffer_iterator < NUM_RE
                                                              << first_pos + 2 << " & "
                                                              << first_pos + 3 << "\n";
                 */
-/*
+
                 buffer_collector[streamed_buffer_iterator][buffer_offset_pos] 
                     =     0x0 
                         | recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4)      + streamed_buffer_iterator * 4 ]  << 0
                         | recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4) + 1  + streamed_buffer_iterator * 4 ]  << 8
                         | recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4) + 2  + streamed_buffer_iterator * 4 ]  << 16
                         | recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4) + 3  + streamed_buffer_iterator * 4 ]  << 24;
-*/
+
                 //if (buffer_offset_pos > 3)
                 //break;
             }
            //std::cin.get();
             //non-interleaved
-            unsigned byte_per_channel = recorder.buffer_bytes()/NUM_RECORDED_CHANNELS;
+            
+            // unsigned byte_per_channel = recorder.buffer_bytes()/NUM_RECORDED_CHANNELS;
 
-            memcpy( &(buffer_collector[streamed_buffer_iterator][0]), 
-                    &recorded_buffer[ byte_per_channel * streamed_buffer_iterator], 
-                    byte_per_channel );
+            // memcpy( &(buffer_collector[streamed_buffer_iterator][0]), 
+            //         &recorded_buffer[ byte_per_channel * streamed_buffer_iterator], 
+            //         byte_per_channel );
         }
 
 /*
@@ -158,7 +159,7 @@ for(unsigned int streamed_buffer_iterator = 0; streamed_buffer_iterator < NUM_RE
 */
              fft_transformer.set_FFT_buffers(NUM_RECORDED_CHANNELS, 
                             recorder.buffer_bytes()/NUM_RECORDED_CHANNELS,
-                            (int*)recorded_buffer);   
+                            buffer_collector);   
 
 
 //std::chrono::system_clock::time_point before_fft = std::chrono::system_clock::now();

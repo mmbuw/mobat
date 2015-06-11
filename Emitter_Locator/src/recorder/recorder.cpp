@@ -10,7 +10,7 @@ Recorder::Recorder(unsigned chan, unsigned frames, unsigned recording_time) :
 
   std::vector<std::string> capture_devices{get_supporting_devices(devices, config_, SND_PCM_STREAM_CAPTURE)};
 
-  std::string capture_name{capture_devices[1]};
+  std::string capture_name{capture_devices[0]};
   for(auto device : capture_devices) {
 
     //check for strings that contain the behringer id string
@@ -21,7 +21,7 @@ Recorder::Recorder(unsigned chan, unsigned frames, unsigned recording_time) :
     }
   }
   if(capture_name == capture_devices[0]) {
-    std::cerr << "Behringer UMC not found, using default recording device" << std::endl;
+    std::cerr << "Behringer UMC not found, using \"" << capture_name << "\""<< std::endl;
   }
   // open chosen device
   device_ =  device{capture_name, SND_PCM_STREAM_CAPTURE};

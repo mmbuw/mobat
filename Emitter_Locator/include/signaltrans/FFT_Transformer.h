@@ -24,7 +24,7 @@ class FFT_Transformer {
 
 		unsigned int audio_buffer_size_;
 		unsigned int num_audio_buffers_;
-		int* audio_buffers_;
+		int** audio_buffers_;
 
 		unsigned short fft_frame_size_;
 		fftw_complex* fft_in_;
@@ -59,7 +59,7 @@ class FFT_Transformer {
 	
 		void set_FFT_buffers( unsigned int num_buffers,
 							  unsigned int buffer_size,
-							  int* buffers);
+							  int** buffers);
 };
 
 #endif
