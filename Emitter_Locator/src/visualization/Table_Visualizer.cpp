@@ -154,7 +154,7 @@ Finalize_Visualization_Frame() {
 
 		unsigned int Elapsed_Milliseconds = Get_Elapsed_Milliseconds();
 
-		std::cout << "Elapsed Milliseconds: " << Elapsed_Milliseconds << "\n";
+		//std::cout << "Elapsed Milliseconds: " << Elapsed_Milliseconds << "\n";
 		
 		if( ! id_token_pair.second
 			.Update_Token(refresh_token, 

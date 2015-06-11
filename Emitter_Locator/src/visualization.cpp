@@ -56,13 +56,16 @@ FFT_Transformer fft_transformer(N);
 
 fft_transformer.initialize_execution_plan();
 
+#define NUM_RECORDED_CHANNELS 1
 
-
-Recorder recorder{1, 44100, 400000};
+Recorder recorder{NUM_RECORDED_CHANNELS, 44100, 200000};
 //recorder initialization code END
 
 
-int* streamed_buffer1 = (int*) malloc(recorder.buffer_bytes() );
+std::cout << "NUM_RECORDED_CHANNELS: " << NUM_RECORDED_CHANNELS << "\n";
+
+
+//int* streamed_buffer1 = (int*) malloc(recorder.buffer_bytes()/ NUM_RECORDED_CHANNELS);
 //int* streamed_buffer2 = (int*) malloc(recorder.buffer_bytes() / 4 );
 //int* streamed_buffer3 = (int*) malloc(recorder.buffer_bytes() / 4 );
 //int* streamed_buffer4 = (int*) malloc(recorder.buffer_bytes() / 4 );
@@ -70,15 +73,18 @@ int* streamed_buffer1 = (int*) malloc(recorder.buffer_bytes() );
 int **buffer_collector = 0;
 
 buffer_collector 
-    = (int **) malloc(4*sizeof(int*));
+    = (int **) malloc( NUM_RECORDED_CHANNELS * sizeof(int*));
+
+
+for(unsigned int streamed_buffer_iterator = 0; streamed_buffer_iterator < NUM_RECORDED_CHANNELS; ++streamed_buffer_iterator) {
+    buffer_collector[streamed_buffer_iterator] = (int*) malloc(recorder.buffer_bytes() / NUM_RECORDED_CHANNELS);
+}
 
 
 
 
 
-
-
-  //unsigned signal_counter = 0;
+    unsigned frame_counter = 0;
     while (window.isOpen())
     {
         recorder.record();
@@ -89,30 +95,37 @@ buffer_collector
 
         
         //streamed_buffer1 = (int*) recorded_buffer;
-        memcpy(streamed_buffer1, recorded_buffer, recorder.buffer_bytes() );
+        //memcpy(streamed_buffer1, recorded_buffer, recorder.buffer_bytes()/2 );
+
+        std::cout << "Num Recorded Channels: " << NUM_RECORDED_CHANNELS << "\n";
+
+        for(unsigned int streamed_buffer_iterator = 0; streamed_buffer_iterator < NUM_RECORDED_CHANNELS; ++streamed_buffer_iterator) {
+
+           for(unsigned int buffer_offset_pos = 0; buffer_offset_pos < recorder.buffer_bytes()/(NUM_RECORDED_CHANNELS*4); ++buffer_offset_pos) {
+             //memcpy( &(buffer_collector[streamed_buffer_iterator][buffer_offset_pos]), &recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4) ], 4 );
 
 
-       /* for(unsigned int buffer_offset_pos = 0; buffer_offset_pos < recorder.buffer_bytes()/4; ++buffer_offset_pos) {
-            memcpy(&streamed_buffer1[buffer_offset_pos], &recorded_buffer[buffer_offset_pos], 4 );
+                buffer_collector[streamed_buffer_iterator][buffer_offset_pos] 
+                    =     0x0 
+                        | recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4) ]                             << 0
+                        | recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4) +     NUM_RECORDED_CHANNELS ] << 8
+                        | recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4) + 2 * NUM_RECORDED_CHANNELS ] << 16
+                        | recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4) + 3 * NUM_RECORDED_CHANNELS ] << 24;
+  
+                                                                            
+
+
+            }
         }
-*/
-        //int first_int = *(reinterpret_cast<int *>(&recorded_buffer[4]));
-        std::cout << (char)recorded_buffer[2] <<"\n";
-        std::cout << "First int: " << streamed_buffer1[0] << "\n";
-
-        buffer_collector[0] = streamed_buffer1;
 
 
-        fft_transformer.set_FFT_buffers(1, 
-                            recorder.buffer_bytes()/4,
+        fft_transformer.set_FFT_buffers(NUM_RECORDED_CHANNELS, 
+                            recorder.buffer_bytes()/NUM_RECORDED_CHANNELS,
                             (int**)buffer_collector);
 
 
-        //fft_transformer.set_FFT_input(0);
 
-
-
-std::chrono::system_clock::time_point before_fft = std::chrono::system_clock::now();
+//std::chrono::system_clock::time_point before_fft = std::chrono::system_clock::now();
     for(unsigned int i = 0; i < 200000; ++i) {
 
         unsigned offset = 10 * i;
@@ -132,9 +145,9 @@ std::chrono::system_clock::time_point before_fft = std::chrono::system_clock::no
      
     } 
 
-std::chrono::system_clock::time_point after_fft = std::chrono::system_clock::now();
-std::cout << "fftw execution time: " <<
-std::chrono::duration_cast<std::chrono::microseconds>(after_fft - before_fft).count() << "\n";
+//std::chrono::system_clock::time_point after_fft = std::chrono::system_clock::now();
+//std::cout << "fftw execution time: " <<
+//std::chrono::duration_cast<std::chrono::microseconds>(after_fft - before_fft).count() << "\n";
 
 
 
@@ -166,22 +179,24 @@ std::chrono::duration_cast<std::chrono::microseconds>(after_fft - before_fft).co
                
             }
        }
-       std::cout << window.getSize().x << ", " << window.getSize().y << "\n";
+
+
+
         window.clear();
-table_visualizer.Recalculate_Geometry();
+        table_visualizer.Recalculate_Geometry();
         table_visualizer.Draw(window);
-
            
-            glm::vec2 point = loc.locate();
-            smartphonePosition.x = point.x / 100.0;
-            smartphonePosition.y = point.y / 100.0;
+        glm::vec2 point = loc.locate();
+        smartphonePosition.x = point.x / 100.0;
+        smartphonePosition.y = point.y / 100.0;
 
-            std::cout << "SP: " << smartphonePosition.x << "; " << smartphonePosition.y << "\n";
-            table_visualizer.Signal_Token(18000, smartphonePosition);
-        	//table_visualizer.Signal_Token(18000, sf::Vector2f(1.0f, 0.5f));
-        	//std::rand()/RAND_MAX
-        	//signal_counter = 0;
-        
+        //std::cout << "SP: " << smartphonePosition.x << "; " << smartphonePosition.y << "\n";
+        table_visualizer.Signal_Token(18000, smartphonePosition);
+
+        if( 0 == ++frame_counter % 40  ) {
+         table_visualizer.Signal_Token(16000, sf::Vector2f(smartphonePosition.x/2.0,
+                                                            smartphonePosition.y+0.2));
+        }
 
         table_visualizer.Finalize_Visualization_Frame();
         window.display();

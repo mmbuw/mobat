@@ -214,7 +214,7 @@ bool FFT_Transformer::perform_FFT() {
 
 		//eighteen_khz_sum_ /= taken_normalization_samples;
 
-		std::cout << "eighteen khz sum: " << eighteen_khz_sum_ << "\n";
+		std::cout << "\n\n18 khz sum: " << eighteen_khz_sum_ << "\n\n";
 
 		last_x_sample_[(fft_frame_count_%10)] = eighteen_khz_sum_;
 
