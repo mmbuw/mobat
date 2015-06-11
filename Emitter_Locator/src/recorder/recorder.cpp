@@ -24,7 +24,7 @@ Recorder::Recorder(unsigned chan, unsigned frames, unsigned recording_time) :
     std::cerr << "Behringer UMC not found, using default recording device" << std::endl;
   }
   // open chosen device
-  device_ =  device{"default", SND_PCM_STREAM_CAPTURE};
+  device_ =  device{capture_name, SND_PCM_STREAM_CAPTURE};
   if(!device_) {
     std::cerr << "no usable device found" << std::endl;
     return;
