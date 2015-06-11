@@ -130,7 +130,7 @@ void FFT_Transformer::set_FFT_input( unsigned int offset ) {
 				++frame_idx) {
 
 				//std::cout << "buffer content: " << audio_buffers_[0][(offset) + frame_idx] << "\n";
-				fft_in_[frame_idx][0] = window_[frame_idx] * (audio_buffers_[1][    (offset) + frame_idx]) / 2147483647.0;
+				fft_in_[frame_idx][0] = window_[frame_idx] * (audio_buffers_[0][    (offset) + frame_idx]) / 2147483647.0;
 				fft_in_[frame_idx][1] = 0.0;
 			}
 		}

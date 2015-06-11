@@ -23,6 +23,8 @@ sf::Vector2u windowResolution(800, 800);
 
 unsigned int N = 512;
 
+unsigned int current_listened_channel = 0;
+
 int main(int argc, char** argv) {
 
 std::vector<Microphone> mics = {{0.0, 0.0}, {200, 0.0}, {0.0, 100.0}, {200.0, 100.0}};
@@ -144,7 +146,7 @@ for(unsigned int streamed_buffer_iterator = 0; streamed_buffer_iterator < NUM_RE
             }
            //std::cin.get();
             //non-interleaved
-            
+
             // unsigned byte_per_channel = recorder.buffer_bytes()/NUM_RECORDED_CHANNELS;
 
             // memcpy( &(buffer_collector[streamed_buffer_iterator][0]), 
@@ -159,7 +161,7 @@ for(unsigned int streamed_buffer_iterator = 0; streamed_buffer_iterator < NUM_RE
 */
              fft_transformer.set_FFT_buffers(NUM_RECORDED_CHANNELS, 
                             recorder.buffer_bytes()/NUM_RECORDED_CHANNELS,
-                            buffer_collector);   
+                            (int**)&buffer_collector[current_listened_channel]);   
 
 
 //std::chrono::system_clock::time_point before_fft = std::chrono::system_clock::now();
@@ -204,8 +206,14 @@ for(unsigned int streamed_buffer_iterator = 0; streamed_buffer_iterator < NUM_RE
             		|| event.key.code == sf::Keyboard::Left 
             		|| event.key.code == sf::Keyboard::Right) {
 	            	if (event.key.code == sf::Keyboard::Up) {
+
+                        if(current_listened_channel < 3)
+                            ++current_listened_channel;
 	            	}
 	            	if (event.key.code == sf::Keyboard::Down) {
+
+                        if(current_listened_channel > 0)
+                            --current_listened_channel;
 	            	}
 	            	if (event.key.code == sf::Keyboard::Left) {
 	            	} 
