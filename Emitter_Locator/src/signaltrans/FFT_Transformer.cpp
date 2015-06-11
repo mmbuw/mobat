@@ -116,7 +116,7 @@ void FFT_Transformer::set_analyzation_range(unsigned int start_sample, unsigned 
 	}
 }
 
-void FFT_Transformer::set_FFT_buffers(unsigned int num_buffers, unsigned int buffer_size, int** buffers) {
+void FFT_Transformer::set_FFT_buffers(unsigned int num_buffers, unsigned int buffer_size, int* buffers) {
 	num_audio_buffers_ = num_buffers;
 	audio_buffer_size_ = buffer_size;
 	audio_buffers_ = buffers;
@@ -130,7 +130,7 @@ void FFT_Transformer::set_FFT_input( unsigned int offset ) {
 				++frame_idx) {
 
 				//std::cout << "buffer content: " << audio_buffers_[0][(offset) + frame_idx] << "\n";
-				fft_in_[frame_idx][0] = window_[frame_idx] * (audio_buffers_[0][(offset) + frame_idx]) / 32767.0;
+				fft_in_[frame_idx][0] = window_[frame_idx] * (audio_buffers_[    (offset) + frame_idx]) / 2147483647.0;
 				fft_in_[frame_idx][1] = 0.0;
 			}
 		}

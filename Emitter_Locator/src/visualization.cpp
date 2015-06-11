@@ -29,7 +29,7 @@ std::vector<Microphone> mics = {{0.0, 0.0}, {200, 0.0}, {0.0, 100.0}, {200.0, 10
 
 
 
-Locator loc{100000, mics[0], mics[1], mics[2], mics[3], 0.0, 200.4, 0.0, 150.9};
+Locator loc{100000, mics[0], mics[1], mics[2], mics[3], 0.0, 200, 0.0, 100};
 
     mics[0].set_toa(0.0003062);
     mics[1].set_toa(0.0012464);
@@ -84,6 +84,8 @@ for(unsigned int streamed_buffer_iterator = 0; streamed_buffer_iterator < NUM_RE
 
 
 
+
+
     unsigned frame_counter = 0;
     while (window.isOpen())
     {
@@ -101,10 +103,15 @@ for(unsigned int streamed_buffer_iterator = 0; streamed_buffer_iterator < NUM_RE
 
         for(unsigned int streamed_buffer_iterator = 0; streamed_buffer_iterator < NUM_RECORDED_CHANNELS; ++streamed_buffer_iterator) {
 
-           for(unsigned int buffer_offset_pos = 0; buffer_offset_pos < recorder.buffer_bytes()/(NUM_RECORDED_CHANNELS*4); ++buffer_offset_pos) {
+            std::cout << "Audiostream " << streamed_buffer_iterator << " accessor\n";
+           //interleaved
+           for(unsigned int buffer_offset_pos = 0; buffer_offset_pos < recorder.buffer_bytes()/(NUM_RECORDED_CHANNELS*4
+
+            ); ++buffer_offset_pos) {
              //memcpy( &(buffer_collector[streamed_buffer_iterator][buffer_offset_pos]), &recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4) ], 4 );
 
-
+/*
+                //interleaved 8 bit chunks
                 buffer_collector[streamed_buffer_iterator][buffer_offset_pos] 
                     =     0x0 
                         | recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4) ]                             << 0
@@ -112,17 +119,46 @@ for(unsigned int streamed_buffer_iterator = 0; streamed_buffer_iterator < NUM_RE
                         | recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4) + 2 * NUM_RECORDED_CHANNELS ] << 16
                         | recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4) + 3 * NUM_RECORDED_CHANNELS ] << 24;
   
-                                                                            
+                                               */                             
+                //interleaved 32 bit chunks
 
 
+               // unsigned int first_pos = buffer_offset_pos * (NUM_RECORDED_CHANNELS*4) + streamed_buffer_iterator * 4 ;
+
+                /*
+                std::cout << "Accessing recorder buffer at " << first_pos << " & "
+                                                             << first_pos + 1 << " & "
+                                                             << first_pos + 2 << " & "
+                                                             << first_pos + 3 << "\n";
+                */
+/*
+                buffer_collector[streamed_buffer_iterator][buffer_offset_pos] 
+                    =     0x0 
+                        | recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4)      + streamed_buffer_iterator * 4 ]  << 0
+                        | recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4) + 1  + streamed_buffer_iterator * 4 ]  << 8
+                        | recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4) + 2  + streamed_buffer_iterator * 4 ]  << 16
+                        | recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4) + 3  + streamed_buffer_iterator * 4 ]  << 24;
+*/
+                //if (buffer_offset_pos > 3)
+                //break;
             }
+           //std::cin.get();
+            //non-interleaved
+            unsigned byte_per_channel = recorder.buffer_bytes()/NUM_RECORDED_CHANNELS;
+
+            memcpy( &(buffer_collector[streamed_buffer_iterator][0]), 
+                    &recorded_buffer[ byte_per_channel * streamed_buffer_iterator], 
+                    byte_per_channel );
         }
 
-
+/*
         fft_transformer.set_FFT_buffers(NUM_RECORDED_CHANNELS, 
                             recorder.buffer_bytes()/NUM_RECORDED_CHANNELS,
-                            (int**)buffer_collector);
-
+                            (int*)&buffer_collector[0][0]);
+*/
+             fft_transformer.set_FFT_buffers(NUM_RECORDED_CHANNELS, 
+                            recorder.buffer_bytes()/NUM_RECORDED_CHANNELS,
+                            (int*)recorded_buffer);   
 
 
 //std::chrono::system_clock::time_point before_fft = std::chrono::system_clock::now();
