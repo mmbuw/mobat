@@ -58,12 +58,12 @@ fft_transformer.initialize_execution_plan();
 
 
 
-Recorder recorder{1, 44100, 4000000};
+Recorder recorder{1, 44100, 400000};
 //recorder initialization code END
 
 
 int* streamed_buffer1 = (int*) malloc(recorder.buffer_bytes() );
-//in t* streamed_buffer2 = (int*) malloc(recorder.buffer_bytes() / 4 );
+//int* streamed_buffer2 = (int*) malloc(recorder.buffer_bytes() / 4 );
 //int* streamed_buffer3 = (int*) malloc(recorder.buffer_bytes() / 4 );
 //int* streamed_buffer4 = (int*) malloc(recorder.buffer_bytes() / 4 );
 
@@ -118,7 +118,7 @@ std::chrono::system_clock::time_point before_fft = std::chrono::system_clock::no
         unsigned offset = 10 * i;
         if(offset > 200000)
             break;
-/*
+
 
       //  fft_transf.set_FFT_input(
         //                         offset);
@@ -129,13 +129,12 @@ std::chrono::system_clock::time_point before_fft = std::chrono::system_clock::no
             break;
         }
 
-*/     
+     
     } 
 
 std::chrono::system_clock::time_point after_fft = std::chrono::system_clock::now();
 std::cout << "fftw execution time: " <<
 std::chrono::duration_cast<std::chrono::microseconds>(after_fft - before_fft).count() << "\n";
-    std::cout << "After setting input\n";
 
 
 

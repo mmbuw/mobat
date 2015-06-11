@@ -129,7 +129,7 @@ void FFT_Transformer::set_FFT_input( unsigned int offset ) {
 				frame_idx < fft_window_size_;
 				++frame_idx) {
 
-				//std::cout << audio_buffers_[0][(offset) + frame_idx] << "\n";
+				//std::cout << "buffer content: " << audio_buffers_[0][(offset) + frame_idx] << "\n";
 				fft_in_[frame_idx][0] = window_[frame_idx] * (audio_buffers_[0][(offset) + frame_idx]) / 32767.0;
 				fft_in_[frame_idx][1] = 0.0;
 			}
@@ -148,13 +148,14 @@ bool FFT_Transformer::perform_FFT() {
 
 	unsigned int taken_normalization_samples = 0;
 
+/*
 	for(unsigned int i = 0; i < 1024; ++i) {
 		if(fft_in_[i][0] != 0.0) {
 			std::cout << "NOT NULL\n";
 			std::cin.get();
 		}
 	}
-
+*/
 	//std::cout << "start at sample: " << start_sample_ << "\nstop at sample: " << end_sample_ <<"\n\n"; 
 
 	//std::cin.get();
@@ -162,8 +163,8 @@ bool FFT_Transformer::perform_FFT() {
 		//std::cout << "Trying offset " << offset <<"\n";
 
 
-
-		if(fft_cached_results_.find(start_sample_) == fft_cached_results_.end() ) {
+		if(true) {
+		//if(fft_cached_results_.find(start_sample_) == fft_cached_results_.end() ) {
 			//std::cout << "Window Size: " << fft_window_size_ << "\n";
 
 			set_FFT_input(offset);
@@ -187,7 +188,7 @@ bool FFT_Transformer::perform_FFT() {
 						if(current_frequency > 18000.0 && current_frequency < 18002.0 ) {
 						    temp_accum_18khz += std::sqrt(fft_result_[signal_it][0]*fft_result_[signal_it][0]) + 
 								  	(fft_result_[signal_it][1]*fft_result_[signal_it][1]) ;
-						std::cout << "Current Frequency: " << current_frequency << ": " << temp_accum_18khz<< "\n";
+						//std::cout << "Current Frequency: " << current_frequency << ": " << temp_accum_18khz<< "\n";
 						}
 
 
