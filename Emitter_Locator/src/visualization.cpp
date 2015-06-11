@@ -4,6 +4,9 @@
 
 #include "Table_Visualizer.h"
 
+#include "microphone.hpp"
+#include "locator.hpp"
+
 #include "FFT_Transformer.h"
 #include "ring_buffer.h"
 
@@ -12,12 +15,26 @@
 #include <iostream>
 
 
+
+
+
 sf::Vector2f smartphonePosition(1.0f,0.5f);
 sf::Vector2u windowResolution(800, 800);
 
-unsigned int N = 2048;
+unsigned int N = 512;
 
 int main(int argc, char** argv) {
+
+std::vector<Microphone> mics = {{0.0, 0.0}, {200, 0.0}, {0.0, 100.0}, {200.0, 100.0}};
+
+
+
+Locator loc{100000, mics[0], mics[1], mics[2], mics[3], 0.0, 200.4, 0.0, 150.9};
+
+    mics[0].set_toa(0.0003062);
+    mics[1].set_toa(0.0012464);
+    mics[2].set_toa(0.0000);
+    mics[3].set_toa(0.0011279);
 
 //sf::VideoMode fullScreenMode = sf::VideoMode::getDesktopMode();
 sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
@@ -31,24 +48,7 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
 		default_microphone_positions_.push_back(sf::Vector2f(4.0,8.0));
 
 TTT::Table_Visualizer table_visualizer(windowResolution);
-
-//table_visualizer.Set_Table_Fill_Color(sf::Color(82,159,153));
-//table_visualizer.Recalculate_Geometry((sf::Vector2f)window.getSize());
-
-
-
-//recorder initialization code START
-//int err;
-
-//std::vector<std::string> devices{Recorder::get_pcms()};
- 
-//Config playback_config{1, 44100, 23219};
-//std::vector<std::string> playback_devices{Recorder::get_supporting_devices(devices, playback_config, SND_PCM_STREAM_PLAYBACK)};
-
-//device playback_device{playback_devices[0], SND_PCM_STREAM_PLAYBACK};
-//if(!playback_device) return 1;
-
-//playback_config.install(playback_device);
+table_visualizer.Set_Token_Recognition_Timeout(10000);
 
 std::cout << "FFT Window Size: " << N << "\n";
 
@@ -58,29 +58,27 @@ fft_transformer.initialize_execution_plan();
 
 
 
-Recorder recorder{4, 44100, 4000000};
+Recorder recorder{1, 44100, 4000000};
 //recorder initialization code END
 
 
-int* int_buffer = (int*) malloc(recorder.buffer_bytes() );
+int* streamed_buffer1 = (int*) malloc(recorder.buffer_bytes() );
+//in t* streamed_buffer2 = (int*) malloc(recorder.buffer_bytes() / 4 );
+//int* streamed_buffer3 = (int*) malloc(recorder.buffer_bytes() / 4 );
+//int* streamed_buffer4 = (int*) malloc(recorder.buffer_bytes() / 4 );
 
 int **buffer_collector = 0;
 
 buffer_collector 
     = (int **) malloc(4*sizeof(int*));
 
-buffer_collector[0] = int_buffer;
-
-fft_transformer.set_FFT_buffers(1, 
-                            recorder.buffer_bytes()/4,
-                            (int**)buffer_collector);
-
-
-fft_transformer.set_FFT_input(0);
 
 
 
-  unsigned signal_counter = 0;
+
+
+
+  //unsigned signal_counter = 0;
     while (window.isOpen())
     {
         recorder.record();
@@ -90,12 +88,27 @@ fft_transformer.set_FFT_input(0);
         unsigned char* recorded_buffer = recorder.buffer();
 
         
-        int_buffer = (int*) recorded_buffer;
+        //streamed_buffer1 = (int*) recorded_buffer;
+        memcpy(streamed_buffer1, recorded_buffer, recorder.buffer_bytes() );
 
+
+       /* for(unsigned int buffer_offset_pos = 0; buffer_offset_pos < recorder.buffer_bytes()/4; ++buffer_offset_pos) {
+            memcpy(&streamed_buffer1[buffer_offset_pos], &recorded_buffer[buffer_offset_pos], 4 );
+        }
+*/
         //int first_int = *(reinterpret_cast<int *>(&recorded_buffer[4]));
         std::cout << (char)recorded_buffer[2] <<"\n";
-        std::cout << "First int: " << int_buffer[0] << "\n";
+        std::cout << "First int: " << streamed_buffer1[0] << "\n";
 
+        buffer_collector[0] = streamed_buffer1;
+
+
+        fft_transformer.set_FFT_buffers(1, 
+                            recorder.buffer_bytes()/4,
+                            (int**)buffer_collector);
+
+
+        //fft_transformer.set_FFT_input(0);
 
 
 
@@ -105,7 +118,7 @@ std::chrono::system_clock::time_point before_fft = std::chrono::system_clock::no
         unsigned offset = 10 * i;
         if(offset > 200000)
             break;
-
+/*
 
       //  fft_transf.set_FFT_input(
         //                         offset);
@@ -116,9 +129,7 @@ std::chrono::system_clock::time_point before_fft = std::chrono::system_clock::no
             break;
         }
 
-        //fft_transf.print_FFT_result(i);
-
-     
+*/     
     } 
 
 std::chrono::system_clock::time_point after_fft = std::chrono::system_clock::now();
@@ -161,24 +172,17 @@ std::chrono::duration_cast<std::chrono::microseconds>(after_fft - before_fft).co
 table_visualizer.Recalculate_Geometry();
         table_visualizer.Draw(window);
 
-		if(++signal_counter < 3 ) {
-			//std::cout << "signaling\n";
+           
+            glm::vec2 point = loc.locate();
+            smartphonePosition.x = point.x / 100.0;
+            smartphonePosition.y = point.y / 100.0;
 
-        	table_visualizer.Signal_Token(18000, smartphonePosition);
-        } else {
-
-            if(signal_counter < 5) {
-
-            } else {
-                smartphonePosition.x = 2.0* std::rand() / (float)(RAND_MAX);
-                smartphonePosition.y = 1.0* std::rand() / (float)(RAND_MAX);
-                signal_counter = 0;
-            }
-
+            std::cout << "SP: " << smartphonePosition.x << "; " << smartphonePosition.y << "\n";
+            table_visualizer.Signal_Token(18000, smartphonePosition);
         	//table_visualizer.Signal_Token(18000, sf::Vector2f(1.0f, 0.5f));
         	//std::rand()/RAND_MAX
         	//signal_counter = 0;
-        }
+        
 
         table_visualizer.Finalize_Visualization_Frame();
         window.display();

@@ -38,8 +38,8 @@ target_include_directories(sigtrans_example PUBLIC include/signaltrans)
 target_link_libraries(sigtrans_example signaltrans)
 
 add_executable(visualizer_example src/visualization.cpp)
-target_include_directories(visualizer_example PUBLIC include/recorder include/signaltrans include/visualization)
-target_link_libraries(visualizer_example recorder signaltrans visualization)
+target_include_directories(visualizer_example PUBLIC include/recorder include/signaltrans include/locator include/visualization)
+target_link_libraries(visualizer_example recorder signaltrans locator visualization)
 
 add_executable(locator_example src/locate.cpp)
 target_link_libraries(locator_example locator)
