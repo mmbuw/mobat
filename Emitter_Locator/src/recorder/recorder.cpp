@@ -15,9 +15,7 @@ Recorder::Recorder(unsigned chan, unsigned frames, unsigned recording_time) :
 
     //check for strings that contain the behringer id string
     //other device
-    std::string::size_type behringer_substring_pos 
-      = device.find("hw:CARD=UMC404,DEV=0");
-    if( std::string::npos != behringer_substring_pos ) {
+    if( "hw:CARD=UMC404,DEV=0" == device ) {
       capture_name = device;
       break;
     }

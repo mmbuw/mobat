@@ -129,6 +129,7 @@ void FFT_Transformer::set_FFT_input( unsigned int offset ) {
 				frame_idx < fft_window_size_;
 				++frame_idx) {
 
+				//std::cout << audio_buffers_[0][(offset) + frame_idx] << "\n";
 				fft_in_[frame_idx][0] = window_[frame_idx] * (audio_buffers_[0][(offset) + frame_idx]) / 32767.0;
 				fft_in_[frame_idx][1] = 0.0;
 			}
@@ -147,6 +148,12 @@ bool FFT_Transformer::perform_FFT() {
 
 	unsigned int taken_normalization_samples = 0;
 
+	for(unsigned int i = 0; i < 1024; ++i) {
+		if(fft_in_[i][0] != 0.0) {
+			std::cout << "NOT NULL\n";
+			std::cin.get();
+		}
+	}
 
 	//std::cout << "start at sample: " << start_sample_ << "\nstop at sample: " << end_sample_ <<"\n\n"; 
 
@@ -154,8 +161,10 @@ bool FFT_Transformer::perform_FFT() {
 	for(unsigned int offset = start_sample_; offset <= end_sample_ - (fft_window_size_ - 1) ; ++offset ) {
 		//std::cout << "Trying offset " << offset <<"\n";
 
-		if(fft_cached_results_.find(start_sample_) == fft_cached_results_.end() ) {
 
+
+		if(fft_cached_results_.find(start_sample_) == fft_cached_results_.end() ) {
+			//std::cout << "Window Size: " << fft_window_size_ << "\n";
 
 			set_FFT_input(offset);
 			fftw_execute(fftw_execution_plan_);
@@ -163,6 +172,8 @@ bool FFT_Transformer::perform_FFT() {
 			double temp_accum_18khz = 0.0;
 			double normalization_range_value = 0.0;
 			
+
+
 			for(unsigned int signal_it = 0;
 				signal_it < (unsigned int) (fft_window_size_ / 2 - 1);
 				++signal_it) {
@@ -176,7 +187,12 @@ bool FFT_Transformer::perform_FFT() {
 						if(current_frequency > 18000.0 && current_frequency < 18002.0 ) {
 						    temp_accum_18khz += std::sqrt(fft_result_[signal_it][0]*fft_result_[signal_it][0]) + 
 								  	(fft_result_[signal_it][1]*fft_result_[signal_it][1]) ;
+						std::cout << "Current Frequency: " << current_frequency << ": " << temp_accum_18khz<< "\n";
 						}
+
+
+
+
 			}
 
 			double current_iteration_khz_sum = temp_accum_18khz / normalization_range_value;
@@ -193,8 +209,11 @@ bool FFT_Transformer::perform_FFT() {
 		++taken_normalization_samples;
 	}
 
-		eighteen_khz_sum_ /= taken_normalization_samples;
+		//std::cout << "Performed FFT.\n";
 
+		//eighteen_khz_sum_ /= taken_normalization_samples;
+
+		std::cout << "eighteen khz sum: " << eighteen_khz_sum_ << "\n";
 
 		last_x_sample_[(fft_frame_count_%10)] = eighteen_khz_sum_;
 
@@ -211,8 +230,10 @@ bool FFT_Transformer::perform_FFT() {
 		else
 			stabilization_counter_ = 0;
 
+
+
 		if(stabilization_counter_ >= 10) {
-			std::cout << "18khz at sample: " << start_sample_ <<"\n"; 
+			//std::cout << "18khz at sample: " << start_sample_ <<"\n"; 
 			return true;
 		}
 

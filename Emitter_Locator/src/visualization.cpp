@@ -52,25 +52,33 @@ TTT::Table_Visualizer table_visualizer(windowResolution);
 
 std::cout << "FFT Window Size: " << N << "\n";
 
-//FFT_Transformer fft_transformer(N);
+FFT_Transformer fft_transformer(N);
 
-//fft_transformer.initialize_execution_plan();
+fft_transformer.initialize_execution_plan();
 
 
 
-Recorder recorder{4, 44100, 400000};
+Recorder recorder{4, 44100, 4000000};
 //recorder initialization code END
 
 
-unsigned int* int_buffer = (unsigned int*) malloc(recorder.buffer_bytes() );
+int* int_buffer = (int*) malloc(recorder.buffer_bytes() );
 
-unsigned int **buffer_collector = 0;
+int **buffer_collector = 0;
+
+buffer_collector 
+    = (int **) malloc(4*sizeof(int*));
 
 buffer_collector[0] = int_buffer;
 
-//fft_transformer.set_FFT_buffers(1, 
-//                            recorder.buffer_bytes()/4,
-//                            (int**)buffer_collector);
+fft_transformer.set_FFT_buffers(1, 
+                            recorder.buffer_bytes()/4,
+                            (int**)buffer_collector);
+
+
+fft_transformer.set_FFT_input(0);
+
+
 
   unsigned signal_counter = 0;
     while (window.isOpen())
@@ -82,11 +90,42 @@ buffer_collector[0] = int_buffer;
         unsigned char* recorded_buffer = recorder.buffer();
 
         
-        memcpy(int_buffer, recorded_buffer, recorder.buffer_bytes());
+        int_buffer = (int*) recorded_buffer;
 
-        int first_int = *(reinterpret_cast<int *>(&recorded_buffer[4]));
+        //int first_int = *(reinterpret_cast<int *>(&recorded_buffer[4]));
         std::cout << (char)recorded_buffer[2] <<"\n";
-        std::cout << "First int: " << first_int << "\n";
+        std::cout << "First int: " << int_buffer[0] << "\n";
+
+
+
+
+std::chrono::system_clock::time_point before_fft = std::chrono::system_clock::now();
+    for(unsigned int i = 0; i < 200000; ++i) {
+
+        unsigned offset = 10 * i;
+        if(offset > 200000)
+            break;
+
+
+      //  fft_transf.set_FFT_input(
+        //                         offset);
+        fft_transformer.set_analyzation_range(0+offset, N+50 + offset);
+        
+
+        if(fft_transformer.perform_FFT() ) {
+            break;
+        }
+
+        //fft_transf.print_FFT_result(i);
+
+     
+    } 
+
+std::chrono::system_clock::time_point after_fft = std::chrono::system_clock::now();
+std::cout << "fftw execution time: " <<
+std::chrono::duration_cast<std::chrono::microseconds>(after_fft - before_fft).count() << "\n";
+    std::cout << "After setting input\n";
+
 
 
         sf::Event event;
