@@ -50,7 +50,7 @@ target_link_libraries(locator_example locator)
 
 #request C++11 if on unix, generate debug symbols and output all errors
 if(UNIX)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -Wall -Werror")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -Wall -Werror -pthread")
 endif(UNIX)
 
 #if user didnt set install dir, override it and write it to the cache -> Type and description necessary,

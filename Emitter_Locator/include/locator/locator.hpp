@@ -17,9 +17,13 @@ class Locator {
 
      void record_position();
 
+     void shut_down();
+
 private:
 
     mutable std::mutex position_mutex;
+
+    bool shutdown;
     glm::vec2 position;
     glm::vec2 cached_position;
 

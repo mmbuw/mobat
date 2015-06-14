@@ -3,6 +3,7 @@
 #include <iostream>
 
 Locator::Locator(unsigned int num_mics):
+ shutdown{false},
  position{0, 0},
  cached_position{0, 0},
  window_size{512},
@@ -18,10 +19,11 @@ Locator::Locator(unsigned int num_mics):
  glm::vec2 Locator::load_position() const {
     // try to access current position
     if(position_mutex.try_lock()) {
-        return position;
+        glm::vec2 temp = position;
         position_mutex.unlock();
+        return temp;
     }
-    // if recorder is writing, use chached one
+    // if recorder is writing, use cached one
     else {
         return cached_position;
     }
@@ -30,7 +32,7 @@ Locator::Locator(unsigned int num_mics):
  void Locator::record_position() {
     unsigned int current_listened_channel = 0;
 
-    while (true)
+    while (!shutdown)
     {
         recorder.record();
 
@@ -60,4 +62,8 @@ Locator::Locator(unsigned int num_mics):
         position = cached_position;
         position_mutex.unlock();
     }
+ }
+
+ void Locator::shut_down() {
+    shutdown = true;
  }

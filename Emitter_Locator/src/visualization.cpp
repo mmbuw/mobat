@@ -1,31 +1,18 @@
-#include "FFT_Transformer.h"
-
-#include "recorder.hpp"
-#include "buffer_collection.hpp"
-
+#include "locator.hpp"
 #include "Table_Visualizer.h"
-
-#include "microphone.hpp"
-#include "tdoator.hpp"
-
-#include "FFT_Transformer.h"
-#include "ring_buffer.h"
 
 #include <SFML/Graphics.hpp>
 
 #include <iostream>
+#include <thread>
+
 #define NUM_RECORDED_CHANNELS 4
 
 sf::Vector2f smartphonePosition(1.0f,0.5f);
 sf::Vector2u windowResolution(800, 800);
 
-unsigned int N = 512;
-
-unsigned int current_listened_channel = 0;
 
 int main(int argc, char** argv) {
-
-
 
 //sf::VideoMode fullScreenMode = sf::VideoMode::getDesktopMode();
 sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
@@ -38,63 +25,16 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
         default_microphone_positions_.push_back(sf::Vector2f(4.0,0.0));
         default_microphone_positions_.push_back(sf::Vector2f(4.0,8.0));
 
-TTT::Table_Visualizer table_visualizer(windowResolution);
-table_visualizer.Set_Token_Recognition_Timeout(10000);
+    TTT::Table_Visualizer table_visualizer(windowResolution);
+    table_visualizer.Set_Token_Recognition_Timeout(10000);
 
-std::vector<Microphone> mics = {{0.0, 0.0}, {200, 0.0}, {0.0, 100.0}, {200.0, 100.0}};
+    Locator locator{4};
 
-TDOAtor loc{100000, mics[0], mics[1], mics[2], mics[3]};
-
-mics[0].toa = 0.0003062;
-mics[1].toa = 0.0012464;
-mics[2].toa = 0.0000;
-mics[3].toa = 0.0011279;
-
-std::cout << "FFT Window Size: " << N << "\n";
-
-FFT_Transformer fft_transformer(N);
-
-fft_transformer.initialize_execution_plan();
-
-Recorder recorder{NUM_RECORDED_CHANNELS, 44100, 200000};
-//recorder initialization code END
-
-std::cout << "NUM_RECORDED_CHANNELS: " << NUM_RECORDED_CHANNELS << "\n";
-
-buffer_collection collector{recorder.buffer_bytes() / NUM_RECORDED_CHANNELS, NUM_RECORDED_CHANNELS};
+    auto recording_thread = std::thread(&Locator::record_position, &locator);
 
     unsigned frame_counter = 0;
     while (window.isOpen())
     {
-        recorder.record();
-
-        collector.from_interleaved(recorder.buffer());
-
-        fft_transformer.set_FFT_buffers(NUM_RECORDED_CHANNELS, 
-                recorder.buffer_bytes()/NUM_RECORDED_CHANNELS,
-            (int**)&collector[current_listened_channel]);   
-
-        for(unsigned int i = 0; i < 200000; ++i) {
-            unsigned offset = 10 * i;
-            if(offset > 200000)
-                break;
-
-            fft_transformer.set_analyzation_range(0+offset, N+50 + offset);
-            
-
-            if(fft_transformer.perform_FFT() ) {
-                break;
-            }
-
-         
-        } 
-
-//std::chrono::system_clock::time_point after_fft = std::chrono::system_clock::now();
-//std::cout << "fftw execution time: " <<
-//std::chrono::duration_cast<std::chrono::microseconds>(after_fft - before_fft).count() << "\n";
-
-
-
         sf::Event event;
         while (window.pollEvent(event))
         {
@@ -110,16 +50,16 @@ buffer_collection collector{recorder.buffer_bytes() / NUM_RECORDED_CHANNELS, NUM
             		|| event.key.code == sf::Keyboard::Down
             		|| event.key.code == sf::Keyboard::Left 
             		|| event.key.code == sf::Keyboard::Right) {
-	            	if (event.key.code == sf::Keyboard::Up) {
+	            	// if (event.key.code == sf::Keyboard::Up) {
 
-                        if(current_listened_channel < 3)
-                            ++current_listened_channel;
-	            	}
-	            	if (event.key.code == sf::Keyboard::Down) {
+              //           if(current_listened_channel < 3)
+              //               ++current_listened_channel;
+	            	// }
+	            	// if (event.key.code == sf::Keyboard::Down) {
 
-                        if(current_listened_channel > 0)
-                            --current_listened_channel;
-	            	}
+              //           if(current_listened_channel > 0)
+              //               --current_listened_channel;
+	            	// }
 	            	if (event.key.code == sf::Keyboard::Left) {
 	            	} 
 	            	if (event.key.code == sf::Keyboard::Right) {
@@ -135,7 +75,7 @@ buffer_collection collector{recorder.buffer_bytes() / NUM_RECORDED_CHANNELS, NUM
         table_visualizer.Recalculate_Geometry();
         table_visualizer.Draw(window);
            
-        glm::vec2 point = loc.locate();
+        glm::vec2 point = locator.load_position();
         smartphonePosition.x = point.x / 100.0;
         smartphonePosition.y = point.y / 100.0;
 
@@ -150,6 +90,9 @@ buffer_collection collector{recorder.buffer_bytes() / NUM_RECORDED_CHANNELS, NUM
         table_visualizer.Finalize_Visualization_Frame();
         window.display();
     }
+
+    locator.shut_down();
+    recording_thread.join();
 
     return 0;
 }
