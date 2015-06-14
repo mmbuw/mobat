@@ -18,17 +18,17 @@ int main()
 	
 	#if 1
 	//real Values for tap at (40,70) with c=1000 m/s
-	mics[0].set_toa(0.0003062);
-	mics[1].set_toa(0.0012464);
-	mics[2].set_toa(0.0000);
-	mics[3].set_toa(0.0011279);
+	mics[0].toa = 0.0003062;
+	mics[1].toa = 0.0012464;
+	mics[2].toa = 0.0000;
+	mics[3].toa = 0.0011279;
 
 	#else
 	//distances for tap at (40,70) with c=1000 m/s
-	mics[0].set_toa(80.62);
-	mics[1].set_toa(174.64);
-	mics[2].set_toa(50);
-	mics[3].set_toa(162.79);
+	mics[0].toa = 80.62;
+	mics[1].toa = 174.64;
+	mics[2].toa = 50)
+	mics[3].toa = 162.79;
 	#endif
 
 

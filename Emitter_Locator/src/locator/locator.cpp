@@ -20,10 +20,10 @@ set_c(double in_c) {
 
 void Locator::
 update_times(double a, double b, double c, double d) {
-    mics_[0].set_toa(a);
-    mics_[1].set_toa(b);
-    mics_[2].set_toa(c);
-    mics_[3].set_toa(d);
+    mics_[0].toa = a;
+    mics_[1].toa = b;
+    mics_[2].toa = c;
+    mics_[3].toa = d;
 };
 
 double Locator::

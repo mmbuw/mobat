@@ -33,10 +33,10 @@ std::vector<Microphone> mics = {{0.0, 0.0}, {200, 0.0}, {0.0, 100.0}, {200.0, 10
 
 Locator loc{100000, mics[0], mics[1], mics[2], mics[3], 0.0, 200, 0.0, 100};
 
-    mics[0].set_toa(0.0003062);
-    mics[1].set_toa(0.0012464);
-    mics[2].set_toa(0.0000);
-    mics[3].set_toa(0.0011279);
+    mics[0].toa = 0.0003062;
+    mics[1].toa = 0.0012464;
+    mics[2].toa = 0.0000;
+    mics[3].toa = 0.0011279;
 
 //sf::VideoMode fullScreenMode = sf::VideoMode::getDesktopMode();
 sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)

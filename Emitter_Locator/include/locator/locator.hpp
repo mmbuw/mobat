@@ -7,8 +7,6 @@
 #include <vector>
 #include <math.h>
 #include <sstream>
-#include <glm/glm.hpp>
-
 
 #include "microphone.hpp"
 
