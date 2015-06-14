@@ -1,21 +1,22 @@
 #ifndef MICROPHONE
 #define MICROPHONE
 
+//set default glm types to highest precision 
+#define GLM_PRECISION_HIGHP_DOUBLE
+#include <glm/glm.hpp>
 #include <iostream>
 
-class Microphone
+struct Microphone
 {
   public:
 
-	Microphone()	:
-		x_{0.0},
-		y_{0.0}
+	Microphone() :
+	 position{0, 0}
 	{}
 
 
-	Microphone(double x, double y)	:
-		x_{x},
-		y_{y}
+	Microphone(double x, double y) :
+		position{x, y}
 	{}
 
 
@@ -27,9 +28,8 @@ class Microphone
 
   //private not really necessary
 
-	double x_;
-	double y_;
-	double toa_;		//time of arrival
+	glm::vec2 position;
+	double toa;		//time of arrival
 
 
 
