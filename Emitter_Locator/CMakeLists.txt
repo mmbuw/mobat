@@ -2,6 +2,8 @@ cmake_minimum_required (VERSION 2.8)
 # allows access to environment variables with the name 
 project (TTT)
 
+include_directories(external/glm0.9.6.3/)
+
 # locator
 file(GLOB LOCATOR_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/locator/*.cpp)
 add_library(locator STATIC ${LOCATOR_SOURCES})
