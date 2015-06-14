@@ -79,8 +79,18 @@ void Recorder::record() {
   for(unsigned char* start = &buffer_[0]; start < &buffer_[buffer_length_ / sizeof(*buffer_)]; start += config_.period_bytes()) {
     int err = snd_pcm_readi(device_, start, config_.period_frames());
     if(err != int(config_.period_frames())) {
-      std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
-      return;
+      // handle buffer over- or underrun
+      if(err == -EPIPE) {
+        int handled_err = snd_pcm_recover(device_, err, 0);
+        // recovery failed
+        if(handled_err == err) {
+          std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
+          return;
+        }
+      } else {
+        std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
+        return;
+      }
     }
   }  
 }
