@@ -10,7 +10,7 @@ Config::Config() :
   params_{nullptr}
 {}
 
-Config::Config(unsigned chan, unsigned frames, unsigned period_time) :
+Config::Config(unsigned chan, std::size_t frames, std::size_t period_time) :
   channels_{chan},
   framerate_{frames},
   period_time_{period_time},
@@ -149,11 +149,11 @@ bool Config::is_supported(snd_pcm_t* pcm_handle) const{
   return true;
 }
 
-void Config::set_period_time(unsigned time) {
+void Config::set_period_time(std::size_t time) {
   period_time_ = time;
 }
 
-std::pair<unsigned, unsigned> Config::period_time_extremes() const {
+std::pair<std::size_t, std::size_t> Config::period_time_extremes() const {
   unsigned int min = 0;
   int err = snd_pcm_hw_params_get_period_time_min(params_, &min, 0);
   if(err < 0) {
@@ -175,7 +175,7 @@ unsigned Config::channels() const {
   return channels_;
 }
 
-unsigned Config::period_bytes() const {
+std::size_t Config::period_bytes() const {
   // frames per period * channels * samplesize(depending on format)
   int sample_bits = snd_pcm_hw_params_get_sbits(params_);
   if(sample_bits < 0) {
@@ -184,21 +184,21 @@ unsigned Config::period_bytes() const {
   return period_frames() * channels_ * sample_bits;
 }
 
-unsigned Config::period_time() const {
+std::size_t Config::period_time() const {
   // how long a period takes in us
   unsigned period_time;
   snd_pcm_hw_params_get_period_time(params_, &period_time, 0);
   return period_time;
 }
 
-unsigned Config::period_frames() const {
+std::size_t Config::period_frames() const {
   snd_pcm_uframes_t num_frames;
   // number of frames per period
   snd_pcm_hw_params_get_period_size(params_, &num_frames, 0);
   return num_frames;
 }
 
-unsigned long Config::buffer_bytes(unsigned long useconds) const {
+std::size_t Config::buffer_bytes(std::size_t useconds) const {
   // extra brackets necessary, otherwise result is totally wrong
   return period_bytes() * (useconds / period_time());
 }

@@ -6,7 +6,7 @@
 
 class Config {
  public:
-  Config(unsigned chan = 2, unsigned frames = 44100, unsigned period_time = 23219);
+  Config(unsigned chan = 2, std::size_t frames = 44100, std::size_t period_time = 23219);
 
   Config();
   Config(Config&& c);
@@ -22,24 +22,24 @@ class Config {
 
   bool is_supported(snd_pcm_t* pcm_handle) const;
 
-  void set_period_time(unsigned time);
+  void set_period_time(std::size_t time);
   
   // returns the min and max time of a period in us
-  std::pair<unsigned, unsigned> period_time_extremes() const;
+  std::pair<std::size_t, std::size_t> period_time_extremes() const;
 
   unsigned channels() const;
   
   // return size of buffer required to record one period
-  unsigned period_bytes() const;
+  std::size_t period_bytes() const;
 
   // return time a period takes in us
-  unsigned period_time() const;
+  std::size_t period_time() const;
 
   // return number of samples during one period
-  unsigned period_frames() const;
+  std::size_t period_frames() const;
 
   // returns size of buffer required to record time of useconds
-  unsigned long buffer_bytes(unsigned long useconds) const;
+  std::size_t buffer_bytes(std::size_t useconds) const;
 
   friend void swap(Config& a, Config& b);
 
@@ -47,8 +47,8 @@ class Config {
   bool configure(snd_pcm_t* pcm_handle);
   
   unsigned channels_;
-  unsigned framerate_;
-  unsigned period_time_;
+  std::size_t framerate_;
+  std::size_t period_time_;
   snd_pcm_format_t format_;
   snd_pcm_access_t access_;
   snd_pcm_hw_params_t* params_;

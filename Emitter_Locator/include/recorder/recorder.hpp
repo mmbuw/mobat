@@ -9,12 +9,12 @@
 
 class Recorder {
  public:
-  Recorder(unsigned chan = 2, unsigned frames = 44100, unsigned recording_time = 2000000);
+  Recorder(unsigned chan = 2, std::size_t frames = 44100, std::size_t recording_time = 2000000);
   ~Recorder();
 
   static void output_cards();
-  unsigned long buffer_bytes() const;
-  unsigned char* buffer();
+  std::size_t buffer_bytes() const;
+  uint8_t* buffer();
 
   std::string const& device_name() const;
   Config& config();
@@ -26,10 +26,10 @@ class Recorder {
 
   Config config_;
   device device_;
-  unsigned long recording_time_;
-  unsigned long buffer_length_;
+  std::size_t recording_time_;
+  std::size_t buffer_length_;
   // use char array for easy iteration over data
-  unsigned char* buffer_;
+  uint8_t* buffer_;
 };
 
 #endif //RECORDER_HPP 
