@@ -6,7 +6,7 @@
 #include "Table_Visualizer.h"
 
 #include "microphone.hpp"
-#include "locator.hpp"
+#include "tdoator.hpp"
 
 #include "FFT_Transformer.h"
 #include "ring_buffer.h"
@@ -14,6 +14,7 @@
 #include <SFML/Graphics.hpp>
 
 #include <iostream>
+#define NUM_RECORDED_CHANNELS 4
 
 sf::Vector2f smartphonePosition(1.0f,0.5f);
 sf::Vector2u windowResolution(800, 800);
@@ -24,30 +25,30 @@ unsigned int current_listened_channel = 0;
 
 int main(int argc, char** argv) {
 
-std::vector<Microphone> mics = {{0.0, 0.0}, {200, 0.0}, {0.0, 100.0}, {200.0, 100.0}};
 
-
-
-Locator loc{100000, mics[0], mics[1], mics[2], mics[3]};
-
-    mics[0].toa = 0.0003062;
-    mics[1].toa = 0.0012464;
-    mics[2].toa = 0.0000;
-    mics[3].toa = 0.0011279;
 
 //sf::VideoMode fullScreenMode = sf::VideoMode::getDesktopMode();
 sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
-						, "Table_Vis");
+                        , "Table_Vis");
 //window.setSize(windowResolution);
 
-	std::vector<sf::Vector2f> default_microphone_positions_;
-		default_microphone_positions_.push_back(sf::Vector2f(0.0,0.0));
-		default_microphone_positions_.push_back(sf::Vector2f(0.0,8.0));
-		default_microphone_positions_.push_back(sf::Vector2f(4.0,0.0));
-		default_microphone_positions_.push_back(sf::Vector2f(4.0,8.0));
+    std::vector<sf::Vector2f> default_microphone_positions_;
+        default_microphone_positions_.push_back(sf::Vector2f(0.0,0.0));
+        default_microphone_positions_.push_back(sf::Vector2f(0.0,8.0));
+        default_microphone_positions_.push_back(sf::Vector2f(4.0,0.0));
+        default_microphone_positions_.push_back(sf::Vector2f(4.0,8.0));
 
 TTT::Table_Visualizer table_visualizer(windowResolution);
 table_visualizer.Set_Token_Recognition_Timeout(10000);
+
+std::vector<Microphone> mics = {{0.0, 0.0}, {200, 0.0}, {0.0, 100.0}, {200.0, 100.0}};
+
+TDOAtor loc{100000, mics[0], mics[1], mics[2], mics[3]};
+
+mics[0].toa = 0.0003062;
+mics[1].toa = 0.0012464;
+mics[2].toa = 0.0000;
+mics[3].toa = 0.0011279;
 
 std::cout << "FFT Window Size: " << N << "\n";
 
@@ -55,11 +56,8 @@ FFT_Transformer fft_transformer(N);
 
 fft_transformer.initialize_execution_plan();
 
-#define NUM_RECORDED_CHANNELS 4
-
 Recorder recorder{NUM_RECORDED_CHANNELS, 44100, 200000};
 //recorder initialization code END
-
 
 std::cout << "NUM_RECORDED_CHANNELS: " << NUM_RECORDED_CHANNELS << "\n";
 
@@ -76,8 +74,6 @@ buffer_collection collector{recorder.buffer_bytes() / NUM_RECORDED_CHANNELS, NUM
                 recorder.buffer_bytes()/NUM_RECORDED_CHANNELS,
             (int**)&collector[current_listened_channel]);   
 
-
-//std::chrono::system_clock::time_point before_fft = std::chrono::system_clock::now();
         for(unsigned int i = 0; i < 200000; ++i) {
             unsigned offset = 10 * i;
             if(offset > 200000)

@@ -6,6 +6,8 @@ project (TTT)
 file(GLOB LOCATOR_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/locator/*.cpp)
 add_library(locator STATIC ${LOCATOR_SOURCES})
 target_include_directories(locator PUBLIC include/locator)
+target_include_directories(locator PUBLIC include/recorder)
+target_include_directories(locator PUBLIC include/signaltrans)
 
 
 # recorder

@@ -1,12 +1,12 @@
-#ifndef LOCATOR_H
-#define LOCATOR_H
+#ifndef TDOATOR_HPP
+#define TDOATOR_HPP
 
 #include "microphone.hpp"
 
-class Locator{
+class TDOAtor{
   public:
 
-    Locator(double c,
+    TDOAtor(double c,
            Microphone const& m1, Microphone const& m2, Microphone const& m3, Microphone const& m4);
 
     // set the speed of sound

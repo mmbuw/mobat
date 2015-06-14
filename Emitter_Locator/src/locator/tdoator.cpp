@@ -1,10 +1,10 @@
-#include "locator.hpp"
+#include "tdoator.hpp"
 
 #include <iostream>
 #include <math.h>
 
- Locator::
- Locator(double c,
+ TDOAtor::
+ TDOAtor(double c,
    Microphone const& m1, Microphone const& m2,
    Microphone const& m3, Microphone const& m4):
     c_{c},
@@ -17,12 +17,12 @@
     max_.y = std::max(std::max(std::max(mics_[0].position.y , mics_[1].position.y), mics_[2].position.y), mics_[3].position.y);
 }
 
-void Locator::
+void TDOAtor::
 set_c(double in_c) {
     c_ = in_c;
 }
 
-void Locator::
+void TDOAtor::
 update_times(double a, double b, double c, double d) {
     mics_[0].toa = a;
     mics_[1].toa = b;
@@ -30,7 +30,7 @@ update_times(double a, double b, double c, double d) {
     mics_[3].toa = d;
 };
 
-double Locator::
+double TDOAtor::
 dif(glm::vec2 const& p, 
                     Microphone const& mic1, 
                     Microphone const& mic2) const {
@@ -40,7 +40,7 @@ dif(glm::vec2 const& p,
     return glm::length(p - mic1.position) - glm::length(p - mic2.position) - c_ * dtoa;
 };
 
-glm::vec2 Locator::
+glm::vec2 TDOAtor::
 locate() const {
     int min_x = -1;
     int min_y = -1;
