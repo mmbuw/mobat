@@ -37,7 +37,7 @@ dif(glm::vec2 const& p,
     double dtoa = (mic1.toa - mic2.toa);
 
     //std::cout<<"betr "<<betrag(p , p_mic_1)<<"    "<<betrag(p , p_mic_2)<<"    "<<c*dtoa<<"\n";
-    return glm::length(p - mic1.position) - glm::length(p - mic1.position) - c_ * dtoa;
+    return glm::length(p - mic1.position) - glm::length(p - mic2.position) - c_ * dtoa;
 };
 
 glm::vec2 Locator::

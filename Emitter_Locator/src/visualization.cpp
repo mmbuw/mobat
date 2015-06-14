@@ -1,6 +1,7 @@
 #include "FFT_Transformer.h"
 
 #include "recorder.hpp"
+#include "buffer_collection.hpp"
 
 #include "Table_Visualizer.h"
 
@@ -13,10 +14,6 @@
 #include <SFML/Graphics.hpp>
 
 #include <iostream>
-
-
-
-
 
 sf::Vector2f smartphonePosition(1.0f,0.5f);
 sf::Vector2u windowResolution(800, 800);
@@ -66,27 +63,7 @@ Recorder recorder{NUM_RECORDED_CHANNELS, 44100, 200000};
 
 std::cout << "NUM_RECORDED_CHANNELS: " << NUM_RECORDED_CHANNELS << "\n";
 
-
-//int* streamed_buffer1 = (int*) malloc(recorder.buffer_bytes()/ NUM_RECORDED_CHANNELS);
-//int* streamed_buffer2 = (int*) malloc(recorder.buffer_bytes() / 4 );
-//int* streamed_buffer3 = (int*) malloc(recorder.buffer_bytes() / 4 );
-//int* streamed_buffer4 = (int*) malloc(recorder.buffer_bytes() / 4 );
-
-int **buffer_collector = 0;
-
-buffer_collector 
-    = (int **) malloc( NUM_RECORDED_CHANNELS * sizeof(int*));
-
-
-for(unsigned int streamed_buffer_iterator = 0; streamed_buffer_iterator < NUM_RECORDED_CHANNELS; ++streamed_buffer_iterator) {
-    buffer_collector[streamed_buffer_iterator] = (int*) malloc(recorder.buffer_bytes() / NUM_RECORDED_CHANNELS);
-}
-
-
-
-
-
-
+buffer_collection collector{recorder.buffer_bytes() / NUM_RECORDED_CHANNELS, NUM_RECORDED_CHANNELS};
 
     unsigned frame_counter = 0;
     while (window.isOpen())
@@ -97,10 +74,6 @@ for(unsigned int streamed_buffer_iterator = 0; streamed_buffer_iterator < NUM_RE
 
         unsigned char* recorded_buffer = recorder.buffer();
 
-        
-        //streamed_buffer1 = (int*) recorded_buffer;
-        //memcpy(streamed_buffer1, recorded_buffer, recorder.buffer_bytes()/2 );
-
         std::cout << "Num Recorded Channels: " << NUM_RECORDED_CHANNELS << "\n";
 
         for(unsigned int streamed_buffer_iterator = 0; streamed_buffer_iterator < NUM_RECORDED_CHANNELS; ++streamed_buffer_iterator) {
@@ -110,70 +83,27 @@ for(unsigned int streamed_buffer_iterator = 0; streamed_buffer_iterator < NUM_RE
            for(unsigned int buffer_offset_pos = 0; buffer_offset_pos < recorder.buffer_bytes()/(NUM_RECORDED_CHANNELS*4
 
             ); ++buffer_offset_pos) {
-             //memcpy( &(buffer_collector[streamed_buffer_iterator][buffer_offset_pos]), &recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4) ], 4 );
 
-/*
-                //interleaved 8 bit chunks
-                buffer_collector[streamed_buffer_iterator][buffer_offset_pos] 
-                    =     0x0 
-                        | recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4) ]                             << 0
-                        | recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4) +     NUM_RECORDED_CHANNELS ] << 8
-                        | recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4) + 2 * NUM_RECORDED_CHANNELS ] << 16
-                        | recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4) + 3 * NUM_RECORDED_CHANNELS ] << 24;
-  
-                                               */                             
-                //interleaved 32 bit chunks
-
-
-               // unsigned int first_pos = buffer_offset_pos * (NUM_RECORDED_CHANNELS*4) + streamed_buffer_iterator * 4 ;
-
-                /*
-                std::cout << "Accessing recorder buffer at " << first_pos << " & "
-                                                             << first_pos + 1 << " & "
-                                                             << first_pos + 2 << " & "
-                                                             << first_pos + 3 << "\n";
-                */
-
-                buffer_collector[streamed_buffer_iterator][buffer_offset_pos] 
+                collector[streamed_buffer_iterator][buffer_offset_pos] 
                     =     0x0 
                         | recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4)      + streamed_buffer_iterator * 4 ]  << 0
                         | recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4) + 1  + streamed_buffer_iterator * 4 ]  << 8
                         | recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4) + 2  + streamed_buffer_iterator * 4 ]  << 16
                         | recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4) + 3  + streamed_buffer_iterator * 4 ]  << 24;
-
-                //if (buffer_offset_pos > 3)
-                //break;
             }
-           //std::cin.get();
-            //non-interleaved
-
-            // unsigned byte_per_channel = recorder.buffer_bytes()/NUM_RECORDED_CHANNELS;
-
-            // memcpy( &(buffer_collector[streamed_buffer_iterator][0]), 
-            //         &recorded_buffer[ byte_per_channel * streamed_buffer_iterator], 
-            //         byte_per_channel );
         }
 
-/*
-        fft_transformer.set_FFT_buffers(NUM_RECORDED_CHANNELS, 
-                            recorder.buffer_bytes()/NUM_RECORDED_CHANNELS,
-                            (int*)&buffer_collector[0][0]);
-*/
-             fft_transformer.set_FFT_buffers(NUM_RECORDED_CHANNELS, 
-                            recorder.buffer_bytes()/NUM_RECORDED_CHANNELS,
-                            (int**)&buffer_collector[current_listened_channel]);   
+    fft_transformer.set_FFT_buffers(NUM_RECORDED_CHANNELS, 
+                recorder.buffer_bytes()/NUM_RECORDED_CHANNELS,
+            (int**)&collector[current_listened_channel]);   
 
 
 //std::chrono::system_clock::time_point before_fft = std::chrono::system_clock::now();
     for(unsigned int i = 0; i < 200000; ++i) {
-
         unsigned offset = 10 * i;
         if(offset > 200000)
             break;
 
-
-      //  fft_transf.set_FFT_input(
-        //                         offset);
         fft_transformer.set_analyzation_range(0+offset, N+50 + offset);
         
 
@@ -226,7 +156,6 @@ for(unsigned int streamed_buffer_iterator = 0; streamed_buffer_iterator < NUM_RE
        }
 
 
-
         window.clear();
         table_visualizer.Recalculate_Geometry();
         table_visualizer.Draw(window);
@@ -247,5 +176,5 @@ for(unsigned int streamed_buffer_iterator = 0; streamed_buffer_iterator < NUM_RE
         window.display();
     }
 
-return 0;
+    return 0;
 }
