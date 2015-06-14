@@ -33,7 +33,7 @@ int main()
 
 
 
-	Locator loc{100000, mics[0], mics[1], mics[2], mics[3], 0.0, 200.4, 0.0, 150.9};
+	Locator loc{100000, mics[0], mics[1], mics[2], mics[3]};
 	glm::vec2 point = loc.locate();
 	std::cout << "(" << point.x <<", " << point.y << ")\n";
 
