@@ -70,49 +70,28 @@ buffer_collection collector{recorder.buffer_bytes() / NUM_RECORDED_CHANNELS, NUM
     {
         recorder.record();
 
-        std::cout << "Buffer Length: " << recorder.buffer_bytes() << "\n";
+        collector.from_interleaved(recorder.buffer());
 
-        unsigned char* recorded_buffer = recorder.buffer();
-
-        std::cout << "Num Recorded Channels: " << NUM_RECORDED_CHANNELS << "\n";
-
-        for(unsigned int streamed_buffer_iterator = 0; streamed_buffer_iterator < NUM_RECORDED_CHANNELS; ++streamed_buffer_iterator) {
-
-            std::cout << "Audiostream " << streamed_buffer_iterator << " accessor\n";
-           //interleaved
-           for(unsigned int buffer_offset_pos = 0; buffer_offset_pos < recorder.buffer_bytes()/(NUM_RECORDED_CHANNELS*4
-
-            ); ++buffer_offset_pos) {
-
-                collector[streamed_buffer_iterator][buffer_offset_pos] 
-                    =     0x0 
-                        | recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4)      + streamed_buffer_iterator * 4 ]  << 0
-                        | recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4) + 1  + streamed_buffer_iterator * 4 ]  << 8
-                        | recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4) + 2  + streamed_buffer_iterator * 4 ]  << 16
-                        | recorded_buffer[buffer_offset_pos * (NUM_RECORDED_CHANNELS*4) + 3  + streamed_buffer_iterator * 4 ]  << 24;
-            }
-        }
-
-    fft_transformer.set_FFT_buffers(NUM_RECORDED_CHANNELS, 
+        fft_transformer.set_FFT_buffers(NUM_RECORDED_CHANNELS, 
                 recorder.buffer_bytes()/NUM_RECORDED_CHANNELS,
             (int**)&collector[current_listened_channel]);   
 
 
 //std::chrono::system_clock::time_point before_fft = std::chrono::system_clock::now();
-    for(unsigned int i = 0; i < 200000; ++i) {
-        unsigned offset = 10 * i;
-        if(offset > 200000)
-            break;
+        for(unsigned int i = 0; i < 200000; ++i) {
+            unsigned offset = 10 * i;
+            if(offset > 200000)
+                break;
 
-        fft_transformer.set_analyzation_range(0+offset, N+50 + offset);
-        
+            fft_transformer.set_analyzation_range(0+offset, N+50 + offset);
+            
 
-        if(fft_transformer.perform_FFT() ) {
-            break;
-        }
+            if(fft_transformer.perform_FFT() ) {
+                break;
+            }
 
-     
-    } 
+         
+        } 
 
 //std::chrono::system_clock::time_point after_fft = std::chrono::system_clock::now();
 //std::cout << "fftw execution time: " <<
