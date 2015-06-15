@@ -66,6 +66,8 @@ class Table_Visualizer : Drawable_Object {
 		void Finalize_Visualization_Frame();
 
 		unsigned Get_Elapsed_Milliseconds();
+
+		bool circ_circ_intersect(sf::CircleShape const& c1, sf::CircleShape const& c2) const;
 };
 
 }; //end TTT

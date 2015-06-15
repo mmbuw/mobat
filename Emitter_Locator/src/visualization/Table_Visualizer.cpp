@@ -187,4 +187,15 @@ Get_Elapsed_Milliseconds(){
 	return elapsed_milliseconds.count();
 }
 
+bool Table_Visualizer::circ_circ_intersect(sf::CircleShape const& c1, sf::CircleShape const& c2) const{
+	//Position is upper left corner of square, not mid
+	double x1 = c1.getPosition().x, y1 = c1.getPosition().y, x2 = c2.getPosition().x, y2 = c2.getPosition().y;
+    double dist = sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
+
+    double r1 = c1.getRadius();
+    if(r1 < c2.getRadius()) {r1 = c2.getRadius();}
+
+   return (dist <= 2*r1);
+}
+
 }; //namespace TTT
