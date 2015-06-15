@@ -19,7 +19,7 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
                         , "Table_Vis");
 //window.setSize(windowResolution);
 
-    std::vector<sf::Vector2f> default_microphone_positions_ = {{0.02, 1.0-0.02}, {0.02, 1.0-0.47}, {0.465, 1.0-0.475}, {0.45, 1.0-0.03}};
+    std::vector<sf::Vector2f> default_microphone_positions_ = {{0.02, 1-0.02}, {0.02, 1-0.47}, {0.655, 1-0.47}, {0.665, 1-0.015}};
        /* default_microphone_positions_.push_back(sf::Vector2f(0.0,4.0));
         default_microphone_positions_.push_back(sf::Vector2f(0.0,8.0));
         default_microphone_positions_.push_back(sf::Vector2f(4.0,0.0));
@@ -38,8 +38,7 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
     while (window.isOpen())
     {
         sf::Event event;
-        while (window.pollEvent(event))
-        {
+        while (window.pollEvent(event)){
             if (event.type == sf::Event::Closed)
                 window.close();
 

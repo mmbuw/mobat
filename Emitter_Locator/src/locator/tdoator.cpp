@@ -42,20 +42,25 @@ dif(glm::vec2 const& p,
 
 glm::vec2 TDOAtor::
 locate() const {
-    int min_x = -1;
-    int min_y = -1;
-    double min_dif = 1000000;
+    double min_x = min_.x;
+    double min_y = min_.y;
+    double min_dif = 10000000;
     double temp_dif = 0;
     glm::vec2 test;
 
-    for(double x = min_.x; x <= max_.x; ++x/*x=x+10*/ ) {
+    double x_step_length = (max_.x - min_.x) / 1000.0;
+    double y_step_length = (max_.y - min_.y) / 1000.0;
+
+    for(double x = min_.x; x <= max_.x; x += x_step_length/*x=x+10*/ ) {
         test.x = x;
-        for(double y = min_.y; y <= max_.y; ++y/*y=y+10*/) {
+        for(double y = min_.y; y <= max_.y; y += y_step_length/*y=y+10*/) {
             test.y = y;
             for(int i = 0; i < 3; ++i) {
                 for(int j = i+1; j < 4; ++j) {
                     //std::cout<<fabs(dif(test, mics[i], mics[j]))<<"   ";
-                    temp_dif += fabs(dif(test, mics_[i], mics_[j]));
+
+                    if(mics_[i].toa < 10000 && mics_[j].toa < 10000)
+                        temp_dif += fabs(dif(test, mics_[i], mics_[j]));
                 }
             }
             

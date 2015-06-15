@@ -3,6 +3,8 @@
 #include <limits>
 #include <iostream>
 
+#include <numeric>
+
 Locator::Locator(unsigned int num_mics):
  shutdown{false},
  position{0, 0},
@@ -11,7 +13,7 @@ Locator::Locator(unsigned int num_mics):
  recorder{num_mics, 44100, 300000},
  collector{recorder.buffer_bytes() / num_mics, num_mics},
  fft_transformer{window_size},
- locator{100000, {2.0, 2.0}, {2.0, 47.0}, {46.5, 47.5}, {45.0, 3.0}}
+ locator{80000, {2.0, 2.0}, {2.0, 47.0}, {65.5, 47.0}, {66.5, 1.5}}
  {
     fft_transformer.initialize_execution_plan();
     locator.update_times(0.0003062, 0.0012464, 0.0000, 0.0011279);
@@ -38,8 +40,8 @@ Locator::Locator(unsigned int num_mics):
     while (!shutdown)
     {
 
-
-        unsigned recognized_sample_pos[4] = {0, 0, 0, 0};
+        std::array<unsigned, 4> recognized_sample_pos = {0, 0, 0, 0};
+        //unsigned recognized_sample_pos[4] = {0, 0, 0, 0};
 
         recorder.record();
 
@@ -74,26 +76,64 @@ Locator::Locator(unsigned int num_mics):
         }
 
         unsigned min_sample = std::numeric_limits<unsigned>::max();
+        unsigned max_sample = 0;
+
+        double temp_avg = 0.0;
+        //double average = std::accumulate(recognized_sample_pos.begin(), recognized_sample_pos.end(), 0) / recognized_sample_pos.size();
+
+        unsigned int num_valid_entries = 0;
 
         for(unsigned channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
-            if(recognized_sample_pos[channel_iterator] < min_sample) {
-                min_sample = recognized_sample_pos[channel_iterator];
+
+            unsigned current_channel_sample_pos = recognized_sample_pos[channel_iterator];
+
+            if( current_channel_sample_pos != 0 ) { 
+                if( current_channel_sample_pos < min_sample ) {
+                 min_sample = current_channel_sample_pos;
+                }
+
+                if( current_channel_sample_pos > max_sample ) {
+                    max_sample = current_channel_sample_pos;
+                }
+
+                temp_avg += current_channel_sample_pos;
+                ++num_valid_entries;
+            }
+
+        }
+
+        double average = temp_avg / num_valid_entries;
+
+        double temp_sd = 0.0;
+
+        for(unsigned channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
+            unsigned current_channel_sample_pos = recognized_sample_pos[channel_iterator];
+
+            if( current_channel_sample_pos != 0 ) { 
+                temp_sd += std::pow(average-current_channel_sample_pos, 2);
             }
         }
 
+        double standard_deviation =   std::sqrt(temp_sd/num_valid_entries);
+        std::cout << "standard_deviation: " << standard_deviation << "\n";
 
-        double update_times[4];
+        if( max_sample-min_sample < 2000 ) {
+            double updated_times[4];
 
-        std::cout << "Sample diffs: ";
+            std::cout << "Sample diffs: ";
 
-        for(unsigned channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
-            std::cout << "Channel " << channel_iterator << ": " << recognized_sample_pos[channel_iterator] - min_sample << "\n";
-            update_times[channel_iterator] = (recognized_sample_pos[channel_iterator] - min_sample) / 44100.0;
-        }    
+            for(unsigned channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
+                std::cout << "Channel " << channel_iterator << ": " << recognized_sample_pos[channel_iterator] - min_sample << "\n";
+
+                if( std::abs(average - recognized_sample_pos[channel_iterator]) < std::abs(average -standard_deviation) )
+                    updated_times[channel_iterator] = (recognized_sample_pos[channel_iterator] - min_sample) / 44100.0;
+                else
+                    updated_times[channel_iterator] = std::numeric_limits<unsigned>::max();
+            }    
 
 
-        //locator.update_times(0.0003062, 0.0012464, 0.0000, 0.0011279);
-        locator.update_times(update_times[0], update_times[1], update_times[2], update_times[3]);
+            //locator.update_times(0.0003062, 0.0012464, 0.0000, 0.0011279);
+            locator.update_times(updated_times[0], updated_times[1], updated_times[2], updated_times[3]);
 
 
 
@@ -101,6 +141,9 @@ Locator::Locator(unsigned int num_mics):
         cached_position = locator.locate();
 
         std::cout << "Cached position: " << cached_position.x << ", " << cached_position.y << "\n";
+
+       }
+        
         position_mutex.lock();
         position = cached_position;
         position_mutex.unlock();

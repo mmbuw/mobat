@@ -238,7 +238,7 @@ unsigned int FFT_Transformer::perform_FFT() {
 
 			if(eighteen_khz_sum_ > detection_threshold_) {
 				if(num_samples_below_threshold_ > 3000) {
-					++num_samples_above_threshold_;
+					++num_samples_above_threshold_;	
 					//std::cout << "\n\n18 khz sum: " << num_samples_above_threshold_ << "comparison below: " << num_samples_below_threshold_ << "\n\n";
 					//std::cout << "PEAK DETECTED!\n";
 					return 1;
