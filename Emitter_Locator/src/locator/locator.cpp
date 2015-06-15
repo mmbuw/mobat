@@ -34,9 +34,6 @@ Locator::Locator(unsigned int num_mics):
 
  void Locator::record_position() {
     //unsigned int current_listened_channel = 0;
-
-
-
     while (!shutdown)
     {
 
@@ -44,6 +41,9 @@ Locator::Locator(unsigned int num_mics):
         //unsigned recognized_sample_pos[4] = {0, 0, 0, 0};
 
         recorder.record();
+        if(!recorder.new_recording()) {
+            continue;
+        }
 
         collector.from_interleaved(recorder.buffer());
 

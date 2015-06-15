@@ -4,7 +4,8 @@ Recorder::Recorder(unsigned chan, std::size_t frames, std::size_t recording_time
   config_{chan, frames, 0},
   device_{},
   recording_time_{recording_time},
-  buffer_length_{0}
+  buffer_length_{0},
+  new_recording_{false}
 {
   std::vector<std::string> devices{get_pcms()};
 
@@ -81,18 +82,18 @@ void Recorder::record() {
     if(err != int(config_.period_frames())) {
       // handle buffer over- or underrun
       if(err == -EPIPE) {
-        int handled_err = snd_pcm_recover(device_, err, 0);
-        // recovery failed
-        if(handled_err == err) {
-          std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
-          return;
-        }
+        snd_pcm_recover(device_, err, 1);
+        std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
+        new_recording_ = false;
+        return;
       } else {
         std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
+        new_recording_ = false; 
         return;
       }
     }
-  }  
+  }
+  new_recording_ = true;  
 }
 
 std::size_t Recorder::buffer_bytes() const {
@@ -100,8 +101,14 @@ std::size_t Recorder::buffer_bytes() const {
 }
 
 uint8_t* Recorder::buffer() {
+  new_recording_ = false;
   return buffer_;
 }
+
+bool Recorder::new_recording() const {
+  return new_recording_;
+}
+
 
 std::vector<std::string> Recorder::get_supporting_devices(std::vector<std::string> const& devices, Config const& config, snd_pcm_stream_t type) {
   std::vector<std::string> supporting_devices{};
