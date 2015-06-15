@@ -106,7 +106,7 @@ FFT_Transformer::~FFT_Transformer() {
 void FFT_Transformer::reset_sample_counters() {
 	num_samples_above_threshold_ = 0;
 	num_samples_below_threshold_ = 0;
-	detection_threshold_ = 1.5;
+	detection_threshold_ = 3.5;
 }
 
 void FFT_Transformer::clear_cached_fft_results() {

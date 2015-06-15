@@ -19,20 +19,22 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
                         , "Table_Vis");
 //window.setSize(windowResolution);
 
-    std::vector<sf::Vector2f> default_microphone_positions_;
-        default_microphone_positions_.push_back(sf::Vector2f(0.0,0.0));
+    std::vector<sf::Vector2f> default_microphone_positions_ = {{0.02, 1.0-0.02}, {0.02, 1.0-0.47}, {0.465, 1.0-0.475}, {0.45, 1.0-0.03}};
+       /* default_microphone_positions_.push_back(sf::Vector2f(0.0,4.0));
         default_microphone_positions_.push_back(sf::Vector2f(0.0,8.0));
         default_microphone_positions_.push_back(sf::Vector2f(4.0,0.0));
-        default_microphone_positions_.push_back(sf::Vector2f(4.0,8.0));
+        default_microphone_positions_.push_back(sf::Vector2f(4.0,8.0));*/
 
-    TTT::Table_Visualizer table_visualizer(windowResolution);
+
+
+    TTT::Table_Visualizer table_visualizer(windowResolution, sf::Vector2f(2.0, 1.0), default_microphone_positions_);
     table_visualizer.Set_Token_Recognition_Timeout(10000);
 
     Locator locator{4};
 
     auto recording_thread = std::thread(&Locator::record_position, &locator);
 
-    unsigned frame_counter = 0;
+    //unsigned frame_counter = 0;
     while (window.isOpen())
     {
         sf::Event event;
@@ -77,16 +79,17 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
            
         glm::vec2 point = locator.load_position();
         smartphonePosition.x = point.x / 100.0;
-        smartphonePosition.y = point.y / 100.0;
+        smartphonePosition.y = 1.0 - point.y / 100.0;
 
         //std::cout << "SP: " << smartphonePosition.x << "; " << smartphonePosition.y << "\n";
         table_visualizer.Signal_Token(18000, smartphonePosition);
 
+/*
         if( 0 == ++frame_counter % 40  ) {
          table_visualizer.Signal_Token(16000, sf::Vector2f(smartphonePosition.x/2.0,
                                                             smartphonePosition.y+0.2));
         }
-
+*/
         table_visualizer.Finalize_Visualization_Frame();
         window.display();
     }
