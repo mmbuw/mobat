@@ -13,7 +13,7 @@ Locator::Locator(unsigned int num_mics):
  recorder{num_mics, 44100, 300000},
  collector{recorder.buffer_bytes() / num_mics, num_mics},
  fft_transformer{window_size},
- locator{80000, {2.0, 2.0}, {2.0, 47.0}, {65.5, 47.0}, {66.5, 1.5}}
+ locator{15000, {0.02, 0.02}, {0.02, 0.47}, {0.65, 0.47}, {0.665, 0.015}}
  {
     fft_transformer.initialize_execution_plan();
     locator.update_times(0.0003062, 0.0012464, 0.0000, 0.0011279);

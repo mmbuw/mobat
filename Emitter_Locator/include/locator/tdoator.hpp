@@ -23,7 +23,7 @@ class TDOAtor{
     // calculates the difference of ?
     double dif(glm::vec2 const& p, Microphone const& mic1, Microphone const& mic2) const;
 
-    //cm/s
+    //m/s
     double c_;
 
     //with toa in s

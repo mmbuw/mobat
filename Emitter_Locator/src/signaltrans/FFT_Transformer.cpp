@@ -236,8 +236,10 @@ unsigned int FFT_Transformer::perform_FFT() {
 		//eighteen_khz_sum_ /= taken_normalization_samples;
 		if(!std::isnan(eighteen_khz_sum_)) {
 
+
 			if(eighteen_khz_sum_ > detection_threshold_) {
-				if(num_samples_below_threshold_ > 3000) {
+						//	std::cout << "18 khz sum: " << eighteen_khz_sum_ << "\n";
+				if(num_samples_below_threshold_ > 2000) {
 					++num_samples_above_threshold_;	
 					//std::cout << "\n\n18 khz sum: " << num_samples_above_threshold_ << "comparison below: " << num_samples_below_threshold_ << "\n\n";
 					//std::cout << "PEAK DETECTED!\n";

@@ -77,8 +77,8 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
         table_visualizer.Draw(window);
            
         glm::vec2 point = locator.load_position();
-        smartphonePosition.x = point.x / 100.0;
-        smartphonePosition.y = 1.0 - point.y / 100.0;
+        smartphonePosition.x = point.x;
+        smartphonePosition.y = 1.0 - point.y;
 
         //std::cout << "SP: " << smartphonePosition.x << "; " << smartphonePosition.y << "\n";
         table_visualizer.Signal_Token(18000, smartphonePosition);
