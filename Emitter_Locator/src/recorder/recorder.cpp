@@ -1,6 +1,6 @@
 #include "recorder.hpp"
 
-Recorder::Recorder(unsigned chan, unsigned frames, unsigned recording_time) :
+Recorder::Recorder(unsigned chan, std::size_t frames, std::size_t recording_time) :
   config_{chan, frames, 0},
   device_{},
   recording_time_{recording_time},
@@ -31,7 +31,7 @@ Recorder::Recorder(unsigned chan, unsigned frames, unsigned recording_time) :
   }
 
   auto extremes = config_.period_time_extremes();
-  unsigned period_time = extremes.second;
+  std::size_t period_time = extremes.second;
   // find largest period size fitting in recording buffer
   if(recording_time_ < period_time) {
     period_time = recording_time_;
@@ -50,7 +50,7 @@ Recorder::Recorder(unsigned chan, unsigned frames, unsigned recording_time) :
   // install configuration and allocate buffer
   config_.install(device_);
   buffer_length_ = config_.buffer_bytes(recording_time_);
-  buffer_ = new unsigned char[buffer_length_];
+  buffer_ = new uint8_t[buffer_length_];
 }
 
 Recorder::~Recorder() {
@@ -67,7 +67,7 @@ Config& Recorder::config() {
 void Recorder::record() {
 
   // prevent under- or overruns
-  unsigned loops = recording_time_ / config_.period_time();
+  std::size_t loops = recording_time_ / config_.period_time();
   if(loops * config_.period_bytes() > buffer_length_) {
     std::cerr << "Recorder::record - buffer size to small" << std::endl;
     return;
@@ -76,7 +76,7 @@ void Recorder::record() {
     std::cerr << "Recorder::record - buffer size too large" << std::endl;
   }
 
-  for(unsigned char* start = &buffer_[0]; start < &buffer_[buffer_length_ / sizeof(*buffer_)]; start += config_.period_bytes()) {
+  for(uint8_t* start = &buffer_[0]; start < &buffer_[buffer_length_ / sizeof(*buffer_)]; start += config_.period_bytes()) {
     int err = snd_pcm_readi(device_, start, config_.period_frames());
     if(err != int(config_.period_frames())) {
       // handle buffer over- or underrun
@@ -95,11 +95,11 @@ void Recorder::record() {
   }  
 }
 
-unsigned long Recorder::buffer_bytes() const {
+std::size_t Recorder::buffer_bytes() const {
   return buffer_length_;
 }
 
-unsigned char* Recorder::buffer() {
+uint8_t* Recorder::buffer() {
   return buffer_;
 }
 
