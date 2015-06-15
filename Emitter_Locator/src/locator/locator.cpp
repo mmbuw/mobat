@@ -42,21 +42,26 @@ Locator::Locator(unsigned int num_mics):
                 recorder.buffer_bytes()/collector.count,
             (int**)&collector[current_listened_channel]);   
 
-        for(unsigned int i = 0; i < 200000; ++i) {
-            unsigned offset = 10 * i;
-            if(offset > 200000)
+
+        fft_transformer.reset_sample_counters();
+        for(unsigned int i = 0; i < 13000; ++i) {
+            unsigned offset = 1 * i;
+            if(offset > (12000) )
                 break;
 
             fft_transformer.set_analyzation_range(0+offset, window_size+50 + offset);
             
 
-            if(fft_transformer.perform_FFT() ) {
+            unsigned int fft_result = fft_transformer.perform_FFT();
+
+            if(fft_result == 1 ) {
+                std::cout << "Signal starts at sample " << i << "\n";
                 break;
             }
 
          
         } 
-
+        std::cout << "Done.\n";
         cached_position = locator.locate();
         position_mutex.lock();
         position = cached_position;

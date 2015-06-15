@@ -39,6 +39,10 @@ class FFT_Transformer {
 
 		unsigned stabilization_counter_;
 
+		double detection_threshold_;
+		unsigned num_samples_below_threshold_;
+		unsigned num_samples_above_threshold_;
+
 		double last_x_sample_[10];
 		unsigned int fft_frame_count_;
 		void create_hamming_window();
@@ -49,9 +53,11 @@ class FFT_Transformer {
 		FFT_Transformer(unsigned short fft_frame_size);
 		~FFT_Transformer();
 
+		void reset_sample_counters();
+
 		void initialize_execution_plan();
 		void set_FFT_input( unsigned int offset);
-		bool perform_FFT();
+		unsigned perform_FFT();
 		void print_FFT_result(unsigned int call_idx);
 
 		void set_analyzation_range(unsigned int start_sample,

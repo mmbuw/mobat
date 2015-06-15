@@ -103,6 +103,12 @@ FFT_Transformer::~FFT_Transformer() {
 	fftw_cleanup_threads();
 };
 
+void FFT_Transformer::reset_sample_counters() {
+	num_samples_above_threshold_ = 0;
+	num_samples_below_threshold_ = 0;
+	detection_threshold_ = 1.5;
+}
+
 void FFT_Transformer::initialize_execution_plan() {
 
 	fftw_plan_with_nthreads(1);
@@ -142,7 +148,7 @@ void FFT_Transformer::set_FFT_input( unsigned int offset ) {
  
 }
 
-bool FFT_Transformer::perform_FFT() {
+unsigned int FFT_Transformer::perform_FFT() {
 
 	eighteen_khz_sum_ = 0.0;
 
@@ -197,6 +203,17 @@ bool FFT_Transformer::perform_FFT() {
 			}
 
 			double current_iteration_khz_sum = temp_accum_18khz / normalization_range_value;
+
+			//std::cout << "cis: " << current_iteration_khz_sum << "\n";
+/*
+			if(current_iteration_khz_sum <= detection_threshold_) {
+				++num_samples_below_threshold_;
+			} else {
+				if(num_samples_below_threshold_ > 3000) {
+					//std::cout << "Found peak!\n";
+				}
+			}
+*/
 			fft_cached_results_[start_sample_] =  current_iteration_khz_sum;
 
 			eighteen_khz_sum_ += current_iteration_khz_sum;
@@ -213,8 +230,27 @@ bool FFT_Transformer::perform_FFT() {
 		//std::cout << "Performed FFT.\n";
 
 		//eighteen_khz_sum_ /= taken_normalization_samples;
+		if(!std::isnan(eighteen_khz_sum_)) {
 
-		std::cout << "\n\n18 khz sum: " << eighteen_khz_sum_ << "\n\n";
+			if(eighteen_khz_sum_ > detection_threshold_) {
+				if(num_samples_below_threshold_ > 3000) {
+					++num_samples_above_threshold_;
+					//std::cout << "\n\n18 khz sum: " << num_samples_above_threshold_ << "comparison below: " << num_samples_below_threshold_ << "\n\n";
+					//std::cout << "PEAK DETECTED!\n";
+					return 1;
+				}
+
+
+			} else
+			{ 
+				++num_samples_below_threshold_;
+				//std::cout << "\n\nb low: " << num_samples_below_threshold_ << "\n\n";
+			  num_samples_above_threshold_ = 0;
+			}
+
+		} else {
+			return 2;
+		}
 
 		last_x_sample_[(fft_frame_count_%10)] = eighteen_khz_sum_;
 
@@ -235,10 +271,10 @@ bool FFT_Transformer::perform_FFT() {
 
 		if(stabilization_counter_ >= 10) {
 			//std::cout << "18khz at sample: " << start_sample_ <<"\n"; 
-			return true;
+			return 0;
 		}
 
-		return false;
+		return 0;
 }
 
 void FFT_Transformer::print_FFT_result(unsigned int call_idx) {
