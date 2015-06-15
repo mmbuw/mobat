@@ -7,7 +7,7 @@ Locator::Locator(unsigned int num_mics):
  position{0, 0},
  cached_position{0, 0},
  window_size{512},
- recorder{num_mics, 44100, 200000},
+ recorder{num_mics, 44100, 300000},
  collector{recorder.buffer_bytes() / num_mics, num_mics},
  fft_transformer{window_size},
  locator{100000, {0.0, 0.0}, {200, 0.0}, {0.0, 100.0}, {200.0, 100.0}}
@@ -44,6 +44,7 @@ Locator::Locator(unsigned int num_mics):
 
 
         fft_transformer.reset_sample_counters();
+        fft_transformer.clear_cached_fft_results();
         for(unsigned int i = 0; i < 13000; ++i) {
             unsigned offset = 1 * i;
             if(offset > (12000) )

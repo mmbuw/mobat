@@ -54,6 +54,7 @@ class FFT_Transformer {
 		~FFT_Transformer();
 
 		void reset_sample_counters();
+		void clear_cached_fft_results();
 
 		void initialize_execution_plan();
 		void set_FFT_input( unsigned int offset);

@@ -109,6 +109,10 @@ void FFT_Transformer::reset_sample_counters() {
 	detection_threshold_ = 1.5;
 }
 
+void FFT_Transformer::clear_cached_fft_results() {
+	fft_cached_results_.clear();
+}
+
 void FFT_Transformer::initialize_execution_plan() {
 
 	fftw_plan_with_nthreads(1);
@@ -169,8 +173,8 @@ unsigned int FFT_Transformer::perform_FFT() {
 		//std::cout << "Trying offset " << offset <<"\n";
 
 
-		if(true) {
-		//if(fft_cached_results_.find(start_sample_) == fft_cached_results_.end() ) {
+		//if(true) {
+		if(fft_cached_results_.find(start_sample_) == fft_cached_results_.end() ) {
 			//std::cout << "Window Size: " << fft_window_size_ << "\n";
 
 			set_FFT_input(offset);
