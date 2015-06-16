@@ -20,6 +20,10 @@ class Recorder {
   Config& config();
   void record();
   bool new_recording() const;
+  void request_recording();
+
+  void recording_loop();
+  void shutdown();
 
   static std::vector<std::string> get_pcms();
   static std::vector<std::string> get_supporting_devices(std::vector<std::string> const&, Config const&, snd_pcm_stream_t);
@@ -30,6 +34,7 @@ class Recorder {
   std::size_t recording_time_;
   std::size_t buffer_length_;
   bool new_recording_;
+  bool shutdown_;
   // use char array for easy iteration over data
   uint8_t* buffer_;
 };

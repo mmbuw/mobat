@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include <numeric>
+#include <thread>
 
 Locator::Locator(unsigned int num_mics):
  shutdown{false},
@@ -33,19 +34,20 @@ Locator::Locator(unsigned int num_mics):
  }
 
  void Locator::record_position() {
-    //unsigned int current_listened_channel = 0;
+    // start recording loop
+    auto recording_thread = std::thread{&Recorder::recording_loop, &recorder};
+
     while (!shutdown)
     {
-
         std::array<unsigned, 4> recognized_sample_pos = {0, 0, 0, 0};
-        //unsigned recognized_sample_pos[4] = {0, 0, 0, 0};
 
-        recorder.record();
         if(!recorder.new_recording()) {
             continue;
         }
 
         collector.from_interleaved(recorder.buffer());
+
+        recorder.request_recording();
 
         for (unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
             fft_transformer.set_FFT_buffers(collector.count, 
@@ -143,11 +145,14 @@ Locator::Locator(unsigned int num_mics):
         std::cout << "Cached position: " << cached_position.x << ", " << cached_position.y << "\n";
 
        }
-        
+
         position_mutex.lock();
         position = cached_position;
         position_mutex.unlock();
     }
+    // stop recording loop
+    recorder.shutdown();
+    recording_thread.join();
  }
 
  void Locator::shut_down() {

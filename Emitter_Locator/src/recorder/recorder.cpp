@@ -5,7 +5,8 @@ Recorder::Recorder(unsigned chan, std::size_t frames, std::size_t recording_time
   device_{},
   recording_time_{recording_time},
   buffer_length_{0},
-  new_recording_{false}
+  new_recording_{false},
+  shutdown_{false}
 {
   std::vector<std::string> devices{get_pcms()};
 
@@ -113,7 +114,6 @@ std::size_t Recorder::buffer_bytes() const {
 }
 
 uint8_t* Recorder::buffer() {
-  new_recording_ = false;
   return buffer_;
 }
 
@@ -121,6 +121,21 @@ bool Recorder::new_recording() const {
   return new_recording_;
 }
 
+void Recorder::shutdown() {
+  shutdown_ = true;
+}
+
+void Recorder::request_recording() {
+  new_recording_ = false;
+}
+
+void Recorder::recording_loop() {
+  while(!shutdown_) {
+    if(!new_recording_) {
+      record();
+    }
+  }
+}
 
 std::vector<std::string> Recorder::get_supporting_devices(std::vector<std::string> const& devices, Config const& config, snd_pcm_stream_t type) {
   std::vector<std::string> supporting_devices{};
