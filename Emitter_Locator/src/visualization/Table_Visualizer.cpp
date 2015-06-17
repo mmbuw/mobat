@@ -188,14 +188,12 @@ Get_Elapsed_Milliseconds(){
 }
 
 bool Table_Visualizer::circ_circ_intersect(sf::CircleShape const& c1, sf::CircleShape const& c2) const{
-	//Position is upper left corner of square, not mid
-	double x1 = c1.getPosition().x, y1 = c1.getPosition().y, x2 = c2.getPosition().x, y2 = c2.getPosition().y;
+    double x1 = c1.getPosition().x + c1.getRadius(), y1 = c1.getPosition().y + c1.getRadius();
+    double x2 = c2.getPosition().x + c2.getRadius(), y2 = c2.getPosition().y + c2.getRadius();
     double dist = sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
 
-    double r1 = c1.getRadius();
-    if(r1 < c2.getRadius()) {r1 = c2.getRadius();}
+    return (dist < (c1.getRadius() + c2.getRadius() ) && dist > abs(c1.getRadius() - c2.getRadius()));
 
-   return (dist <= 2*r1);
 }
 
 }; //namespace TTT
