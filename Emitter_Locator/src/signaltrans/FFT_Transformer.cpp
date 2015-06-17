@@ -106,7 +106,7 @@ FFT_Transformer::~FFT_Transformer() {
 void FFT_Transformer::reset_sample_counters() {
 	num_samples_above_threshold_ = 0;
 	num_samples_below_threshold_ = 0;
-	detection_threshold_ = 3.5;
+	detection_threshold_ = 2.5;
 }
 
 void FFT_Transformer::clear_cached_fft_results() {
@@ -240,10 +240,14 @@ unsigned int FFT_Transformer::perform_FFT() {
 			if(eighteen_khz_sum_ > detection_threshold_) {
 						//	std::cout << "18 khz sum: " << eighteen_khz_sum_ << "\n";
 				if(num_samples_below_threshold_ > 2000) {
-					++num_samples_above_threshold_;	
+						
+
+
+					if(++num_samples_above_threshold_ > 10 ) {
 					//std::cout << "\n\n18 khz sum: " << num_samples_above_threshold_ << "comparison below: " << num_samples_below_threshold_ << "\n\n";
 					//std::cout << "PEAK DETECTED!\n";
-					return 1;
+						return 1;
+					}
 				}
 
 

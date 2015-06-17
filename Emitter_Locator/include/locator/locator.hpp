@@ -14,6 +14,7 @@ class Locator {
     Locator(unsigned int num_mics);
 
      glm::vec2 load_position() const;
+     glm::vec4 const load_toas() const;
 
      void record_position();
 
@@ -22,10 +23,14 @@ class Locator {
 private:
 
     mutable std::mutex position_mutex;
+    mutable std::mutex toas_mutex;
 
     bool shutdown;
     glm::vec2 position;
     glm::vec2 cached_position;
+
+    glm::vec4 toas;
+    glm::vec4 cached_toas;
 
     unsigned short window_size;
 
