@@ -14,7 +14,7 @@ Locator::Locator(unsigned int num_mics):
  recorder{num_mics, 44100, 300000},
  collector{recorder.buffer_bytes() / num_mics, num_mics},
  fft_transformer{window_size},
- locator{15000, {0.02, 0.02}, {0.02, 0.47}, {0.65, 0.47}, {0.665, 0.015}}
+ locator{3300, {0.01, 0.245}, {0.35,  0.256}, {0.015,  0.01}, {0.355,  0.02}}
  {
     fft_transformer.initialize_execution_plan();
     locator.update_times(0.0003062, 0.0012464, 0.0000, 0.0011279);
@@ -33,7 +33,23 @@ Locator::Locator(unsigned int num_mics):
     }
  }
 
+ glm::vec4 const Locator::load_toas() const {
+        // try to access current position
+
+    if(toas_mutex.try_lock()) {
+        glm::vec4 temp = toas;
+        //std::cout << "Im trylock if\n";
+        toas_mutex.unlock();
+        return temp;
+    }
+    else {
+        std::cout << "Im trylock if\n";
+        return cached_toas;
+    }
+ } 
+
  void Locator::record_position() {
+
     // start recording loop
     auto recording_thread = std::thread{&Recorder::recording_loop, &recorder};
 
@@ -84,6 +100,12 @@ Locator::Locator(unsigned int num_mics):
         //double average = std::accumulate(recognized_sample_pos.begin(), recognized_sample_pos.end(), 0) / recognized_sample_pos.size();
 
         unsigned int num_valid_entries = 0;
+
+        //recognized_sample_pos = {500,0,500,500};
+        recognized_sample_pos[0] = 500;
+        recognized_sample_pos[1] = 0;
+        recognized_sample_pos[2] = 500;
+        recognized_sample_pos[3] = 500;
 
         for(unsigned channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
 
@@ -136,19 +158,34 @@ Locator::Locator(unsigned int num_mics):
 
             //locator.update_times(0.0003062, 0.0012464, 0.0000, 0.0011279);
             locator.update_times(updated_times[0], updated_times[1], updated_times[2], updated_times[3]);
-
-
-
+            
+        //locator.update_times(0.00002267573, 0.0, 0.00002267573, 0.00002267573);
+        //locator.update_times(0.0002267573, 0.0, 0.0002267573, 0.0002267573);
         std::cout << "Done.\n";
         cached_position = locator.locate();
-
+        cached_position.y = 1 - cached_position.y;
         std::cout << "Cached position: " << cached_position.x << ", " << cached_position.y << "\n";
+
 
        }
 
         position_mutex.lock();
         position = cached_position;
         position_mutex.unlock();
+
+
+
+        float updated_times[4] =  {4.3f, 3.3f, 2.3f, 1.3f};
+                    std::cout << "Writing stuff: " << cached_toas[0] << "\n";
+        toas_mutex.lock();
+
+            for(unsigned int mic_index = 0; mic_index < 4; ++mic_index) {
+                cached_toas[mic_index] = updated_times[mic_index];
+            }
+            cached_toas.x = 4.0;
+
+        toas_mutex.unlock();
+
     }
     // stop recording loop
     recorder.shutdown();

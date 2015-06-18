@@ -4,7 +4,19 @@ namespace TTT {
 
 void Table_Object::
 Draw(sf::RenderWindow& canvas) const {
-	canvas.draw(table_rectangle_shape_);
+
+	sf::Shader error_vis_shader;
+
+	if(!error_vis_shader.loadFromFile("../shaders/vertex_shader.vert", "../shaders/fragment_shader.frag")) {
+		std::cout << "Did not load shaders succesfully.\n";
+	} else {
+		std::cout << "=)\n";
+	}
+
+
+	sf::Shader::bind(&error_vis_shader);
+		canvas.draw(table_rectangle_shape_);
+	sf::Shader::bind(NULL);
 }
 
 void Table_Object::
