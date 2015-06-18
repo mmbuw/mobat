@@ -15,8 +15,8 @@ Recognized_Token_Object(unsigned in_id,
 
 void Recognized_Token_Object::
 Draw(sf::RenderWindow& canvas) const {
-	std::cout << "Drawing Token: \n";
-	std::cout << id_ << "Hz @ ";
+	//std::cout << "Drawing Token: \n";
+	//std::cout << id_ << "Hz @ ";
 	std::cout << token_circle_shape_.getPosition().x << " ";
 	std::cout << token_circle_shape_.getPosition().y << "\n";
 
@@ -90,5 +90,11 @@ unsigned Recognized_Token_Object::
 Get_Id() const {
 	return id_;
 }
+
+
+sf::CircleShape Recognized_Token_Object::get_Circle() const{
+	return token_circle_shape_;
+}
+
 
 }; //namespace TTT

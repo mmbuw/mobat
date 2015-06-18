@@ -46,6 +46,8 @@ class Recognized_Token_Object : Drawable_Object {
 
 		unsigned Get_Id() const;
 
+		sf::CircleShape get_Circle() const;
+
 }; //end class Recognized_Token_Object
 
 

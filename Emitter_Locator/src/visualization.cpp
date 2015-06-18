@@ -35,6 +35,7 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
     auto recording_thread = std::thread(&Locator::record_position, &locator);
 
     //unsigned frame_counter = 0;
+#if 1
     while (window.isOpen())
     {
         sf::Event event;
@@ -97,6 +98,157 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
         table_visualizer.Finalize_Visualization_Frame();
         window.display();
     }
+
+#else //pong mit tastatur
+
+        double x_max = windowResolution.x;
+        double y_max = windowResolution.y;
+        
+
+        double l_y_pos  = 0.03;
+        double r_y_pos  = 0.5;
+
+
+        double l_x_pos  = 0.01;
+        double r_x_pos  = 0.04/* - 2*right.getRadius()*/;
+
+
+    double player_speed = 0.03;
+        
+
+        while (window.isOpen())
+        {
+            //sf::Event event;
+            //while (window.pollEvent(event))
+
+    /*        switch (event.type)
+            {
+                // window closed
+                case sf::Event::Closed:
+                    window.close();
+                    break;*/
+
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+            {
+                if(r_y_pos > 0)
+                  r_y_pos += player_speed;
+                std::cout<<"Up pressed\n";
+            }
+
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+            {
+                if(r_y_pos < y_max /*-2*right.getRadius()*/)
+                    r_y_pos -= player_speed;
+                std::cout<<"Down pressed\n";
+            }
+
+
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+            {
+                if(r_x_pos < x_max /*-2*right.getRadius()*/)
+                    r_x_pos += player_speed;
+                std::cout<<"Right pressed\n";
+            }
+
+
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+            {
+                if(r_x_pos - player_speed > x_max/2.0)
+                    r_x_pos -= player_speed;
+                std::cout<<"Left pressed\n";
+            }
+
+            //left player
+
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+            {
+                if(l_y_pos > 0)
+                    l_y_pos += player_speed;
+                std::cout<<"W pressed\n";
+            }
+
+
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+            {
+                if(l_y_pos < y_max/*-2*left.getRadius()*/)
+                    l_y_pos -= player_speed;
+                std::cout<<"S pressed\n";
+            }
+
+
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+            {
+                if(l_x_pos +player_speed < x_max/2.0 /*- 2*left.getRadius()*/)
+                    l_x_pos += player_speed;
+                std::cout<<"D pressed\n";
+            }
+
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+            {
+                if(l_x_pos > 0)
+                    l_x_pos -= player_speed;
+                std::cout<<"A pressed\n";
+            }
+                    
+            
+
+
+
+
+
+            window.clear();
+            table_visualizer.Recalculate_Geometry();
+
+
+
+            table_visualizer.Draw(window);
+               
+            /*glm::vec2 point = locator.load_position();
+            smartphonePosition.x = point.x;
+            smartphonePosition.y = 1.0 - point.y;
+*/
+            //std::cout << "SP: " << smartphonePosition.x << "; " << smartphonePosition.y << "\n";
+
+
+            //std::cout << l_x_pos << "; " << r_y_pos << "\n";
+            table_visualizer.Signal_Token(16000, sf::Vector2f(r_x_pos, r_y_pos));
+            table_visualizer.Signal_Token(18000, sf::Vector2f(l_x_pos, l_y_pos));
+
+    /*
+            if( 0 == ++frame_counter % 40  ) {
+             table_visualizer.Signal_Token(16000, sf::Vector2f(smartphonePosition.x/2.0,
+                                                                 smartphonePosition.y+0.2));
+            }
+    */
+            table_visualizer.Finalize_Visualization_Frame();
+            window.display();
+
+                  
+                    /*glm::vec2 point = locator.load_position();
+                    smartphonePosition.x = point.x;
+                    smartphonePosition.y = 1.0 - point.y;
+
+                    //std::cout << "SP: " << smartphonePosition.x << "; " << smartphonePosition.y << "\n";
+                    table_visualizer.Signal_Token(18000, smartphonePosition);*/
+
+            /*
+                    if( 0 == ++frame_counter % 40  ) {
+                     table_visualizer.Signal_Token(16000, sf::Vector2f(smartphonePosition.x/2.0,
+                                                                        smartphonePosition.y+0.2));
+                    }
+            */
+                    /*table_visualizer.Finalize_Visualization_Frame();
+                    window.display();*/
+         
+        }
+
+
+
+
+
+#endif
+
+
 
     locator.shut_down();
     recording_thread.join();
