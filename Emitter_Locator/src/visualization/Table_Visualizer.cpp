@@ -108,10 +108,11 @@ Recalculate_Geometry() {
 
 // pseudopong zeug
 	//ballschlag
-std::cout<<recognized_tokens_.size()<<"\n";
-for( auto& id_token_pair : recognized_tokens_ ) {
+//std::cout<<recognized_tokens_.size()<<"\n";
+/*for( auto& id_token_pair : recognized_tokens_ ) {
 		std::cout<<id_token_pair.first<<"\n";
 	}
+*/
 
 	if(recognized_tokens_.size() >= 2){
 
@@ -254,13 +255,7 @@ Finalize_Visualization_Frame() {
 			refresh_token = true;
 		}
 
-		//std::cout << "recognized token size: " << recognized_tokens_.size() << "\n";
-		//std::cout << "Before Update Token: " << refresh_token << "\n";
-		//token signaled lifetime zero -> register to remove it
-
 		unsigned int Elapsed_Milliseconds = Get_Elapsed_Milliseconds();
-
-		//std::cout << "Elapsed Milliseconds: " << Elapsed_Milliseconds << "\n";
 		
 		if( ! id_token_pair.second
 			.Update_Token(refresh_token, 
@@ -298,7 +293,7 @@ bool Table_Visualizer::circ_circ_intersect(sf::CircleShape const& c1, sf::Circle
     double x2 = c2.getPosition().x + c2.getRadius(), y2 = c2.getPosition().y + c2.getRadius();
     double dist = sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
 
-    std::cout<<c1.getPosition().x<<"  "<<c1.getPosition().y<<"  "<<c1.getRadius()<<"   "<<c2.getPosition().x<<"  "<<c2.getPosition().y<<"  "<<c2.getRadius()<<"\n";
+    //std::cout<<c1.getPosition().x<<"  "<<c1.getPosition().y<<"  "<<c1.getRadius()<<"   "<<c2.getPosition().x<<"  "<<c2.getPosition().y<<"  "<<c2.getRadius()<<"\n";
 
     return (dist < (c1.getRadius() + c2.getRadius() ) && dist > abs(c1.getRadius() - c2.getRadius()));
 

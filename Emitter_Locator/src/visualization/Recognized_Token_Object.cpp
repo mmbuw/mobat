@@ -17,8 +17,8 @@ void Recognized_Token_Object::
 Draw(sf::RenderWindow& canvas) const {
 	//std::cout << "Drawing Token: \n";
 	//std::cout << id_ << "Hz @ ";
-	std::cout << token_circle_shape_.getPosition().x << " ";
-	std::cout << token_circle_shape_.getPosition().y << "\n";
+	//std::cout << token_circle_shape_.getPosition().x << " ";
+	//std::cout << token_circle_shape_.getPosition().y << "\n";
 
 
 	canvas.draw(token_circle_shape_);

@@ -19,7 +19,7 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
                         , "Table_Vis");
 //window.setSize(windowResolution);
 
-    std::vector<sf::Vector2f> default_microphone_positions_ = {{0.01, 0.01}, {0.47,  0.01}, {0.465,  0.47}, {0.01,  0.475}};
+    std::vector<sf::Vector2f> default_microphone_positions_ = {{0.055, 0.08}, {0.95,  0.09}, {0.105,  1.89}, {0.925,  1.92}};
        /* default_microphone_positions_.push_back(sf::Vector2f(0.0,4.0));
         default_microphone_positions_.push_back(sf::Vector2f(0.0,8.0));
         default_microphone_positions_.push_back(sf::Vector2f(4.0,0.0));
@@ -78,6 +78,7 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
 
 
         glm::vec4 toas = locator.load_toas();
+
 
 
         window.clear();

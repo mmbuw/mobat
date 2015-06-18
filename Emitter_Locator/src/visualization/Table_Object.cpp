@@ -23,11 +23,11 @@ Draw(sf::RenderWindow& canvas, std::vector<Microphone_Object> const& microphones
 	error_vis_shader.setParameter("mic3_pos", microphones[2].physical_position_ );
 	error_vis_shader.setParameter("mic4_pos", microphones[3].physical_position_ );
 
-	std::cout << "toas in draw call: " << toas[0] << ", " << toas[1] << ", " << toas[2] << ", " << toas[3] << "\n";
+	//std::cout << "toas in draw call: " << toas[0] << ", " << toas[1] << ", " << toas[2] << ", " << toas[3] << "\n";
 
 	error_vis_shader.setParameter("toas", toas[0], toas[1], toas[2], toas[3]);
 
-	sf::Shader::bind(&error_vis_shader);
+	//sf::Shader::bind(&error_vis_shader);
 		canvas.draw(table_rectangle_shape_);
 	sf::Shader::bind(NULL);
 }
