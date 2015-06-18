@@ -16,8 +16,8 @@ Table_Visualizer( sf::Vector2u const& in_canvas_resolution,
 				  std::vector<sf::Vector2f> const& microphone_positions,
 				  sf::Color const& in_table_fill_color,
 				  sf::Color const& in_microphone_fill_color,
-				  sf::Color const& in_token_fill_color)
-				  {
+				  sf::Color const& in_token_fill_color,
+				  double ball_size){
 
 	resolution_ = in_canvas_resolution;
 
@@ -44,6 +44,17 @@ Table_Visualizer( sf::Vector2u const& in_canvas_resolution,
 	Set_Microphone_Fill_Color( in_microphone_fill_color );
 	Set_Token_Fill_Color( in_token_fill_color );
 
+
+	//pseudopong
+
+	b_x_pos_ = 1;
+	b_y_pos_ = 0.5;
+	ball_ = Recognized_Token_Object(0, sf::Vector2f(b_x_pos_, b_y_pos_));
+	ball_dir_ = sf::Vector2f(-0.01, 0);
+	ball_.Set_Fill_Color(sf::Color::Red);
+	ball_speed_ = 0.01;
+
+
 	//get initial timestamp
 	last_time_stamp_ = std::chrono::high_resolution_clock::now();
 }
@@ -63,6 +74,8 @@ Draw(sf::RenderWindow& canvas) const {
 		id_token_pair.second.Draw(canvas);
 	}
 
+	ball_.Draw(canvas);
+
 
 }
 
@@ -79,6 +92,7 @@ Reset_Microphones(std::vector<Microphone_Object> const& microphones) {
 
 void Table_Visualizer::
 Recalculate_Geometry() {
+	
 
 	table_.Recalculate_Geometry();
 
@@ -89,6 +103,99 @@ Recalculate_Geometry() {
 	for( auto& id_token_pair : recognized_tokens_ ) {
 		id_token_pair.second.Recalculate_Geometry();
 	}
+
+
+
+// pseudopong zeug
+	//ballschlag
+std::cout<<recognized_tokens_.size()<<"\n";
+for( auto& id_token_pair : recognized_tokens_ ) {
+		std::cout<<id_token_pair.first<<"\n";
+	}
+
+	if(recognized_tokens_.size() >= 2){
+		std::cout<<"HAAALLLLOOO\n";
+
+		sf::CircleShape left  = recognized_tokens_[16000].get_Circle();	//NO HARDCODED FREQUENCIES!!!!!!!!!!!!
+		sf::CircleShape right = recognized_tokens_[18000].get_Circle();
+		sf::CircleShape t_ball = ball_.get_Circle();
+
+
+		if(circ_circ_intersect(t_ball, right) || circ_circ_intersect(t_ball, left))
+		{
+			std::cout<<"INTERSECT\n";
+			exit(0);
+		    int rand_x = 0;
+		    int rand_y = 0;
+
+		    ball_.Set_Fill_Color(sf::Color::Red);
+		    if(circ_circ_intersect(t_ball, right))
+		    {
+		        //rechter spieler schaffts
+		        ball_dir_.x = -rand_x;
+		        ball_dir_.y = rand_y;
+		        //ball_dir_.x = 0;
+		    }
+		    else
+		    {
+		        //linker spieler schaffts
+		        ball_dir_.x = rand_x;
+		        ball_dir_.y = rand_y;
+		        //ball_dir_.x = 0;
+
+		    }
+		}else{
+		    ball_.Set_Fill_Color(sf::Color::White);
+		}
+	}
+
+	//tor-erkennung
+	if(b_x_pos_ < resolution_.x && b_x_pos_ > -2*ball_.get_Circle().getRadius())
+	{
+	    b_x_pos_ += ball_dir_.x;
+	}    
+	else
+	{
+	    std::cout<<"TOOOOOORRRRR\n";
+	    if(b_x_pos_ >= resolution_.x)
+	    {
+	        //tor für spieler left
+	        ball_dir_.x = ball_speed_;
+	        ball_dir_.y = 0;
+	        //++left_goals; 
+	    }
+	    else
+	    {
+	        //tor für spieler right
+	        ball_dir_.x = -ball_speed_;
+	        ball_dir_.y = 0;
+	        //++right_goals;
+	    }
+	    b_x_pos_  = resolution_.x/2.0 - ball_.get_Circle().getRadius();
+	    b_y_pos_  = resolution_.y/2.0 - ball_.get_Circle().getRadius();
+	    
+	    /*l_y_pos  = y_max/2.0 - left.getRadius();
+	    r_y_pos  = y_max/2.0 - right.getRadius();
+
+	    l_x_pos  = 0;
+	    r_x_pos  = resolution_.x - 2*right.getRadius();*/
+	}
+
+
+
+	// oben unten begrenzung
+	if(b_y_pos_ >= resolution_.x - 2*ball_.get_Circle().getRadius() || b_y_pos_ <= 0)
+	{
+	    ball_dir_.y = -ball_dir_.y; //an obere kante gestoßen
+	} 
+	
+	b_y_pos_ += ball_dir_.y;
+
+	ball_ = Recognized_Token_Object(0, sf::Vector2f(b_x_pos_, b_y_pos_)); //when type of ball change, use sth like setPosition
+
+	ball_.Recalculate_Geometry();
+
+
 }
 
 void Table_Visualizer::
@@ -191,6 +298,8 @@ bool Table_Visualizer::circ_circ_intersect(sf::CircleShape const& c1, sf::Circle
     double x1 = c1.getPosition().x + c1.getRadius(), y1 = c1.getPosition().y + c1.getRadius();
     double x2 = c2.getPosition().x + c2.getRadius(), y2 = c2.getPosition().y + c2.getRadius();
     double dist = sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
+
+    std::cout<<c1.getPosition().x<<"  "<<c1.getPosition().y<<"  "<<c1.getRadius()<<"   "<<c2.getPosition().x<<"  "<<c2.getPosition().y<<"  "<<c2.getRadius()<<"\n";
 
     return (dist < (c1.getRadius() + c2.getRadius() ) && dist > abs(c1.getRadius() - c2.getRadius()));
 

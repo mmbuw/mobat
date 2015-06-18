@@ -29,6 +29,15 @@ class Table_Visualizer : Drawable_Object {
 		std::set<unsigned> tokens_to_refresh_;
 
 		std::chrono::high_resolution_clock::time_point last_time_stamp_;
+
+
+		//needed for pesudopong
+		double b_x_pos_;
+		double b_y_pos_;
+		Recognized_Token_Object ball_;	//NO TOKEN, change it later
+		sf::Vector2f ball_dir_;
+		double ball_speed_;
+
 	public:
 		Table_Visualizer(sf::Vector2u const& in_canvas_resolution = sf::Vector2u(800, 600),
 						 sf::Vector2f const& table_dims = sf::Vector2f(2.0,1.0), 
@@ -39,7 +48,8 @@ class Table_Visualizer : Drawable_Object {
 						 sf::Color const& in_microphone_fill_color 
 						 	= sf::Color(0,255,0, 125),
 						 sf::Color const& in_token_fill_color 
-						 	= sf::Color(255,0,0) 
+						 	= sf::Color(255,0,0),
+						 double ball_size = 30 
 						);
 		~Table_Visualizer();
 

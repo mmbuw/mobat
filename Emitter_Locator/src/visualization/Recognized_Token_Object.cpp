@@ -89,4 +89,10 @@ Get_Id() const {
 	return id_;
 }
 
+
+sf::CircleShape Recognized_Token_Object::get_Circle() const{
+	return token_circle_shape_;
+}
+
+
 }; //namespace TTT
