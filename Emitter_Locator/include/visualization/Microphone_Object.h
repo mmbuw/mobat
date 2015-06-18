@@ -11,10 +11,11 @@ class Microphone_Object : Drawable_Object {
 
 	private:
 		unsigned id_;
-		sf::Vector2f physical_position_;
 		sf::CircleShape microphone_circle_shape_;
 
 	public:
+		sf::Vector2f physical_position_;
+		
 		Microphone_Object(unsigned in_id, sf::Vector2f in_position );
 		virtual void Draw(sf::RenderWindow& canvas) const;
 		virtual void Recalculate_Geometry();

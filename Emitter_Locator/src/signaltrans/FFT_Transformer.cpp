@@ -106,7 +106,11 @@ FFT_Transformer::~FFT_Transformer() {
 void FFT_Transformer::reset_sample_counters() {
 	num_samples_above_threshold_ = 0;
 	num_samples_below_threshold_ = 0;
-	detection_threshold_ = 2.5;
+	detection_threshold_ = 1;
+	average_value_ = 0.0;
+	counted_samples_ = 0;
+	fft_frame_count_ = 0;
+	first_hit_samples_below_threshold_at_ = 0;
 }
 
 void FFT_Transformer::clear_cached_fft_results() {
@@ -156,7 +160,7 @@ unsigned int FFT_Transformer::perform_FFT() {
 
 	eighteen_khz_sum_ = 0.0;
 
-	unsigned int taken_normalization_samples = 0;
+
 
 /*
 	for(unsigned int i = 0; i < 1024; ++i) {
@@ -184,6 +188,8 @@ unsigned int FFT_Transformer::perform_FFT() {
 			double normalization_range_value = 0.0;
 			
 
+			unsigned int taken_normalization_samples = 0;
+			unsigned int taken_18_khz_samples = 0;
 
 			for(unsigned int signal_it = 0;
 				signal_it < (unsigned int) (fft_window_size_ / 2 - 1);
@@ -193,11 +199,15 @@ unsigned int FFT_Transformer::perform_FFT() {
 						if(current_frequency > 12000.0 && current_frequency < 18002.0 ) {
 							normalization_range_value +=  std::sqrt(fft_result_[signal_it][0]*fft_result_[signal_it][0]) + 
 								  	(fft_result_[signal_it][1]*fft_result_[signal_it][1]) ;
+
+								  	++taken_normalization_samples;
 						}
 
 						if(current_frequency > 18000.0 && current_frequency < 18002.0 ) {
 						    temp_accum_18khz += std::sqrt(fft_result_[signal_it][0]*fft_result_[signal_it][0]) + 
 								  	(fft_result_[signal_it][1]*fft_result_[signal_it][1]) ;
+
+								  	++taken_18_khz_samples;
 						//std::cout << "Current Frequency: " << current_frequency << ": " << temp_accum_18khz<< "\n";
 						}
 
@@ -206,7 +216,13 @@ unsigned int FFT_Transformer::perform_FFT() {
 
 			}
 
-			double current_iteration_khz_sum = temp_accum_18khz / normalization_range_value;
+			double current_iteration_khz_sum = 0.0;
+			if(  temp_accum_18khz / taken_18_khz_samples  >  3 * ( (normalization_range_value - temp_accum_18khz)/ (taken_normalization_samples -taken_18_khz_samples) ) )
+				current_iteration_khz_sum = 10.0;
+
+				//std::cout << "!!!!!!!\n"; 
+
+			//double current_iteration_khz_sum = temp_accum_18khz / normalization_range_value;
 
 			//std::cout << "cis: " << current_iteration_khz_sum << "\n";
 /*
@@ -228,60 +244,71 @@ unsigned int FFT_Transformer::perform_FFT() {
 		}
 
 	
-		++taken_normalization_samples;
+
 	}
+		//std::cout << "cis: " << eighteen_khz_sum_ << "\n";
+
 
 		//std::cout << "Performed FFT.\n";
 
-		//eighteen_khz_sum_ /= taken_normalization_samples;
-		if(!std::isnan(eighteen_khz_sum_)) {
-
-
-			if(eighteen_khz_sum_ > detection_threshold_) {
-						//	std::cout << "18 khz sum: " << eighteen_khz_sum_ << "\n";
-				if(num_samples_below_threshold_ > 2000) {
-						
-
-
-					if(++num_samples_above_threshold_ > 10 ) {
-					//std::cout << "\n\n18 khz sum: " << num_samples_above_threshold_ << "comparison below: " << num_samples_below_threshold_ << "\n\n";
-					//std::cout << "PEAK DETECTED!\n";
-						return 1;
-					}
-				}
-
-
-			} else
-			{ 
-				++num_samples_below_threshold_;
-				//std::cout << "\n\nb low: " << num_samples_below_threshold_ << "\n\n";
-			  num_samples_above_threshold_ = 0;
-			}
-
-		} else {
-			return 2;
-		}
-
-		last_x_sample_[(fft_frame_count_%10)] = eighteen_khz_sum_;
+		last_x_sample_[(fft_frame_count_%10)] = eighteen_khz_sum_ > 1.0 ? 20.0 : 0.0;
 
 		++fft_frame_count_;
 
-		double avg = 0.0;
-		for(int i = 0; i < 10; ++i) {
-			avg += last_x_sample_[i];
+/*
+		if( first_hit_samples_below_threshold_at_ > 0) {
+			if(counted_samples_ - 500 > first_hit_samples_below_threshold_at_ )
+				return 2;
 		}
-		avg /= 10.0;
+*/
+		//eighteen_khz_sum_ /= taken_normalization_samples;
+		//std::cout << "#";
+		if(!std::isnan(eighteen_khz_sum_)) {
+			average_value_ += eighteen_khz_sum_;
+			++counted_samples_;
 
-		if(avg > 0.05)
-			++stabilization_counter_;
-		else
-			stabilization_counter_ = 0;
+			average_value_ = 0;
+			for(int i = 0; i < 10; ++i) {
+				average_value_ += last_x_sample_[i];
+
+			}
+				//std::cout << "18 khz sum: " << average_value_/10.0 << "\n";
+							//std::cout << "18 khz sum: " << eighteen_khz_sum_ << "\n";
 
 
+				if(average_value_/10.0 > 1) {
 
-		if(stabilization_counter_ >= 10) {
-			//std::cout << "18khz at sample: " << start_sample_ <<"\n"; 
-			return 0;
+					//num_samples_below_threshold_ = 0;
+
+					if(num_samples_below_threshold_ > 3700) {
+							if(first_hit_samples_below_threshold_at_ == 0) {
+								first_hit_samples_below_threshold_at_ = counted_samples_;
+							}
+
+				
+						if(++num_samples_above_threshold_ >= 1000 ) {
+
+						//std::cout << "\n\n18 khz sum: " << num_samples_above_threshold_ << "comparison below: " << num_samples_below_threshold_ << "\n\n";
+						//std::cout << "PEAK DETECTED!\n";
+							return 1;
+						}
+					}
+
+
+				} else
+				{ 
+				  ++num_samples_below_threshold_;
+				  //if(num_samples_below_threshold_ > 3700)
+				  		//std::cout << "Pause done\n";	
+
+				 // std::cout << "num_samples_below_threshold_: " << num_samples_below_threshold_ << "\n";
+					//std::cout << "\n\nb low: " << num_samples_below_threshold_ << "\n\n";
+				  num_samples_above_threshold_ = 0;
+				}
+			
+
+		} else {
+			return 2;
 		}
 
 		return 0;

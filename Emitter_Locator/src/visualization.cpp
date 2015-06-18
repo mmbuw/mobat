@@ -19,7 +19,7 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
                         , "Table_Vis");
 //window.setSize(windowResolution);
 
-    std::vector<sf::Vector2f> default_microphone_positions_ = {{0.01, 0.245}, {0.35,  0.256}, {0.015,  0.01}, {0.355,  0.02}};
+    std::vector<sf::Vector2f> default_microphone_positions_ = {{0.01, 0.01}, {0.47,  0.01}, {0.465,  0.47}, {0.01,  0.475}};
        /* default_microphone_positions_.push_back(sf::Vector2f(0.0,4.0));
         default_microphone_positions_.push_back(sf::Vector2f(0.0,8.0));
         default_microphone_positions_.push_back(sf::Vector2f(4.0,0.0));
@@ -27,7 +27,7 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
 
 
 
-    TTT::Table_Visualizer table_visualizer(windowResolution, sf::Vector2f(1.194, 0.802), default_microphone_positions_);
+    TTT::Table_Visualizer table_visualizer(windowResolution, sf::Vector2f(1.0, 2.0), default_microphone_positions_);
     table_visualizer.Set_Token_Recognition_Timeout(10000);
 
     Locator locator{4};
@@ -70,24 +70,24 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
                
             }
        }
-
-
-        window.clear();
-        table_visualizer.Recalculate_Geometry();
-        table_visualizer.Draw(window);
            
         glm::vec2 point = locator.load_position();
         smartphonePosition.x = point.x;
         smartphonePosition.y = 1.0 - point.y;
 
 
-       // glm::vec4 toas = locator.load_toas();
+        glm::vec4 toas = locator.load_toas();
 
-       // std::cout << "toas: " << toas[0] << ", " << toas[1] << ", " << toas[2] << ", " << toas[3] << "\n";
+
+        window.clear();
+        table_visualizer.Recalculate_Geometry();
+        table_visualizer.Draw(window, toas);
+
+   //    std::cout << "toas: " << toas[0] << ", " << toas[1] << ", " << toas[2] << ", " << toas[3] << "\n";
 
         //std::cout << "SP: " << smartphonePosition.x << "; " << smartphonePosition.y << "\n";
+        table_visualizer.Signal_Token(16000, smartphonePosition);
         table_visualizer.Signal_Token(18000, smartphonePosition);
-
 /*
         if( 0 == ++frame_counter % 40  ) {
          table_visualizer.Signal_Token(16000, sf::Vector2f(smartphonePosition.x/2.0,

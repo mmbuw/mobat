@@ -42,6 +42,9 @@ class FFT_Transformer {
 		double detection_threshold_;
 		unsigned num_samples_below_threshold_;
 		unsigned num_samples_above_threshold_;
+		unsigned counted_samples_;
+		float average_value_;
+		unsigned first_hit_samples_below_threshold_at_;
 
 		double last_x_sample_[10];
 		unsigned int fft_frame_count_;

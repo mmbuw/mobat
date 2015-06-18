@@ -43,7 +43,9 @@ class Table_Visualizer : Drawable_Object {
 						);
 		~Table_Visualizer();
 
-		virtual void Draw(sf::RenderWindow& in_canvas) const;
+		virtual void Draw(sf::RenderWindow& in_canvas) const {};
+
+		void Draw(sf::RenderWindow& in_canvas, glm::vec4 toas) const;
 
 		void Resize_Physical_Table(sf::Vector2f const& in_table_dims);
 

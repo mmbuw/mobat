@@ -11,10 +11,10 @@ Locator::Locator(unsigned int num_mics):
  position{0, 0},
  cached_position{0, 0},
  window_size{512},
- recorder{num_mics, 44100, 300000},
+ recorder{num_mics, 44100, 310000},
  collector{recorder.buffer_bytes() / num_mics, num_mics},
  fft_transformer{window_size},
- locator{3300, {0.01, 0.245}, {0.35,  0.256}, {0.015,  0.01}, {0.355,  0.02}}
+ locator{3300, {0.01, 0.01}, {0.47,  0.01}, {0.465,  0.47}, {0.01,  0.475}}
  {
     fft_transformer.initialize_execution_plan();
     locator.update_times(0.0003062, 0.0012464, 0.0000, 0.0011279);
@@ -43,7 +43,6 @@ Locator::Locator(unsigned int num_mics):
         return temp;
     }
     else {
-        std::cout << "Im trylock if\n";
         return cached_toas;
     }
  } 
@@ -102,10 +101,13 @@ Locator::Locator(unsigned int num_mics):
         unsigned int num_valid_entries = 0;
 
         //recognized_sample_pos = {500,0,500,500};
+        /*
         recognized_sample_pos[0] = 500;
         recognized_sample_pos[1] = 0;
         recognized_sample_pos[2] = 500;
         recognized_sample_pos[3] = 500;
+        */
+
 
         for(unsigned channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
 
@@ -141,10 +143,14 @@ Locator::Locator(unsigned int num_mics):
         double standard_deviation =   std::sqrt(temp_sd/num_valid_entries);
         std::cout << "standard_deviation: " << standard_deviation << "\n";
 
-        if( max_sample-min_sample < 2000 ) {
+
+        std::cout << "Min sample: " << min_sample << "\n";
+        if( max_sample-min_sample < 3000 ) {
             double updated_times[4];
 
             std::cout << "Sample diffs: ";
+
+
 
             for(unsigned channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
                 std::cout << "Channel " << channel_iterator << ": " << recognized_sample_pos[channel_iterator] - min_sample << "\n";
@@ -167,6 +173,21 @@ Locator::Locator(unsigned int num_mics):
         std::cout << "Cached position: " << cached_position.x << ", " << cached_position.y << "\n";
 
 
+        //glm::vec4 update_times = {}
+        //double updated_times[4] =  {4.3, 3.3, 2.3, 1.3};
+
+        for(unsigned int mic_index = 0; mic_index < 4; ++mic_index) {
+            cached_toas[mic_index] = updated_times[mic_index];
+        }
+
+        toas_mutex.lock();
+            for(unsigned int mic_index = 0; mic_index < 4; ++mic_index) {
+                toas[mic_index] = cached_toas[mic_index];
+            }
+            cached_toas.x = 4.0;
+
+        toas_mutex.unlock();
+
        }
 
         position_mutex.lock();
@@ -175,16 +196,7 @@ Locator::Locator(unsigned int num_mics):
 
 
 
-        float updated_times[4] =  {4.3f, 3.3f, 2.3f, 1.3f};
-                    std::cout << "Writing stuff: " << cached_toas[0] << "\n";
-        toas_mutex.lock();
 
-            for(unsigned int mic_index = 0; mic_index < 4; ++mic_index) {
-                cached_toas[mic_index] = updated_times[mic_index];
-            }
-            cached_toas.x = 4.0;
-
-        toas_mutex.unlock();
 
     }
     // stop recording loop

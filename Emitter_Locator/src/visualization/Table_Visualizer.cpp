@@ -52,8 +52,8 @@ Table_Visualizer::
 ~Table_Visualizer() {}
 
 void Table_Visualizer::
-Draw(sf::RenderWindow& canvas) const {
-	table_.Draw(canvas);
+Draw(sf::RenderWindow& canvas, glm::vec4 toas) const {
+	table_.Draw(canvas, microphones_, toas );
 
 	for(auto const& mic_obj : microphones_) {
 		mic_obj.Draw(canvas);
@@ -149,6 +149,7 @@ Finalize_Visualization_Frame() {
 			refresh_token = true;
 		}
 
+		//std::cout << "recognized token size: " << recognized_tokens_.size() << "\n";
 		//std::cout << "Before Update Token: " << refresh_token << "\n";
 		//token signaled lifetime zero -> register to remove it
 
