@@ -6,18 +6,26 @@
 #include <numeric>
 #include <thread>
 
+
+
 Locator::Locator(unsigned int num_mics):
  shutdown{false},
  position{0, 0},
  cached_position{0, 0},
  window_size{512},
- recorder{num_mics, 44100, 310000},
+ recorder{num_mics, 44100, 130000},
  collector{recorder.buffer_bytes() / num_mics, num_mics},
  fft_transformer{window_size},
- locator{330, {0.055, 0.08}, {0.95,  0.09}, {0.105,  1.89}, {0.925,  1.92}}
+ locator{330, {0.055, 0.08}, {0.95,  0.09}, {0.105,  1.89}, {0.925,  1.92}},
+ signal_plot_window_(sf::VideoMode(512, 400)
+                    , "Transformed_Frequencies")
  {
     fft_transformer.initialize_execution_plan();
     locator.update_times(0.0003062, 0.0012464, 0.0000, 0.0011279);
+
+
+   
+
  }
 
  glm::vec2 Locator::load_position() const {
@@ -72,9 +80,9 @@ Locator::Locator(unsigned int num_mics):
 
             fft_transformer.reset_sample_counters();
             fft_transformer.clear_cached_fft_results();
-            for(unsigned int i = 0; i < 13000; ++i) {
+            for(unsigned int i = 0; i < 3600; ++i) {
                 unsigned offset = 1 * i;
-                if(offset > (12000) )
+                if(offset > (3500) )
                     break;
 
                 fft_transformer.set_analyzation_range(0+offset, window_size+50 + offset);
@@ -172,6 +180,11 @@ Locator::Locator(unsigned int num_mics):
         cached_position.y = 1 - cached_position.y;
         std::cout << "Cached position: " << cached_position.x << ", " << cached_position.y << "\n";
 
+        signal_plot_window_.clear(sf::Color(255, 255, 255));
+            for(auto const& sig : signal_results_) {
+                std::cout << "Sig: " << sig << "\n";
+            }
+        signal_plot_window_.display();
 
         //glm::vec4 update_times = {}
         //double updated_times[4] =  {4.3, 3.3, 2.3, 1.3};

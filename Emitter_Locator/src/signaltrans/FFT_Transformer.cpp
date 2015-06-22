@@ -2,7 +2,7 @@
 
 #include <limits>
 #include <iostream>
-#
+
 
 #define MATH_PI 3.14159265359 
 
@@ -111,6 +111,8 @@ void FFT_Transformer::reset_sample_counters() {
 	counted_samples_ = 0;
 	fft_frame_count_ = 0;
 	first_hit_samples_below_threshold_at_ = 0;
+
+	signal_results_.clear();
 }
 
 void FFT_Transformer::clear_cached_fft_results() {
@@ -162,20 +164,11 @@ unsigned int FFT_Transformer::perform_FFT() {
 
 
 
-/*
-	for(unsigned int i = 0; i < 1024; ++i) {
-		if(fft_in_[i][0] != 0.0) {
-			std::cout << "NOT NULL\n";
-			std::cin.get();
-		}
-	}
-*/
-	//std::cout << "start at sample: " << start_sample_ << "\nstop at sample: " << end_sample_ <<"\n\n"; 
+	if(start_sample_ > end_sample_ - (fft_window_size_ + 1) )
+		return 0;
 
-	//std::cin.get();
-	for(unsigned int offset = start_sample_; offset <= end_sample_ - (fft_window_size_ - 1) ; ++offset ) {
+	for(unsigned int offset = start_sample_; offset <= end_sample_ - (fft_window_size_ + 1) ; ++offset ) {
 		//std::cout << "Trying offset " << offset <<"\n";
-
 
 		//if(true) {
 		if(fft_cached_results_.find(start_sample_) == fft_cached_results_.end() ) {
@@ -215,28 +208,10 @@ unsigned int FFT_Transformer::perform_FFT() {
 
 
 			}
-/*
-			std::cout << "temp 18 khz sum: " << temp_accum_18khz / taken_normalization_samples<< "\n";
 
-			double current_iteration_khz_sum = 0.0;
-			if(  temp_accum_18khz / taken_18_khz_samples  >  3 * ( (normalization_range_value - temp_accum_18khz)/ (taken_normalization_samples -taken_18_khz_samples) ) )
-				current_iteration_khz_sum = 10.0;
-
-				//std::cout << "!!!!!!!\n"; 
-*/
 			double current_iteration_khz_sum = temp_accum_18khz / normalization_range_value;
 
-			//std::cout << "Current iteration khz sum: " << current_iteration_khz_sum << "\n";
-			//std::cout << "cis: " << current_iteration_khz_sum << "\n";
-/*
-			if(current_iteration_khz_sum <= detection_threshold_) {
-				++num_samples_below_threshold_;
-			} else {
-				if(num_samples_below_threshold_ > 3000) {
-					//std::cout << "Found peak!\n";
-				}
-			}
-*/
+
 			fft_cached_results_[start_sample_] =  current_iteration_khz_sum;
 
 			eighteen_khz_sum_ += current_iteration_khz_sum;
@@ -249,24 +224,17 @@ unsigned int FFT_Transformer::perform_FFT() {
 	
 
 	}
-		//std::cout << "cis: " << eighteen_khz_sum_ << "\n";
-
-
-		//std::cout << "Performed FFT.\n";
 
 		last_x_sample_[(fft_frame_count_%10)] = eighteen_khz_sum_;
 
 		++fft_frame_count_;
 
-/*
-		if( first_hit_samples_below_threshold_at_ > 0) {
-			if(counted_samples_ - 500 > first_hit_samples_below_threshold_at_ )
-				return 2;
-		}
-*/
-		//eighteen_khz_sum_ /= taken_normalization_samples;
-		//std::cout << "#";
+
 		if(!std::isnan(eighteen_khz_sum_)) {
+
+			signal_results_.push_back(eighteen_khz_sum_);
+/*		
+
 			average_value_ += eighteen_khz_sum_;
 			++counted_samples_;
 
@@ -275,30 +243,31 @@ unsigned int FFT_Transformer::perform_FFT() {
 				average_value_ += last_x_sample_[i];
 
 			}
-				//std::cout << "18 khz sum: " << average_value_/10.0 << "\n";
+				std::cout << "18 khz sum: " << average_value_/10.0 << "\n";
 							//std::cout << "18 khz sum: " << eighteen_khz_sum_ << "\n";
 
 
-				if(average_value_/10.0 > detection_threshold_) {
+				if(average_value_/10.0 > 8.0) {
 
 					//num_samples_below_threshold_ = 0;
 
-					if(num_samples_below_threshold_ > 3000) {
+					if(num_samples_below_threshold_ > 500) {
 							if(first_hit_samples_below_threshold_at_ == 0) {
 								first_hit_samples_below_threshold_at_ = counted_samples_;
 							}
 
 				
-						if(++num_samples_above_threshold_ >= 50 ) {
+						if(++num_samples_above_threshold_ >= 10 ) {
 
 						//std::cout << "\n\n18 khz sum: " << num_samples_above_threshold_ << "comparison below: " << num_samples_below_threshold_ << "\n\n";
 						std::cout << "PEAK DETECTED!\n";
+						std::cin.get();
 							return 1;
 						}
 					}
 
 
-				} else
+				} else if(average_value_/10.0 < 6.0)
 				{ 
 				  ++num_samples_below_threshold_;
 				  //if(num_samples_below_threshold_ > 3700)
@@ -310,8 +279,11 @@ unsigned int FFT_Transformer::perform_FFT() {
 				  num_samples_above_threshold_ = 0;
 				}
 			
-
+*/
 		} else {
+
+			//std::cout << "NaN detected!!!!";
+			//std::cin.get();
 			return 2;
 		}
 

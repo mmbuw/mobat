@@ -10,6 +10,8 @@
 
 #include <map>
 
+#include <vector>
+
 class FFT_Transformer {
 	private:
 
@@ -48,6 +50,9 @@ class FFT_Transformer {
 
 		double last_x_sample_[10];
 		unsigned int fft_frame_count_;
+
+		std::vector<unsigned int> signal_results_;
+
 		void create_hamming_window();
 		void create_hann_window();
 		void create_blackmann_harris_window();

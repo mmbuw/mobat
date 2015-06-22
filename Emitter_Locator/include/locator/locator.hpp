@@ -2,6 +2,8 @@
 #define LOCATOR_HPP
 
 #include <mutex>
+#include <SFML/Graphics.hpp>
+
 
 #include "microphone.hpp"
 #include "recorder.hpp"
@@ -38,6 +40,8 @@ private:
     buffer_collection collector;
     FFT_Transformer fft_transformer;
     TDOAtor locator;
+
+    sf::RenderWindow signal_plot_window_;
  };
 
  #endif //LOCATOR_HPP
