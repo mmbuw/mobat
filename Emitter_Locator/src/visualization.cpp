@@ -16,7 +16,7 @@ sf::Vector2u windowResolution(800, 800);
 
 int main(int argc, char** argv) {
 
-XInitThreads();
+//XInitThreads();
 //sf::VideoMode fullScreenMode = sf::VideoMode::getDesktopMode();
 sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
                         , "Table_Vis");
@@ -38,7 +38,7 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
     auto recording_thread = std::thread(&Locator::record_position, &locator);
 
     //unsigned frame_counter = 0;
-#if 1
+#if 0
     while (window.isOpen())
     {
         sf::Event event;
@@ -46,7 +46,7 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
             if (event.type == sf::Event::Closed)
                 window.close();
 
-2           if (event.type == sf::Event::KeyPressed) {
+            if (event.type == sf::Event::KeyPressed) {
 
             	if(event.key.code == sf::Keyboard::Escape)
             		window.close();
@@ -80,7 +80,7 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
         smartphonePosition.y = 1.0 - point.y;
 
 
-        glm::vec4 toas = locator.lo2d_toas();
+        glm::vec4 toas = locator.load_toas();
 
 
 
