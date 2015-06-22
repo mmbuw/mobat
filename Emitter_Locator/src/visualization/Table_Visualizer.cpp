@@ -62,6 +62,19 @@ Table_Visualizer( sf::Vector2u const& in_canvas_resolution,
 Table_Visualizer::
 ~Table_Visualizer() {}
 
+
+void Table_Visualizer::
+Draw(sf::RenderWindow& canvas) const {
+	table_.Draw(canvas);
+
+	for( auto& id_token_pair : recognized_tokens_ ) {
+		id_token_pair.second.Draw(canvas);
+	}
+
+	ball_.Draw(canvas);
+}
+
+
 void Table_Visualizer::
 Draw(sf::RenderWindow& canvas, glm::vec4 toas) const {
 	table_.Draw(canvas, microphones_, toas );
@@ -121,14 +134,14 @@ Recalculate_Geometry() {
 		sf::CircleShape t_ball = ball_.get_Circle();
 
 
-		if(circ_circ_intersect(t_ball, right) || circ_circ_intersect(t_ball, left))
+		if(circ_circ_intersect(t_ball, right).first || circ_circ_intersect(t_ball, left).first)
 		{
 
 		    int rand_x = 0;
 		    int rand_y = 0;
 
 		    ball_.Set_Fill_Color(sf::Color::Red);
-		    if(circ_circ_intersect(t_ball, right))
+		    if(circ_circ_intersect(t_ball, right).first)
 		    {
 		        //rechter spieler schaffts
 		        ball_dir_.x = -rand_x;
@@ -288,14 +301,22 @@ Get_Elapsed_Milliseconds(){
 	return elapsed_milliseconds.count();
 }
 
-bool Table_Visualizer::circ_circ_intersect(sf::CircleShape const& c1, sf::CircleShape const& c2) const{
+std::pair<bool, sf::Vector2f> Table_Visualizer::circ_circ_intersect(sf::CircleShape const& c1, sf::CircleShape const& c2) const{
     double x1 = c1.getPosition().x + c1.getRadius(), y1 = c1.getPosition().y + c1.getRadius();
     double x2 = c2.getPosition().x + c2.getRadius(), y2 = c2.getPosition().y + c2.getRadius();
+
+    glm::vec2 mid_1{x1,y1};
+    glm::vec2 mid_2{x2,y2};
     double dist = sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
 
     //std::cout<<c1.getPosition().x<<"  "<<c1.getPosition().y<<"  "<<c1.getRadius()<<"   "<<c2.getPosition().x<<"  "<<c2.getPosition().y<<"  "<<c2.getRadius()<<"\n";
 
-    return (dist < (c1.getRadius() + c2.getRadius() ) && dist > abs(c1.getRadius() - c2.getRadius()));
+
+    bool tmp1 = (dist < (c1.getRadius() + c2.getRadius() ) && dist > abs(c1.getRadius() - c2.getRadius()));
+    sf::Vector2f normal{float(x1-x2), float(y1-y2)};
+
+
+    return std::pair<bool, sf::Vector2f>{tmp1, normal}; 
 
 }
 

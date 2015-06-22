@@ -35,7 +35,7 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
     auto recording_thread = std::thread(&Locator::record_position, &locator);
 
     //unsigned frame_counter = 0;
-#if 1
+#if 0
     while (window.isOpen())
     {
         sf::Event event;

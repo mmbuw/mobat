@@ -4,6 +4,7 @@
 #include "Table_Object.h"
 #include "Microphone_Object.h"
 #include "Recognized_Token_Object.h"
+#include "Ball.h"
 
 #include <vector>
 #include <map>
@@ -53,7 +54,7 @@ class Table_Visualizer : Drawable_Object {
 						);
 		~Table_Visualizer();
 
-		virtual void Draw(sf::RenderWindow& in_canvas) const {};
+		virtual void Draw(sf::RenderWindow& in_canvas) const;
 
 		void Draw(sf::RenderWindow& in_canvas, glm::vec4 toas) const;
 
@@ -79,7 +80,7 @@ class Table_Visualizer : Drawable_Object {
 
 		unsigned Get_Elapsed_Milliseconds();
 
-		bool circ_circ_intersect(sf::CircleShape const& c1, sf::CircleShape const& c2) const;
+		std::pair<bool, sf::Vector2f> circ_circ_intersect(sf::CircleShape const& c1, sf::CircleShape const& c2) const;
 };
 
 }; //end TTT
