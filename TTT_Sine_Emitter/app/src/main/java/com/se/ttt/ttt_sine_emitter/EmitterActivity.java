@@ -93,7 +93,7 @@ public class EmitterActivity extends Activity {
 
         //initialize spinners
         Spinner sound_length_spinner = (Spinner) findViewById(R.id.Sound_Length_Spinner);
-        String[] availableSoundLengths={"10","20","50","100","200","300","400","500",
+        String[] availableSoundLengths={"1", "2", "5", "10","20","50","100","200","300","400","500",
                                         "600","700", "800", "900", "1000","10000"};
 
         ArrayAdapter<String> sound_length_spinner_adapter
@@ -107,7 +107,7 @@ public class EmitterActivity extends Activity {
                 new SimpleValueUpdaterItemSelectListener(sineLengthString_) );
 
         Spinner pause_length_spinner = (Spinner) findViewById(R.id.Pause_Length_Spinner);
-        String[] availablePauseLengths={"100","200","300","400","500","600","700", "800", "900",
+        String[] availablePauseLengths={"5", "10", "20", "50", "100","200","300","400","500","600","700", "800", "900",
                                         "1000","1500", "2000", "10000"};
         ArrayAdapter<String> pause_length_spinner_adapter
                 = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item,
