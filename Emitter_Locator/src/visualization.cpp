@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <thread>
+#include <X11/Xlib.h>
 
 #define NUM_RECORDED_CHANNELS 4
 
@@ -14,6 +15,7 @@ sf::Vector2u windowResolution(800, 800);
 
 int main(int argc, char** argv) {
 
+XInitThreads();
 //sf::VideoMode fullScreenMode = sf::VideoMode::getDesktopMode();
 sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
                         , "Table_Vis");
@@ -35,7 +37,7 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
     auto recording_thread = std::thread(&Locator::record_position, &locator);
 
     //unsigned frame_counter = 0;
-#if 0
+#if 1
     while (window.isOpen())
     {
         sf::Event event;
