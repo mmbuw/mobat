@@ -47,10 +47,10 @@ Table_Visualizer( sf::Vector2u const& in_canvas_resolution,
 
 	//pseudopong
 
-	b_x_pos_ = 1;
-	b_y_pos_ = 0.5;
-	ball_ = Recognized_Token_Object(0, sf::Vector2f(b_x_pos_, b_y_pos_));
-	ball_dir_ = sf::Vector2f(-0.01, 0);
+	ball_pos_.x = 1;
+	ball_pos_.y = 0.5;
+	ball_ = Recognized_Token_Object(0, sf::Vector2f(ball_pos_.x, ball_pos_.y));
+	ball_dir_ = glm::vec2(-0.01, 0);
 	ball_.Set_Fill_Color(sf::Color::Red);
 	ball_speed_ = 0.01;
 
@@ -162,14 +162,14 @@ Recalculate_Geometry() {
 	}
 
 	//tor-erkennung
-	if(b_x_pos_ < resolution_.x && b_x_pos_ > -2*ball_.get_Circle().getRadius())
+	if(ball_pos_.x < resolution_.x && ball_pos_.x > -2*ball_.get_Circle().getRadius())
 	{
-	    b_x_pos_ += ball_dir_.x;
+	    ball_pos_.x += ball_dir_.x;
 	}    
 	else
 	{
 	   // std::cout<<"TOOOOOORRRRR\n";
-	    if(b_x_pos_ >= resolution_.x)
+	    if(ball_pos_.x >= resolution_.x)
 	    {
 	        //tor für spieler left
 	        ball_dir_.x = ball_speed_;
@@ -183,8 +183,8 @@ Recalculate_Geometry() {
 	        ball_dir_.y = 0;
 	        //++right_goals;
 	    }
-	    b_x_pos_  = resolution_.x/2.0 - ball_.get_Circle().getRadius();
-	    b_y_pos_  = resolution_.y/2.0 - ball_.get_Circle().getRadius();
+	    ball_pos_.x  = resolution_.x/2.0 - ball_.get_Circle().getRadius();
+	    ball_pos_.y  = resolution_.y/2.0 - ball_.get_Circle().getRadius();
 	    
 	    /*l_y_pos  = y_max/2.0 - left.getRadius();
 	    r_y_pos  = y_max/2.0 - right.getRadius();
@@ -196,14 +196,14 @@ Recalculate_Geometry() {
 
 
 	// oben unten begrenzung
-	if(b_y_pos_ >= resolution_.x - 2*ball_.get_Circle().getRadius() || b_y_pos_ <= 0)
+	if(ball_pos_.y >= resolution_.x - 2*ball_.get_Circle().getRadius() || ball_pos_.y <= 0)
 	{
 	    ball_dir_.y = -ball_dir_.y; //an obere kante gestoßen
 	} 
 	
-	b_y_pos_ += ball_dir_.y;
+	ball_pos_.y += ball_dir_.y;
 
-	ball_ = Recognized_Token_Object(0, sf::Vector2f(b_x_pos_, b_y_pos_)); //when type of ball change, use sth like setPosition
+	ball_ = Recognized_Token_Object(0, sf::Vector2f(ball_pos_.x, ball_pos_.y)); //when type of ball change, use sth like setPosition
 
 	ball_.Recalculate_Geometry();
 

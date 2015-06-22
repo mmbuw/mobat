@@ -127,38 +127,22 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
                     window.close();
                     break;*/
 
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-            {
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
                 pl1_dir.y += player_speed;
-                // if(pl2_pos.y > min.y)
-                  // pl2_pos.y += player_speed;
-                std::cout<<"Up pressed\n";
             }
 
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-            {
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
                 pl1_dir.y -= player_speed;
-                // if(pl2_pos.y < max.y /*-2*right.getRadius()*/)
-                    // pl2_pos.y -= player_speed;
-                std::cout<<"Down pressed\n";
             }
 
 
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-            {
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
                 pl1_dir.x += player_speed;
-                // if(pl2_pos.x < max.x /*-2*right.getRadius()*/)
-                    // pl2_pos.x += player_speed;
-                std::cout<<"Right pressed\n";
             }
 
 
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-            {
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
                 pl1_dir.x -= player_speed;
-                // if(pl2_pos.x > min.x)
-                    // pl2_pos.x -= player_speed;
-                std::cout<<"Left pressed\n";
             }
 
             glm::vec2 pl1_new{pl1_pos + pl1_dir};
@@ -166,38 +150,22 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
 
             //left player
 
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::W))
-            {
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
                 pl2_dir.y += player_speed;
-                // if(pl1_pos.y > min.y)
-                    // pl1_pos.y += player_speed;
-                std::cout<<"W pressed\n";
             }
 
 
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-            {
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
                 pl2_dir.y -= player_speed;
-                // if(pl1_pos.y < max.y/*-2*left.getRadius()*/)
-                    // pl1_pos.y -= player_speed;
-                std::cout<<"S pressed\n";
             }
 
 
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-            {
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
                 pl2_dir.x += player_speed;
-                // if(pl1_pos.x  < max.x)
-                    // pl1_pos.x += player_speed;
-                std::cout<<"D pressed\n";
             }
 
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-            {
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
                 pl2_dir.x -= player_speed;
-                // if(pl1_pos.x > min.x)
-                    // pl1_pos.x -= player_speed;
-                std::cout<<"A pressed\n";
             }
                     
             glm::vec2 pl2_new{pl2_pos + pl2_dir};

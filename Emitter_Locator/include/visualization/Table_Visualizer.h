@@ -32,12 +32,11 @@ class Table_Visualizer : Drawable_Object {
 		std::chrono::high_resolution_clock::time_point last_time_stamp_;
 
 
-		//needed for pesudopong
-		double b_x_pos_;
-		double b_y_pos_;
-		Recognized_Token_Object ball_;	//NO TOKEN, change it later
-		sf::Vector2f ball_dir_;
+		//needed for pseudopong
+		glm::vec2 ball_pos_;
+		glm::vec2 ball_dir_;
 		double ball_speed_;
+		Recognized_Token_Object ball_;	//NO TOKEN, change it later
 
 	public:
 		Table_Visualizer(sf::Vector2u const& in_canvas_resolution = sf::Vector2u(800, 600),
