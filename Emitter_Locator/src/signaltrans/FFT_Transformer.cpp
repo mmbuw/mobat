@@ -78,9 +78,9 @@ FFT_Transformer::FFT_Transformer(unsigned short fft_window_size) : start_sample_
 		last_x_sample_[i] = 0.0;
 	}
 	initialize_execution_plan();
-	create_hamming_window();
+	//create_hamming_window();
 	//create_blackmann_harris_window();
-	//create_hann_window();
+	create_hann_window();
 }
 
 FFT_Transformer::~FFT_Transformer() {
@@ -188,14 +188,14 @@ unsigned int FFT_Transformer::perform_FFT(unsigned channel_num) {
 				++signal_it) {
 					float current_frequency = (signal_it * 44100) / fft_window_size_;
 
-						if(current_frequency > 12000.0 && current_frequency < 18002.0 ) {
+						if(current_frequency > 13000.0 && current_frequency < 20002.0 ) {
 							normalization_range_value +=  std::sqrt(fft_result_[signal_it][0]*fft_result_[signal_it][0]) + 
 								  	(fft_result_[signal_it][1]*fft_result_[signal_it][1]) ;
 
 								  	++taken_normalization_samples;
 						}
 
-						if(current_frequency > 17900.0 && current_frequency < 18100.0 ) {
+						if(current_frequency > 17900.0 && current_frequency < 18102.0 ) {
 						    temp_accum_18khz += std::sqrt(fft_result_[signal_it][0]*fft_result_[signal_it][0]) + 
 								  	(fft_result_[signal_it][1]*fft_result_[signal_it][1]) ;
 

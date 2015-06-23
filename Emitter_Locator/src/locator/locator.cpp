@@ -12,7 +12,7 @@ Locator::Locator(unsigned int num_mics):
  shutdown{false},
  position{0, 0},
  cached_position{0, 0},
- window_size{512},
+ window_size{256},
  recorder{num_mics, 44100, 130000},
  collector{recorder.buffer_bytes() / num_mics, num_mics},
  fft_transformer{window_size},
@@ -192,7 +192,7 @@ Locator::Locator(unsigned int num_mics):
         signal_plot_window_.clear(sf::Color(255, 255, 255));
 
 
-        unsigned starting_sample_threshold = 1800;
+        unsigned starting_sample_threshold = 300;
 
         for(unsigned int channel_iterator = 0; channel_iterator < CURRENT_NUM_RECORDED_MICS; ++channel_iterator) {
             unsigned int sample_num = 0;
