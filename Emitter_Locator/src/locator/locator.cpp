@@ -16,9 +16,9 @@ Locator::Locator(unsigned int num_mics):
  recorder{num_mics, 44100, 130000},
  collector{recorder.buffer_bytes() / num_mics, num_mics},
  fft_transformer{window_size},
- locator{330, {0.055, 0.08}, {0.95,  0.09}, {0.105,  1.89}, {0.925,  1.92}},
+ locator{330, {0.055, 0.08}, {0.95,  0.09}, {0.105,  1.89}, {0.925,  1.92}}/*,
  signal_plot_window_(sf::VideoMode(512, 400)
-                    , "Transformed_Frequencies")
+                    , "Transformed_Frequencies")*/
  {
     fft_transformer.initialize_execution_plan();
     locator.update_times(0.0003062, 0.0012464, 0.0000, 0.0011279);
@@ -180,7 +180,7 @@ Locator::Locator(unsigned int num_mics):
         cached_position.y = 1 - cached_position.y;
         std::cout << "Cached position: " << cached_position.x << ", " << cached_position.y << "\n";
 
-        signal_plot_window_.clear(sf::Color(255, 255, 255));
+        //signal_plot_window_.clear(sf::Color(255, 255, 255));
 
 
         unsigned starting_sample_threshold = 1800;
@@ -215,7 +215,7 @@ Locator::Locator(unsigned int num_mics):
                         else
                             data_point.setFillColor(sf::Color(0, 0, 255) );
 
-                    signal_plot_window_.draw(data_point);
+                    //signal_plot_window_.draw(data_point);
 
                    // std::cout << "Sig: " << sig << "\n";
 
@@ -225,7 +225,7 @@ Locator::Locator(unsigned int num_mics):
                 }
         }
 
-        signal_plot_window_.display();
+        //signal_plot_window_.display();
 
         //glm::vec4 update_times = {}
         //double updated_times[4] =  {4.3, 3.3, 2.3, 1.3};

@@ -65,7 +65,7 @@ Table_Visualizer::
 
 void Table_Visualizer::
 Draw(sf::RenderWindow& canvas) const {
-	/*
+	
 	table_.Draw(canvas);
 
 	for( auto& id_token_pair : recognized_tokens_ ) {
@@ -73,13 +73,13 @@ Draw(sf::RenderWindow& canvas) const {
 	}
 
 	ball_.Draw(canvas);
-	*/
+	
 }
 
 
 void Table_Visualizer::
 Draw(sf::RenderWindow& canvas, glm::vec4 toas) const {
-	/*
+	
 	table_.Draw(canvas, microphones_, toas );
 
 	for(auto const& mic_obj : microphones_) {
@@ -91,7 +91,7 @@ Draw(sf::RenderWindow& canvas, glm::vec4 toas) const {
 	}
 
 	ball_.Draw(canvas);
-	*/
+	
 
 }
 

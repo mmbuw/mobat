@@ -17,10 +17,10 @@ sf::Vector2u windowResolution(800, 800);
 int main(int argc, char** argv) {
 
 //XInitThreads();
-//sf::VideoMode fullScreenMode = sf::VideoMode::getDesktopMode();
-//sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
-//                        , "Table_Vis");
-//window.setSize(windowResolution);
+// sf::VideoMode fullScreenMode = sf::VideoMode::getDesktopMode();
+sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
+                       , "Table_Vis");
+window.setSize(windowResolution);
 
     std::vector<sf::Vector2f> default_microphone_positions_ = {{0.055, 0.08}, {0.95,  0.09}, {0.105,  1.89}, {0.925,  1.92}};
        /* default_microphone_positions_.push_back(sf::Vector2f(0.0,4.0));
@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
     auto recording_thread = std::thread(&Locator::record_position, &locator);
 
     //unsigned frame_counter = 0;
-#if 1
+#if 0
     
     //while (window.isOpen())
     while(true)
@@ -182,7 +182,7 @@ int main(int argc, char** argv) {
 
 
 
-            //table_visualizer.Draw(window);
+            table_visualizer.Draw(window);
                
             /*glm::vec2 point = locator.load_position();
             smartphonePosition.x = point.x;
@@ -202,7 +202,7 @@ int main(int argc, char** argv) {
             }
     */
             table_visualizer.Finalize_Visualization_Frame();
-            //window.display();
+            window.display();
 
                   
                     /*glm::vec2 point = locator.load_position();
