@@ -103,7 +103,7 @@ FFT_Transformer::~FFT_Transformer() {
 	fftw_cleanup_threads();
 };
 
-void FFT_Transformer::reset_sample_counters() {
+void FFT_Transformer::reset_sample_counters(unsigned channel_num) {
 	num_samples_above_threshold_ = 0;
 	num_samples_below_threshold_ = 0;
 	detection_threshold_ = 20;
@@ -112,7 +112,7 @@ void FFT_Transformer::reset_sample_counters() {
 	fft_frame_count_ = 0;
 	first_hit_samples_below_threshold_at_ = 0;
 
-	signal_results_.clear();
+	signal_results_[channel_num].clear();
 }
 
 void FFT_Transformer::clear_cached_fft_results() {
@@ -158,7 +158,7 @@ void FFT_Transformer::set_FFT_input( unsigned int offset ) {
  
 }
 
-unsigned int FFT_Transformer::perform_FFT() {
+unsigned int FFT_Transformer::perform_FFT(unsigned channel_num) {
 
 	eighteen_khz_sum_ = 0.0;
 
@@ -170,8 +170,8 @@ unsigned int FFT_Transformer::perform_FFT() {
 	for(unsigned int offset = start_sample_; offset <= end_sample_ - (fft_window_size_ + 1) ; ++offset ) {
 		//std::cout << "Trying offset " << offset <<"\n";
 
-		//if(true) {
-		if(fft_cached_results_.find(start_sample_) == fft_cached_results_.end() ) {
+		if(true) {
+		//if(fft_cached_results_.find(start_sample_) == fft_cached_results_.end() ) {
 			//std::cout << "Window Size: " << fft_window_size_ << "\n";
 
 			set_FFT_input(offset);
@@ -232,8 +232,8 @@ unsigned int FFT_Transformer::perform_FFT() {
 
 		if(!std::isnan(eighteen_khz_sum_)) {
 
-			signal_results_.push_back(eighteen_khz_sum_);
-/*		
+			signal_results_[channel_num].push_back(eighteen_khz_sum_);
+		
 
 			average_value_ += eighteen_khz_sum_;
 			++counted_samples_;
@@ -243,7 +243,7 @@ unsigned int FFT_Transformer::perform_FFT() {
 				average_value_ += last_x_sample_[i];
 
 			}
-				std::cout << "18 khz sum: " << average_value_/10.0 << "\n";
+				//std::cout << "18 khz sum: " << average_value_/10.0 << "\n";
 							//std::cout << "18 khz sum: " << eighteen_khz_sum_ << "\n";
 
 
@@ -261,7 +261,7 @@ unsigned int FFT_Transformer::perform_FFT() {
 
 						//std::cout << "\n\n18 khz sum: " << num_samples_above_threshold_ << "comparison below: " << num_samples_below_threshold_ << "\n\n";
 						std::cout << "PEAK DETECTED!\n";
-						std::cin.get();
+						//std::cin.get();
 							return 1;
 						}
 					}
@@ -279,12 +279,12 @@ unsigned int FFT_Transformer::perform_FFT() {
 				  num_samples_above_threshold_ = 0;
 				}
 			
-*/
+
 		} else {
 
 			//std::cout << "NaN detected!!!!";
 			//std::cin.get();
-			return 2;
+			//return 2;
 		}
 
 		return 0;

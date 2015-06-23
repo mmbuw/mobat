@@ -18,8 +18,8 @@ int main(int argc, char** argv) {
 
 //XInitThreads();
 //sf::VideoMode fullScreenMode = sf::VideoMode::getDesktopMode();
-sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
-                        , "Table_Vis");
+//sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
+//                        , "Table_Vis");
 //window.setSize(windowResolution);
 
     std::vector<sf::Vector2f> default_microphone_positions_ = {{0.055, 0.08}, {0.95,  0.09}, {0.105,  1.89}, {0.925,  1.92}};
@@ -38,18 +38,22 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
     auto recording_thread = std::thread(&Locator::record_position, &locator);
 
     //unsigned frame_counter = 0;
-#if 0
-    while (window.isOpen())
+#if 1
+    
+    //while (window.isOpen())
+    while(true)
     {
         sf::Event event;
-        while (window.pollEvent(event)){
+      //  while (window.pollEvent(event))
+        {
             if (event.type == sf::Event::Closed)
-                window.close();
+                    exit(1);
+        //        window.close();
 
             if (event.type == sf::Event::KeyPressed) {
 
-            	if(event.key.code == sf::Keyboard::Escape)
-            		window.close();
+          //  	if(event.key.code == sf::Keyboard::Escape)
+          //  		window.close();
 
             	if(event.key.code == sf::Keyboard::Up 
             		|| event.key.code == sf::Keyboard::Down
@@ -84,9 +88,9 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
 
 
 
-        window.clear();
+        //window.clear();
         table_visualizer.Recalculate_Geometry();
-        table_visualizer.Draw(window, toas);
+        //table_visualizer.Draw(window, toas);
 
    //    std::cout << "toas: " << toas[0] << ", " << toas[1] << ", " << toas[2] << ", " << toas[3] << "\n";
 
@@ -99,8 +103,8 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
                                                             smartphonePosition.y+0.2));
         }
 */
-        table_visualizer.Finalize_Visualization_Frame();
-        window.display();
+        //table_visualizer.Finalize_Visualization_Frame();
+        //window.display();
     }
 
 #else //pong mit tastatur
@@ -210,7 +214,7 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
 
 
 
-            table_visualizer.Draw(window);
+            //table_visualizer.Draw(window);
                
             /*glm::vec2 point = locator.load_position();
             smartphonePosition.x = point.x;
@@ -230,7 +234,7 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
             }
     */
             table_visualizer.Finalize_Visualization_Frame();
-            window.display();
+            //window.display();
 
                   
                     /*glm::vec2 point = locator.load_position();

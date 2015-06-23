@@ -16,9 +16,9 @@ Locator::Locator(unsigned int num_mics):
  recorder{num_mics, 44100, 130000},
  collector{recorder.buffer_bytes() / num_mics, num_mics},
  fft_transformer{window_size},
- locator{330, {0.055, 0.08}, {0.95,  0.09}, {0.105,  1.89}, {0.925,  1.92}}
-// signal_plot_window_(sf::VideoMode(512, 400)
-//                    , "Transformed_Frequencies")
+ locator{330, {0.055, 0.08}, {0.95,  0.09}, {0.105,  1.89}, {0.925,  1.92}},
+ signal_plot_window_(sf::VideoMode(512, 400)
+                    , "Transformed_Frequencies")
  {
     fft_transformer.initialize_execution_plan();
     locator.update_times(0.0003062, 0.0012464, 0.0000, 0.0011279);
@@ -78,7 +78,7 @@ Locator::Locator(unsigned int num_mics):
                 (int**)&collector[channel_iterator]);   
 
 
-            fft_transformer.reset_sample_counters();
+            fft_transformer.reset_sample_counters(channel_iterator);
             fft_transformer.clear_cached_fft_results();
             for(unsigned int i = 0; i < 3600; ++i) {
                 unsigned offset = 1 * i;
@@ -88,7 +88,7 @@ Locator::Locator(unsigned int num_mics):
                 fft_transformer.set_analyzation_range(0+offset, window_size+50 + offset);
                 
 
-                unsigned int fft_result = fft_transformer.perform_FFT();
+                unsigned int fft_result = fft_transformer.perform_FFT(channel_iterator);
 
                 if(fft_result == 1 ) {
                     std::cout << "Signal starts at sample @ channel " << channel_iterator << ": " << i << "\n";
@@ -180,11 +180,52 @@ Locator::Locator(unsigned int num_mics):
         cached_position.y = 1 - cached_position.y;
         std::cout << "Cached position: " << cached_position.x << ", " << cached_position.y << "\n";
 
-        //signal_plot_window_.clear(sf::Color(255, 255, 255));
-           // for(auto const& sig : signal_results_) {
-           //     std::cout << "Sig: " << sig << "\n";
-           // }
-        //signal_plot_window_.display();
+        signal_plot_window_.clear(sf::Color(255, 255, 255));
+
+
+        unsigned starting_sample_threshold = 1800;
+
+        for(unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
+            unsigned int sample_num = 0;
+            unsigned sum = std::accumulate(fft_transformer.signal_results_[channel_iterator].begin(), 
+                                           fft_transformer.signal_results_[channel_iterator].end(), 0);
+            unsigned avg = sum / fft_transformer.signal_results_[channel_iterator].size();
+            std::cout << "Avg: " << avg << "\n";
+            std::cout << "Num Samples: " << fft_transformer.signal_results_[channel_iterator].size() << "\n";
+
+                for(auto const& sig :fft_transformer.signal_results_[channel_iterator]) {
+
+
+
+                    float width = 512.0f / fft_transformer.signal_results_[channel_iterator].size();
+
+
+
+                    sf::RectangleShape data_point(sf::Vector2f(1,sig) );
+                    data_point.setPosition( sf::Vector2f( width * sample_num, channel_iterator * 100.0 + (100.0-sig) ) );
+
+                    if(sig < avg*0.8 && sig > 2.0)
+                        if(sample_num > starting_sample_threshold)
+                            data_point.setFillColor(sf::Color(255, 0, 0) ) ;
+                        else
+                            data_point.setFillColor(sf::Color(0, 0, 0) ) ;
+                    else
+                        if(sample_num > starting_sample_threshold)
+                            data_point.setFillColor(sf::Color(0, 255, 0) );
+                        else
+                            data_point.setFillColor(sf::Color(0, 0, 255) );
+
+                    signal_plot_window_.draw(data_point);
+
+                   // std::cout << "Sig: " << sig << "\n";
+
+
+
+                    ++sample_num;
+                }
+        }
+
+        signal_plot_window_.display();
 
         //glm::vec4 update_times = {}
         //double updated_times[4] =  {4.3, 3.3, 2.3, 1.3};

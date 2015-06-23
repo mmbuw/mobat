@@ -96,7 +96,7 @@ std::chrono::system_clock::time_point before_fft = std::chrono::system_clock::no
         //                         offset);
         fft_transf.set_analyzation_range(0+offset, N+50 + offset);
         
-        if(fft_transf.perform_FFT() ) {
+        if(fft_transf.perform_FFT(0) ) {
             break;
         }
 
