@@ -259,9 +259,9 @@ unsigned int FFT_Transformer::perform_FFT(unsigned channel_num) {
 						if(++num_samples_above_threshold_ >= 10 ) {
 
 						//std::cout << "\n\n18 khz sum: " << num_samples_above_threshold_ << "comparison below: " << num_samples_below_threshold_ << "\n\n";
-						std::cout << "PEAK DETECTED!\n";
+						//std::cout << "PEAK DETECTED!\n";
 						//std::cin.get();
-							return 1;
+							//return 1;
 						}
 					}
 

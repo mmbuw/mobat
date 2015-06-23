@@ -17,7 +17,7 @@ Locator::Locator(unsigned int num_mics):
  collector{recorder.buffer_bytes() / num_mics, num_mics},
  fft_transformer{window_size},
  locator{330, {0.055, 0.08}, {0.95,  0.09}, {0.105,  1.89}, {0.925,  1.92}},
- signal_plot_window_(sf::VideoMode(512, 400)
+ signal_plot_window_(sf::VideoMode(1200, 400)
                     , "Transformed_Frequencies")
  {
     fft_transformer.initialize_execution_plan();
@@ -206,7 +206,7 @@ Locator::Locator(unsigned int num_mics):
 
 
 
-                    float width = 512.0f / fft_transformer.signal_results_[channel_iterator].size();
+                    float width = 1200.0f / fft_transformer.signal_results_[channel_iterator].size();
 
 
 
