@@ -34,6 +34,7 @@ private:
     glm::vec4 toas;
     glm::vec4 cached_toas;
 
+    
     unsigned short window_size;
 
     Recorder recorder;

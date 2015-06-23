@@ -5,7 +5,8 @@
 
 #include <numeric>
 #include <thread>
-
+#include <algorithm>
+#include <functional>
 
 
 Locator::Locator(unsigned int num_mics):
@@ -17,7 +18,7 @@ Locator::Locator(unsigned int num_mics):
  collector{recorder.buffer_bytes() / num_mics, num_mics},
  fft_transformer{window_size},
  locator{330, {0.055, 0.08}, {0.95,  0.09}, {0.105,  1.89}, {0.925,  1.92}},
- signal_plot_window_(sf::VideoMode(1200, 400)
+ signal_plot_window_(sf::VideoMode(2400, 400)
                     , "Transformed_Frequencies")
  {
     fft_transformer.initialize_execution_plan();
@@ -87,9 +88,9 @@ Locator::Locator(unsigned int num_mics):
 
             fft_transformer.reset_sample_counters(channel_iterator);
             fft_transformer.clear_cached_fft_results(channel_iterator);
-            for(unsigned int i = 0; i < 3600; ++i) {
+            for(unsigned int i = 0; i < 4000; ++i) {
                 unsigned offset = 1 * i;
-                if(offset > (3500) )
+                if(offset > (3900) )
                     break;
 
                 fft_transformer.set_analyzation_range(0+offset, window_size+50 + offset);
@@ -99,7 +100,7 @@ Locator::Locator(unsigned int num_mics):
 
                 if(fft_result == 1 ) {
                     std::cout << "Signal starts at sample @ channel " << channel_iterator << ": " << i << "\n";
-                    recognized_sample_pos[channel_iterator] = i;
+                    //recognized_sample_pos[channel_iterator] = i;
                     break;
                 }
 
@@ -192,13 +193,93 @@ Locator::Locator(unsigned int num_mics):
         signal_plot_window_.clear(sf::Color(255, 255, 255));
 
 
-        unsigned starting_sample_threshold = 300;
+        unsigned starting_sample_threshold =  50;
+
+        std::array<unsigned, 4> signal_detected_at_sample = {10000, 10000, 10000, 10000};
+
+        unsigned signal_average[4] ;
+
+        for(unsigned int channel_iterator = 0; channel_iterator < CURRENT_NUM_RECORDED_MICS; ++channel_iterator) {
+
+
+            unsigned int const & (*max) (unsigned int const &, unsigned int const &) = std::max<unsigned>;
+            unsigned sum = std::accumulate(fft_transformer.signal_results_[channel_iterator].begin(), 
+                                           fft_transformer.signal_results_[channel_iterator].end(), 0, max);
+            signal_average[channel_iterator] = sum ;/// fft_transformer.signal_results_[channel_iterator].size();
+
+            unsigned num_pause_samples = 0;
+            unsigned num_signal_samples = 0;
+
+            unsigned sample_num = 0;
+
+            unsigned avg = signal_average[channel_iterator];
+
+            bool allow_signal_detection = false;
+
+                            //signal_detected_at_sample[channel_iterator] = 500;
+            for(auto const& sig :fft_transformer.signal_results_[channel_iterator]) {
+
+                if(sig < avg * 0.75) {
+                    num_signal_samples = 0;
+
+                    ++num_pause_samples;
+
+                } else {
+
+
+                    if(num_pause_samples > starting_sample_threshold) {
+                        allow_signal_detection = true;
+                    }
+
+                    if(allow_signal_detection) {
+                        ++num_signal_samples;
+
+                        //std::cout << "It.\n";
+                        //std::cin.get();
+                       /* if( num_signal_samples > 10) {
+                            num_pause_samples = 0;
+                        }*/
+
+                        if( num_signal_samples > 600 ) {
+                            signal_detected_at_sample[channel_iterator] = sample_num;
+                            break;
+                        }
+                    }
+
+
+                }
+
+
+
+                ++sample_num;
+            }
+
+        }
+
+        unsigned int const & (*min) (unsigned int const &, unsigned int const &) = std::min<unsigned>;
+        unsigned int const & (*max) (unsigned int const &, unsigned int const &) = std::max<unsigned>;
+
+        unsigned sample_min = std::accumulate(signal_detected_at_sample.begin(),
+                                              signal_detected_at_sample.end(),
+                                              999999, min);
+        unsigned sample_max = std::accumulate(signal_detected_at_sample.begin(),
+                                              signal_detected_at_sample.end(),
+                                              0, max);
+        
+        if(sample_max - sample_min < 500 ) {
+            std::cout << "!!!!\n";
+            std::cout << "s0: " << signal_detected_at_sample[0] << "\n";
+            std::cout << "s1: " << signal_detected_at_sample[1] << "\n";
+            std::cout << "s2: " << signal_detected_at_sample[2] << "\n";
+            std::cout << "s3: " << signal_detected_at_sample[3] << "\n";
+            std::cin.get();
+        }
 
         for(unsigned int channel_iterator = 0; channel_iterator < CURRENT_NUM_RECORDED_MICS; ++channel_iterator) {
             unsigned int sample_num = 0;
-            unsigned sum = std::accumulate(fft_transformer.signal_results_[channel_iterator].begin(), 
-                                           fft_transformer.signal_results_[channel_iterator].end(), 0);
-            unsigned avg = sum / fft_transformer.signal_results_[channel_iterator].size();
+
+            unsigned avg = signal_average[channel_iterator];
+
             std::cout << "Avg: " << avg << "\n";
             std::cout << "Num Samples: " << fft_transformer.signal_results_[channel_iterator].size() << "\n";
 
@@ -206,14 +287,15 @@ Locator::Locator(unsigned int num_mics):
 
 
 
-                    float width = 1200.0f / fft_transformer.signal_results_[channel_iterator].size();
+                    float width = 2400.0f / fft_transformer.signal_results_[channel_iterator].size();
 
 
 
                     sf::RectangleShape data_point(sf::Vector2f(1,sig) );
                     data_point.setPosition( sf::Vector2f( width * sample_num, channel_iterator * 100.0 + (100.0-sig) ) );
 
-                    if(sig < avg*0.8 && sig > 2.0)
+                    /*
+                    if(sig < avg * 1.1 && sig > 3.0)
                         if(sample_num > starting_sample_threshold)
                             data_point.setFillColor(sf::Color(255, 0, 0) ) ;
                         else
@@ -223,6 +305,15 @@ Locator::Locator(unsigned int num_mics):
                             data_point.setFillColor(sf::Color(0, 255, 0) );
                         else
                             data_point.setFillColor(sf::Color(0, 0, 255) );
+                    */
+
+                       // std::cout << sample_num << " : " << signal_detected_at_sample[channel_iterator] <<  "\n";
+                    if(sample_num < signal_detected_at_sample[channel_iterator]) {
+                        data_point.setFillColor(sf::Color(255, 0, 0) ) ;
+                    } else {
+                        data_point.setFillColor(sf::Color(0, 255, 0) ) ;          
+                    }
+                    
 
                     signal_plot_window_.draw(data_point);
 

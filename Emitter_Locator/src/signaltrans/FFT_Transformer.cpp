@@ -281,8 +281,9 @@ unsigned int FFT_Transformer::perform_FFT(unsigned channel_num) {
 
 		} else {
 
-			//std::cout << "NaN detected!!!!";
-			//std::cin.get();
+			std::cout << "NaN detected!!!!";
+
+			std::cin.get();
 			//return 2;
 		}
 
