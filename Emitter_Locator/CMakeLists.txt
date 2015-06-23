@@ -48,11 +48,14 @@ target_link_libraries(visualizer_example recorder signaltrans locator visualizat
 add_executable(locator_example src/locate.cpp)
 target_link_libraries(locator_example locator)
 
+#set the build type if its not set
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel." FORCE )
+endif()
 
-
-#request C++11 if on unix, generate debug symbols and output all errors
+#request C++11 if on unix, stop at all warnings but ignore specific warning in glm headers
 if(UNIX)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -Wall -Werror -pthread")
+  add_definitions( -std=c++11 -Wall -Werror  -Wno-strict-aliasing -pthread)
 endif(UNIX)
 
 #if user didnt set install dir, override it and write it to the cache -> Type and description necessary,
