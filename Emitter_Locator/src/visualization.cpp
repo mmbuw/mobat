@@ -13,14 +13,20 @@
 sf::Vector2f smartphonePosition(1.0f,0.5f);
 sf::Vector2u windowResolution(800, 800);
 
+#define DEBUG_FFT_MODE
 
 int main(int argc, char** argv) {
 
 //XInitThreads();
+
+
 // sf::VideoMode fullScreenMode = sf::VideoMode::getDesktopMode();
+
+#ifndef DEBUG_FFT_MODE
 sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
                        , "Table_Vis");
 window.setSize(windowResolution);
+#endif
 
     std::vector<sf::Vector2f> default_microphone_positions_ = {{0.055, 0.08}, {0.95,  0.09}, {0.105,  1.89}, {0.925,  1.92}};
        /* default_microphone_positions_.push_back(sf::Vector2f(0.0,4.0));
@@ -38,13 +44,17 @@ window.setSize(windowResolution);
     auto recording_thread = std::thread(&Locator::record_position, &locator);
 
     //unsigned frame_counter = 0;
-#if 0
+#ifdef DEBUG_FFT_MODE
     
     //while (window.isOpen())
     while(true)
     {
+
+       // std::cout << "Started loop\n";
+        
+        /*
         sf::Event event;
-      //  while (window.pollEvent(event))
+        while (window.pollEvent(event))
         {
             if (event.type == sf::Event::Closed)
                     exit(1);
@@ -78,7 +88,7 @@ window.setSize(windowResolution);
                
             }
        }
-           
+           */
         glm::vec2 point = locator.load_position();
         smartphonePosition.x = point.x;
         smartphonePosition.y = 1.0 - point.y;
@@ -88,22 +98,22 @@ window.setSize(windowResolution);
 
 
 
-        //window.clear();
-        table_visualizer.Recalculate_Geometry();
-        //table_visualizer.Draw(window, toas);
+            //window.clear();
+        //table_visualizer.Recalculate_Geometry();
+            //table_visualizer.Draw(window, toas);
 
    //    std::cout << "toas: " << toas[0] << ", " << toas[1] << ", " << toas[2] << ", " << toas[3] << "\n";
 
         //std::cout << "SP: " << smartphonePosition.x << "; " << smartphonePosition.y << "\n";
-        table_visualizer.Signal_Token(16000, smartphonePosition);
-        table_visualizer.Signal_Token(18000, smartphonePosition);
+        //table_visualizer.Signal_Token(16000, smartphonePosition);
+        //table_visualizer.Signal_Token(18000, smartphonePosition);
 /*
         if( 0 == ++frame_counter % 40  ) {
          table_visualizer.Signal_Token(16000, sf::Vector2f(smartphonePosition.x/2.0,
                                                             smartphonePosition.y+0.2));
         }
 */
-        //table_visualizer.Finalize_Visualization_Frame();
+        table_visualizer.Finalize_Visualization_Frame();
         //window.display();
     }
 
@@ -220,6 +230,14 @@ window.setSize(windowResolution);
             */
                     /*table_visualizer.Finalize_Visualization_Frame();
                     window.display();*/
+
+
+                            glm::vec2 point = locator.load_position();
+        smartphonePosition.x = point.x;
+        smartphonePosition.y = 1.0 - point.y;
+
+
+        glm::vec4 toas = locator.load_toas();
          
         }
 

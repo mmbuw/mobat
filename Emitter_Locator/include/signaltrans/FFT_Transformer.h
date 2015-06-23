@@ -37,7 +37,7 @@ class FFT_Transformer {
 
 		double eighteen_khz_sum_;
 
-		std::map<unsigned, double> fft_cached_results_;
+
 
 		unsigned stabilization_counter_;
 
@@ -62,7 +62,7 @@ class FFT_Transformer {
 		~FFT_Transformer();
 
 		void reset_sample_counters(unsigned );
-		void clear_cached_fft_results();
+		void clear_cached_fft_results(unsigned);
 
 		void initialize_execution_plan();
 		void set_FFT_input( unsigned int offset);
@@ -77,6 +77,7 @@ class FFT_Transformer {
 							  int** buffers);
 
 		std::vector<unsigned int> signal_results_[4];
+		std::map<unsigned, double> fft_cached_results_[4];
 };
 
 #endif

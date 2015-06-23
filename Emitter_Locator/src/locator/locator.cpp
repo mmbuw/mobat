@@ -16,9 +16,9 @@ Locator::Locator(unsigned int num_mics):
  recorder{num_mics, 44100, 130000},
  collector{recorder.buffer_bytes() / num_mics, num_mics},
  fft_transformer{window_size},
- locator{330, {0.055, 0.08}, {0.95,  0.09}, {0.105,  1.89}, {0.925,  1.92}}/*,
+ locator{330, {0.055, 0.08}, {0.95,  0.09}, {0.105,  1.89}, {0.925,  1.92}},
  signal_plot_window_(sf::VideoMode(512, 400)
-                    , "Transformed_Frequencies")*/
+                    , "Transformed_Frequencies")
  {
     fft_transformer.initialize_execution_plan();
     locator.update_times(0.0003062, 0.0012464, 0.0000, 0.0011279);
@@ -55,6 +55,8 @@ Locator::Locator(unsigned int num_mics):
     }
  } 
 
+#define CURRENT_NUM_RECORDED_MICS 4
+
  void Locator::record_position() {
 
     // start recording loop
@@ -62,24 +64,29 @@ Locator::Locator(unsigned int num_mics):
 
     while (!shutdown)
     {
+
+                //std::cout << "Started Record Position\n";
         std::array<unsigned, 4> recognized_sample_pos = {0, 0, 0, 0};
+
 
         if(!recorder.new_recording()) {
             continue;
         }
 
+      std::cout << "Cleared window\n";
+
         collector.from_interleaved(recorder.buffer());
 
         recorder.request_recording();
 
-        for (unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
+        for (unsigned int channel_iterator = 0; channel_iterator < CURRENT_NUM_RECORDED_MICS; ++channel_iterator) {
             fft_transformer.set_FFT_buffers(collector.count, 
                     recorder.buffer_bytes()/collector.count,
                 (int**)&collector[channel_iterator]);   
 
 
             fft_transformer.reset_sample_counters(channel_iterator);
-            fft_transformer.clear_cached_fft_results();
+            fft_transformer.clear_cached_fft_results(channel_iterator);
             for(unsigned int i = 0; i < 3600; ++i) {
                 unsigned offset = 1 * i;
                 if(offset > (3500) )
@@ -116,8 +123,8 @@ Locator::Locator(unsigned int num_mics):
         recognized_sample_pos[3] = 500;
         */
 
-
-        for(unsigned channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
+  
+        for(unsigned channel_iterator = 0; channel_iterator < CURRENT_NUM_RECORDED_MICS; ++channel_iterator) {
 
             unsigned current_channel_sample_pos = recognized_sample_pos[channel_iterator];
 
@@ -140,7 +147,9 @@ Locator::Locator(unsigned int num_mics):
 
         double temp_sd = 0.0;
 
-        for(unsigned channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
+
+
+        for(unsigned channel_iterator = 0; channel_iterator < CURRENT_NUM_RECORDED_MICS; ++channel_iterator) {
             unsigned current_channel_sample_pos = recognized_sample_pos[channel_iterator];
 
             if( current_channel_sample_pos != 0 ) { 
@@ -160,7 +169,7 @@ Locator::Locator(unsigned int num_mics):
 
 
 
-            for(unsigned channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
+            for(unsigned channel_iterator = 0; channel_iterator < CURRENT_NUM_RECORDED_MICS; ++channel_iterator) {
                 std::cout << "Channel " << channel_iterator << ": " << recognized_sample_pos[channel_iterator] - min_sample << "\n";
 
                 if( std::abs(average - recognized_sample_pos[channel_iterator]) < std::abs(average -standard_deviation) )
@@ -180,12 +189,12 @@ Locator::Locator(unsigned int num_mics):
         cached_position.y = 1 - cached_position.y;
         std::cout << "Cached position: " << cached_position.x << ", " << cached_position.y << "\n";
 
-        //signal_plot_window_.clear(sf::Color(255, 255, 255));
+        signal_plot_window_.clear(sf::Color(255, 255, 255));
 
 
         unsigned starting_sample_threshold = 1800;
 
-        for(unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
+        for(unsigned int channel_iterator = 0; channel_iterator < CURRENT_NUM_RECORDED_MICS; ++channel_iterator) {
             unsigned int sample_num = 0;
             unsigned sum = std::accumulate(fft_transformer.signal_results_[channel_iterator].begin(), 
                                            fft_transformer.signal_results_[channel_iterator].end(), 0);
@@ -215,7 +224,7 @@ Locator::Locator(unsigned int num_mics):
                         else
                             data_point.setFillColor(sf::Color(0, 0, 255) );
 
-                    //signal_plot_window_.draw(data_point);
+                    signal_plot_window_.draw(data_point);
 
                    // std::cout << "Sig: " << sig << "\n";
 
@@ -225,17 +234,18 @@ Locator::Locator(unsigned int num_mics):
                 }
         }
 
-        //signal_plot_window_.display();
+
+        signal_plot_window_.display();
 
         //glm::vec4 update_times = {}
         //double updated_times[4] =  {4.3, 3.3, 2.3, 1.3};
 
-        for(unsigned int mic_index = 0; mic_index < 4; ++mic_index) {
+        for(unsigned int mic_index = 0; mic_index < CURRENT_NUM_RECORDED_MICS; ++mic_index) {
             cached_toas[mic_index] = updated_times[mic_index];
         }
 
         toas_mutex.lock();
-            for(unsigned int mic_index = 0; mic_index < 4; ++mic_index) {
+            for(unsigned int mic_index = 0; mic_index < CURRENT_NUM_RECORDED_MICS; ++mic_index) {
                 toas[mic_index] = cached_toas[mic_index];
             }
             cached_toas.x = 4.0;

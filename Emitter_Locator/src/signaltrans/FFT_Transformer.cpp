@@ -50,13 +50,13 @@ FFT_Transformer::FFT_Transformer(unsigned short fft_window_size) : start_sample_
 																  end_sample_( std::numeric_limits<unsigned int>::max() ),
 																  stabilization_counter_(0),
 																  fft_frame_count_(0) {
-	int fftw_thread_success = fftw_init_threads();
+	/*int fftw_thread_success = fftw_init_threads();
 
 	if(fftw_thread_success == 0) {
 		std::cout << "Could not initialize threads for FFTW\n";
 	} else {
 		std::cout << "Successfully initialized threads for FFTW\n";
-	}
+	}*/
 
 	fft_window_size_ = fft_window_size;
 
@@ -100,7 +100,7 @@ FFT_Transformer::~FFT_Transformer() {
 		free(window_);
 	}
 
-	fftw_cleanup_threads();
+	//fftw_cleanup_threads();
 };
 
 void FFT_Transformer::reset_sample_counters(unsigned channel_num) {
@@ -115,13 +115,13 @@ void FFT_Transformer::reset_sample_counters(unsigned channel_num) {
 	signal_results_[channel_num].clear();
 }
 
-void FFT_Transformer::clear_cached_fft_results() {
-	fft_cached_results_.clear();
+void FFT_Transformer::clear_cached_fft_results(unsigned channel_num) {
+	fft_cached_results_[channel_num].clear();
 }
 
 void FFT_Transformer::initialize_execution_plan() {
 
-	fftw_plan_with_nthreads(1);
+	//fftw_plan_with_nthreads(1);
 	fftw_execution_plan_ = fftw_plan_dft_1d(fft_window_size_, fft_in_, fft_result_,  FFTW_FORWARD, FFTW_MEASURE);
 }
 
@@ -163,15 +163,14 @@ unsigned int FFT_Transformer::perform_FFT(unsigned channel_num) {
 	eighteen_khz_sum_ = 0.0;
 
 
-
 	if(start_sample_ > end_sample_ - (fft_window_size_ + 1) )
 		return 0;
 
 	for(unsigned int offset = start_sample_; offset <= end_sample_ - (fft_window_size_ + 1) ; ++offset ) {
 		//std::cout << "Trying offset " << offset <<"\n";
 
-		if(true) {
-		//if(fft_cached_results_.find(start_sample_) == fft_cached_results_.end() ) {
+		//if(true) {
+		if(fft_cached_results_[channel_num].find(offset) == fft_cached_results_[channel_num].end() ) {
 			//std::cout << "Window Size: " << fft_window_size_ << "\n";
 
 			set_FFT_input(offset);
@@ -212,12 +211,12 @@ unsigned int FFT_Transformer::perform_FFT(unsigned channel_num) {
 			double current_iteration_khz_sum = temp_accum_18khz / normalization_range_value;
 
 
-			fft_cached_results_[start_sample_] =  current_iteration_khz_sum;
+			fft_cached_results_[channel_num][offset] =  current_iteration_khz_sum;
 
 			eighteen_khz_sum_ += current_iteration_khz_sum;
 			//std::cout << "Uncached result\n";
 		} else {
-			eighteen_khz_sum_ += fft_cached_results_[start_sample_];
+			eighteen_khz_sum_ += fft_cached_results_[channel_num][offset];
 			//std::cout << "Cached result\n";		
 		}
 
