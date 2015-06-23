@@ -20,6 +20,9 @@ int main(int argc, char** argv) {
 //XInitThreads();
 
 
+sf::RenderWindow signal_plot_window_(sf::VideoMode(2400, 400)
+                    , "Transformed_Frequencies");
+
 // sf::VideoMode fullScreenMode = sf::VideoMode::getDesktopMode();
 
 #ifndef DEBUG_FFT_MODE
@@ -46,10 +49,68 @@ window.setSize(windowResolution);
     //unsigned frame_counter = 0;
 #ifdef DEBUG_FFT_MODE
     
+
+
     //while (window.isOpen())
     while(true)
     {
 
+        std::array< std::vector<unsigned int>, 4> signal_vis_samples =  locator.load_signal_vis_samples();
+        signal_plot_window_.clear(sf::Color(255, 255, 255));
+
+
+
+        for(unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
+            unsigned int sample_num = 0;
+
+
+                for(auto const& sig : signal_vis_samples[channel_iterator]) {
+
+
+
+                    float width = 2400.0f / signal_vis_samples[channel_iterator].size();
+
+
+
+                    sf::RectangleShape data_point(sf::Vector2f(1,sig) );
+                    data_point.setPosition( sf::Vector2f( width * sample_num, channel_iterator * 100.0 + (100.0-sig) ) );
+
+                    /*
+                    if(sig < avg * 1.1 && sig > 3.0)
+                        if(sample_num > starting_sample_threshold)
+                            data_point.setFillColor(sf::Color(255, 0, 0) ) ;
+                        else
+                            data_point.setFillColor(sf::Color(0, 0, 0) ) ;
+                    else
+                        if(sample_num > starting_sample_threshold)
+                            data_point.setFillColor(sf::Color(0, 255, 0) );
+                        else
+                            data_point.setFillColor(sf::Color(0, 0, 255) );
+                   */
+
+                       // std::cout << sample_num << " : " << signal_detected_at_sample[channel_iterator] <<  "\n";
+                    if(sample_num <  500 /*signal_detected_at_sample[channel_iterator] */) {
+                        data_point.setFillColor(sf::Color(255, 0, 0) ) ;
+                    } else {
+                        data_point.setFillColor(sf::Color(0, 255, 0) ) ;          
+                    }
+                    
+
+                    signal_plot_window_.draw(data_point);
+
+                   // std::cout << "Sig: " << sig << "\n";
+
+
+
+                    ++sample_num;
+                }
+        }
+
+
+
+
+
+        signal_plot_window_.display();
        // std::cout << "Started loop\n";
         
         /*

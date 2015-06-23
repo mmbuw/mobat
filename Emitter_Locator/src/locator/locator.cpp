@@ -17,9 +17,7 @@ Locator::Locator(unsigned int num_mics):
  recorder{num_mics, 44100, 130000},
  collector{recorder.buffer_bytes() / num_mics, num_mics},
  fft_transformer{window_size},
- locator{330, {0.055, 0.08}, {0.95,  0.09}, {0.105,  1.89}, {0.925,  1.92}},
- signal_plot_window_(sf::VideoMode(2400, 400)
-                    , "Transformed_Frequencies")
+ locator{330, {0.055, 0.08}, {0.95,  0.09}, {0.105,  1.89}, {0.925,  1.92}}
  {
     fft_transformer.initialize_execution_plan();
     locator.update_times(0.0003062, 0.0012464, 0.0000, 0.0011279);
@@ -43,7 +41,7 @@ Locator::Locator(unsigned int num_mics):
  }
 
  glm::vec4 const Locator::load_toas() const {
-        // try to access current position
+        // try to access current times of arrival
 
     if(toas_mutex.try_lock()) {
         glm::vec4 temp = toas;
@@ -55,6 +53,24 @@ Locator::Locator(unsigned int num_mics):
         return cached_toas;
     }
  } 
+
+std::array<std::vector<unsigned int>,4> const Locator::load_signal_vis_samples() const {
+    //try to access current signal vis samples
+
+    if(signal_vis_samples_mutex.try_lock()) {
+        std::array<std::vector<unsigned int>,4> temp;
+
+        for(int i = 0; i < 4; ++i) {
+            temp[i] = signal_vis_samples[i];
+        }
+
+        signal_vis_samples_mutex.unlock();
+        return temp;
+    } else {
+        return cached_signal_vis_samples;
+    }
+}
+
 
 #define CURRENT_NUM_RECORDED_MICS 4
 
@@ -190,7 +206,7 @@ Locator::Locator(unsigned int num_mics):
         cached_position.y = 1 - cached_position.y;
         std::cout << "Cached position: " << cached_position.x << ", " << cached_position.y << "\n";
 
-        signal_plot_window_.clear(sf::Color(255, 255, 255));
+
 
 
         unsigned starting_sample_threshold =  50;
@@ -275,6 +291,10 @@ Locator::Locator(unsigned int num_mics):
             std::cin.get();
         }
 
+
+
+
+/*VIS
         for(unsigned int channel_iterator = 0; channel_iterator < CURRENT_NUM_RECORDED_MICS; ++channel_iterator) {
             unsigned int sample_num = 0;
 
@@ -294,7 +314,7 @@ Locator::Locator(unsigned int num_mics):
                     sf::RectangleShape data_point(sf::Vector2f(1,sig) );
                     data_point.setPosition( sf::Vector2f( width * sample_num, channel_iterator * 100.0 + (100.0-sig) ) );
 
-                    /*
+                    
                     if(sig < avg * 1.1 && sig > 3.0)
                         if(sample_num > starting_sample_threshold)
                             data_point.setFillColor(sf::Color(255, 0, 0) ) ;
@@ -305,7 +325,7 @@ Locator::Locator(unsigned int num_mics):
                             data_point.setFillColor(sf::Color(0, 255, 0) );
                         else
                             data_point.setFillColor(sf::Color(0, 0, 255) );
-                    */
+                   
 
                        // std::cout << sample_num << " : " << signal_detected_at_sample[channel_iterator] <<  "\n";
                     if(sample_num < signal_detected_at_sample[channel_iterator]) {
@@ -324,9 +344,9 @@ Locator::Locator(unsigned int num_mics):
                     ++sample_num;
                 }
         }
+*/
 
 
-        signal_plot_window_.display();
 
         //glm::vec4 update_times = {}
         //double updated_times[4] =  {4.3, 3.3, 2.3, 1.3};
@@ -348,6 +368,16 @@ Locator::Locator(unsigned int num_mics):
         position_mutex.lock();
         position = cached_position;
         position_mutex.unlock();
+
+
+        for(unsigned int sample_copy_index = 0; sample_copy_index < 4; ++sample_copy_index) {
+            cached_signal_vis_samples[sample_copy_index] = fft_transformer.signal_results_[sample_copy_index];      
+        }
+
+
+        signal_vis_samples_mutex.lock();
+        signal_vis_samples = cached_signal_vis_samples;
+        signal_vis_samples_mutex.unlock();
 
 
 
