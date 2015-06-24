@@ -31,7 +31,7 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
 window.setSize(windowResolution);
 //#endif
 
-    std::vector<sf::Vector2f> default_microphone_positions_ = {{0.055, 0.08}, {0.95,  0.09}, {0.105,  1.89}, {0.925,  1.92}};
+    std::vector<sf::Vector2f> default_microphone_positions_ = {{0.055, 0.08}, {0.95,  0.09}, {0.925,  1.92}, {0.105,  1.89}};
        /* default_microphone_positions_.push_back(sf::Vector2f(0.0,4.0));
         default_microphone_positions_.push_back(sf::Vector2f(0.0,8.0));
         default_microphone_positions_.push_back(sf::Vector2f(4.0,0.0));
@@ -60,18 +60,20 @@ window.setSize(windowResolution);
         std::array<unsigned, 4> recognized_vis_sample_pos = locator.load_recognized_vis_sample_positions();
 
         
+
+
         for(unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
             unsigned int sample_num = 0;
 
 
                 //for(auto const& sig : signal_vis_samples[channel_iterator]) {
 
-                for(unsigned int sample_idx = 0; sample_idx < signal_vis_samples[channel_iterator].size(); sample_idx+=10) {
+                sf::ConvexShape polyLine(signal_vis_samples[channel_iterator].size());
+                polyLine.setFillColor(sf::Color(255,0,0));
+                for(unsigned int sample_idx = 0; sample_idx < signal_vis_samples[channel_iterator].size(); ++sample_idx) {
                     unsigned int sig = signal_vis_samples[channel_iterator][sample_idx];
 
                     float width = 2400.0f / signal_vis_samples[channel_iterator].size();
-
-
 
                     sf::RectangleShape data_point(sf::Vector2f(1,sig) );
                     data_point.setPosition( sf::Vector2f( width * sample_num, channel_iterator * 100.0 + (100.0-sig) ) );
@@ -83,7 +85,7 @@ window.setSize(windowResolution);
                     } else {
                         data_point.setFillColor(sf::Color(0, 255, 0) ) ;          
                     }
-                    
+    
 
                     signal_plot_window_.draw(data_point);
 
@@ -91,14 +93,13 @@ window.setSize(windowResolution);
 
 
 
-                    sample_num += 10;
+                    ++sample_num;
                 }
+
+
         }
 
-        
-
-
-
+    
 
 
         signal_plot_window_.display();

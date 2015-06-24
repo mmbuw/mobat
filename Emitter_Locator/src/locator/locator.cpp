@@ -17,7 +17,7 @@ Locator::Locator(unsigned int num_mics):
  recorder{num_mics, 44100, 130000},
  collector{recorder.buffer_bytes() / num_mics, num_mics},
  fft_transformer{window_size},
- locator{150, {0.055, 0.08}, {0.95,  0.09}, {0.105,  1.89}, {0.925,  1.92}}
+ locator{330, {0.055, 0.08}, {0.95,  0.09}, {0.925,  1.92} , {0.105,  1.89}}
  {
     fft_transformer.initialize_execution_plan();
     locator.update_times(0.0003062, 0.0012464, 0.0000, 0.0011279);
@@ -221,7 +221,7 @@ std::array<unsigned, 4> const Locator::load_recognized_vis_sample_positions() co
                             //signal_detected_at_sample[channel_iterator] = 500;
             for(auto const& sig :fft_transformer.signal_results_[channel_iterator]) {
 
-                if(sig < avg * 0.75) {
+                if(sig < avg * 0.65) {
                     num_signal_samples = 0;
 
                     ++num_pause_samples;
@@ -236,14 +236,25 @@ std::array<unsigned, 4> const Locator::load_recognized_vis_sample_positions() co
                     if(allow_signal_detection) {
                         ++num_signal_samples;
 
-                        //std::cout << "It.\n";
-                        //std::cin.get();
-                       /* if( num_signal_samples > 10) {
-                            num_pause_samples = 0;
-                        }*/
 
-                        if( num_signal_samples > 600 ) {
+
+                        if( num_signal_samples > 300 ) {
                             signal_detected_at_sample[channel_iterator] = sample_num;
+
+                            //track backwards 'til the signal increases again
+
+                           // unsigned current_val = sig;
+
+
+                            for(int back_tracking_index = sample_num-1; back_tracking_index >= 0; --back_tracking_index) {
+                                if(fft_transformer.signal_results_[channel_iterator][back_tracking_index] < avg * 0.15) {
+                                    signal_detected_at_sample[channel_iterator] = back_tracking_index;
+                                    break;
+                                } else {
+                                   // current_val = fft_transformer.signal_results_[channel_iterator][back_tracking_index];
+                                }
+                            }
+
                             break;
                         }
                     }
@@ -270,11 +281,6 @@ std::array<unsigned, 4> const Locator::load_recognized_vis_sample_positions() co
         
 
 
-
-
-        //glm::vec4 update_times = {}
-        //double updated_times[4] =  {4.3, 3.3, 2.3, 1.3};
-
         for(unsigned int mic_index = 0; mic_index < CURRENT_NUM_RECORDED_MICS; ++mic_index) {
             cached_toas[mic_index] = updated_times[mic_index];
         }
@@ -290,24 +296,38 @@ std::array<unsigned, 4> const Locator::load_recognized_vis_sample_positions() co
 
 
             for(unsigned int signal_idx = 0; signal_idx < 4; ++signal_idx) {
-                updated_times[signal_idx] = (signal_detected_at_sample[signal_idx] - sample_min) / 44.1;
+                updated_times[signal_idx] = (signal_detected_at_sample[signal_idx] - sample_min) / 44.1000;
             }
 
 
-        if(sample_max - sample_min < 500 && sample_max < 9999 ) {
+        if(sample_max - sample_min < 500 && sample_max < 99999 ) {
             locator.update_times(updated_times[0], updated_times[1], updated_times[2], updated_times[3]);
-                
+            //locator.update_times(0.0,0.001,0.001,0.001);
 
             std::cout << "Done.\n";
             cached_position = locator.locate();
             cached_position.y = 1 - cached_position.y;
             std::cout << "Cached position: " << cached_position.x << ", " << cached_position.y << "\n";
+            std::cout << "\n";
+
+            std::cout << "\n";
+
+
+            for(unsigned int sample_copy_index = 0; sample_copy_index < 4; ++sample_copy_index) {
+                std::cout<< signal_detected_at_sample[sample_copy_index]  << "\n";
+            }
         }
+
+
+
 
        }
 
 
-
+            for(unsigned int sample_copy_index = 0; sample_copy_index < 4; ++sample_copy_index) {
+                cached_signal_vis_samples[sample_copy_index] = fft_transformer.signal_results_[sample_copy_index];      
+                cached_recognized_vis_sample_pos[sample_copy_index] = signal_detected_at_sample[sample_copy_index];
+            }
 
 
 
@@ -315,12 +335,6 @@ std::array<unsigned, 4> const Locator::load_recognized_vis_sample_positions() co
         position_mutex.lock();
         position = cached_position;
         position_mutex.unlock();
-
-
-        for(unsigned int sample_copy_index = 0; sample_copy_index < 4; ++sample_copy_index) {
-            cached_signal_vis_samples[sample_copy_index] = fft_transformer.signal_results_[sample_copy_index];      
-            cached_recognized_vis_sample_pos[sample_copy_index] = signal_detected_at_sample[sample_copy_index];
-        }
 
 
         signal_vis_samples_mutex.lock();

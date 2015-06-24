@@ -3,6 +3,8 @@
 
 #include "microphone.hpp"
 
+#include <map>
+
 class TDOAtor{
   public:
 
@@ -30,6 +32,8 @@ class TDOAtor{
     Microphone mics_[4];
     glm::vec2 min_;
     glm::vec2 max_;
+
+    std::map<unsigned int, std::map<unsigned int, float> > distance_mic_low_to_high_;
 };
 
 
