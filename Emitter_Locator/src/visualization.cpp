@@ -116,11 +116,18 @@ window.setSize(windowResolution);
             table_visualizer.Signal_Token(2000, sf::Vector2f(pl1_pos.x, pl1_pos.y));
 
 
-            glm::vec2 point = locator.load_position();
-            smartphonePosition.x = point.x;
-            smartphonePosition.y = 1.0 - point.y;
+            std::map<unsigned, std::pair<unsigned, glm::vec2> > positions = locator.load_position();
+            
+            if(positions.find(18000) != positions.end()) {
 
-            table_visualizer.Signal_Token(18000, sf::Vector2f(smartphonePosition.x, smartphonePosition.y));
+                glm::vec2 current_frequency_position = positions[18000].second;
+
+                smartphonePosition.x = current_frequency_position.x;
+                smartphonePosition.y = 1.0 - current_frequency_position.y;
+
+                table_visualizer.Signal_Token(18000, sf::Vector2f(smartphonePosition.x, smartphonePosition.y));
+            }
+
 
 
             table_visualizer.Finalize_Visualization_Frame();

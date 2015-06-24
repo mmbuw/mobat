@@ -7,12 +7,10 @@
 #include <thread>
 #include <algorithm>
 #include <functional>
-
+#include <utility>
 
 Locator::Locator(unsigned int num_mics):
  shutdown{false},
- position{0, 0},
- cached_position{0, 0},
  window_size{256},
  recorder{num_mics, 44100, 130000},
  collector{recorder.buffer_bytes() / num_mics, num_mics},
@@ -27,16 +25,18 @@ Locator::Locator(unsigned int num_mics):
 
  }
 
- glm::vec2 Locator::load_position() const {
+ //return type: 
+             //frequency      //timestamp //determined position
+    std::map<unsigned, std::pair<unsigned, glm::vec2> > Locator::load_position() const {
     // try to access current position
     if(position_mutex.try_lock()) {
-        glm::vec2 temp = position;
+        std::map<unsigned, std::pair<unsigned, glm::vec2> > temp = located_positions;
         position_mutex.unlock();
         return temp;
     }
     // if recorder is writing, use cached one
     else {
-        return cached_position;
+        return cached_located_positions;
     }
  }
 
@@ -220,8 +220,13 @@ std::array<unsigned, 4> const Locator::load_recognized_vis_sample_positions() co
                 updated_times[signal_idx] = (signal_detected_at_sample[signal_idx] - sample_min) / 44.1000;
             }
 
+        bool found_positions = false;
+
+        glm::vec2 cached_position;
 
         if(sample_max - sample_min < 500 && sample_max < 99999 ) {
+
+            found_positions = true;
             locator.update_times(updated_times[0], updated_times[1], updated_times[2], updated_times[3]);
             //locator.update_times(0.0,0.001,0.001,0.001);
 
@@ -253,10 +258,15 @@ std::array<unsigned, 4> const Locator::load_recognized_vis_sample_positions() co
 
 
 
+        if(found_positions) {
+        std::map<unsigned, std::pair<unsigned, glm::vec2> > currently_located_frequencies;
+
+        cached_located_positions[18000] = std::make_pair(7, cached_position);
         position_mutex.lock();
-        position = cached_position;
+        located_positions = cached_located_positions;
         position_mutex.unlock();
 
+        }
 
         signal_vis_samples_mutex.lock();
         signal_vis_samples = cached_signal_vis_samples;

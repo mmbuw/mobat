@@ -4,6 +4,7 @@
 #include <mutex>
 #include <SFML/Graphics.hpp>
 
+#include <map>
 
 #include "microphone.hpp"
 #include "recorder.hpp"
@@ -15,7 +16,7 @@ class Locator {
  public:
     Locator(unsigned int num_mics);
 
-     glm::vec2 load_position() const;
+     std::map<unsigned, std::pair<unsigned, glm::vec2> > load_position() const;
      glm::vec4 const load_toas() const;
      std::array<std::vector<unsigned int>,4> const load_signal_vis_samples() const;
      std::array<unsigned, 4> const load_recognized_vis_sample_positions() const;
@@ -32,8 +33,8 @@ private:
     mutable std::mutex recognized_vis_sample_pos_mutex;
 
     bool shutdown;
-    glm::vec2 position;
-    glm::vec2 cached_position;
+    std::map<unsigned, std::pair<unsigned, glm::vec2> > located_positions;
+    std::map<unsigned, std::pair<unsigned, glm::vec2> > cached_located_positions;
 
     glm::vec4 toas;
     glm::vec4 cached_toas;
