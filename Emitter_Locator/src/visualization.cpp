@@ -105,10 +105,10 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
         glm::vec2 max{TTT::Drawable_Object::get_phys_table_size().x, TTT::Drawable_Object::get_phys_table_size().y};
         glm::vec2 min{0, 0};
         
-        glm::vec2 pl1_pos{0.01, 0.03};
+        glm::vec2 pl1_pos{0.9, 0.5};
         glm::vec2 pl2_pos{0.04, 0.5};
 
-    double player_speed = 0.03;
+    double player_speed = 0.009;
         
 
         while (window.isOpen())

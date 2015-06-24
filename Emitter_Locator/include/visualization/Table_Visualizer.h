@@ -35,7 +35,7 @@ class Table_Visualizer : Drawable_Object {
 		//needed for pesudopong
 		double b_x_pos_;
 		double b_y_pos_;
-		Recognized_Token_Object ball_;	//NO TOKEN, change it later
+		Ball ball_;	//NO TOKEN, change it later
 		sf::Vector2f ball_dir_;
 		double ball_speed_;
 
@@ -50,7 +50,7 @@ class Table_Visualizer : Drawable_Object {
 						 	= sf::Color(0,255,0, 125),
 						 sf::Color const& in_token_fill_color 
 						 	= sf::Color(255,0,0),
-						 double ball_size = 30 
+						 double ball_size = 15 
 						);
 		~Table_Visualizer();
 
@@ -80,7 +80,9 @@ class Table_Visualizer : Drawable_Object {
 
 		unsigned Get_Elapsed_Milliseconds();
 
-		std::pair<bool, sf::Vector2f> circ_circ_intersect(sf::CircleShape const& c1, sf::CircleShape const& c2) const;
+		std::pair<bool, glm::vec2> circ_circ_intersect(sf::CircleShape const& ball, sf::CircleShape const& paddle) const;
+
+		void move_ball_out_of_token(sf::CircleShape const& t);
 };
 
 }; //end TTT
