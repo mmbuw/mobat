@@ -5,29 +5,18 @@
 
 #include <numeric>
 #include <thread>
-#include <algorithm>
-#include <functional>
-#include <utility>
+
 
 Locator::Locator(unsigned int num_mics):
  shutdown{false},
- window_size{256},
  recorder{num_mics, 44100, 130000},
  collector{recorder.buffer_bytes() / num_mics, num_mics},
- fft_transformer{window_size},
  locator{330, {0.055, 0.08}, {0.95,  0.09}, {0.925,  1.92} , {0.105,  1.89}}
- {
-    fft_transformer.initialize_execution_plan();
-    locator.update_times(0.0003062, 0.0012464, 0.0000, 0.0011279);
+ {}
 
 
-   
-
- }
-
- //return type: 
-             //frequency      //timestamp //determined position
-    std::map<unsigned, std::pair<unsigned, glm::vec2> > Locator::load_position() const {
+std::map<unsigned, std::pair<unsigned, glm::vec2> > Locator::
+load_position() const {
     // try to access current position
     if(position_mutex.try_lock()) {
         std::map<unsigned, std::pair<unsigned, glm::vec2> > temp = located_positions;
@@ -38,9 +27,10 @@ Locator::Locator(unsigned int num_mics):
     else {
         return cached_located_positions;
     }
- }
+}
 
- glm::vec4 const Locator::load_toas() const {
+glm::vec4 const Locator
+::load_toas() const {
         // try to access current times of arrival
 
     if(toas_mutex.try_lock()) {
@@ -51,9 +41,10 @@ Locator::Locator(unsigned int num_mics):
     else {
         return cached_toas;
     }
- } 
+} 
 
-std::array<std::vector<unsigned int>,4> const Locator::load_signal_vis_samples() const {
+std::array<std::vector<unsigned int>,4> const Locator::
+load_signal_vis_samples() const {
     //try to access current signal vis samples
 
     if(signal_vis_samples_mutex.try_lock()) {
@@ -70,7 +61,8 @@ std::array<std::vector<unsigned int>,4> const Locator::load_signal_vis_samples()
     }
 }
 
-std::array<unsigned, 4> const Locator::load_recognized_vis_sample_positions() const {
+std::array<unsigned, 4> const Locator::
+load_recognized_vis_sample_positions() const {
     if(recognized_vis_sample_pos_mutex.try_lock()) {
         std::array<unsigned ,4> temp;
 
@@ -86,7 +78,6 @@ std::array<unsigned, 4> const Locator::load_recognized_vis_sample_positions() co
 }
 
 
-#define CURRENT_NUM_RECORDED_MICS 4
 
  void Locator::record_position() {
 
@@ -96,7 +87,7 @@ std::array<unsigned, 4> const Locator::load_recognized_vis_sample_positions() co
     while (!shutdown)
     {
 
-        std::array<unsigned, 4> signal_detected_at_sample = {100000, 100000, 100000, 100000};
+
 
         if(!recorder.new_recording()) {
             continue;
@@ -108,129 +99,70 @@ std::array<unsigned, 4> const Locator::load_recognized_vis_sample_positions() co
 
         recorder.request_recording();
 
-
-        fft_transformer.perform_FFT_on_channels((int**)&collector[0], recorder.buffer_bytes()/collector.count, window_size);
-
+        signal_analyzer.analyze((int**)&collector[0], recorder.buffer_bytes()/collector.count);
 
 
 
 
 
-        double updated_times[4];
-
-
-        unsigned starting_sample_threshold =  50;
 
 
 
-        unsigned signal_average[4] ;
 
-        for(unsigned int channel_iterator = 0; channel_iterator < CURRENT_NUM_RECORDED_MICS; ++channel_iterator) {
-
-
-            unsigned int const & (*max) (unsigned int const &, unsigned int const &) = std::max<unsigned>;
-            unsigned sum = std::accumulate(fft_transformer.signal_results_[channel_iterator].begin(), 
-                                           fft_transformer.signal_results_[channel_iterator].end(), 0, max);
-            signal_average[channel_iterator] = sum ;/// fft_transformer.signal_results_[channel_iterator].size();
-
-            unsigned num_pause_samples = 0;
-            unsigned num_signal_samples = 0;
-
-            unsigned sample_num = 0;
-
-            unsigned peak = signal_average[channel_iterator];
-            unsigned avg = std::accumulate(fft_transformer.signal_results_[channel_iterator].begin(), 
-                                           fft_transformer.signal_results_[channel_iterator].end(), 0) /  fft_transformer.signal_results_[channel_iterator].size();
-
-            bool allow_signal_detection = false;
-
-                            //signal_detected_at_sample[channel_iterator] = 500;
-            for(auto const& sig :fft_transformer.signal_results_[channel_iterator]) {
-
-                if(sig < peak * 0.75) {
-                    num_signal_samples = 0;
-
-                    ++num_pause_samples;
-
-                } else {
-
-
-                    if(num_pause_samples > starting_sample_threshold) {
-                        allow_signal_detection = true;
-                    }
-
-                    if(allow_signal_detection) {
-                        ++num_signal_samples;
-
-
-
-                        if( num_signal_samples > 300 ) {
-
-
-                            for(int back_tracking_index = sample_num-1; back_tracking_index >= 0; --back_tracking_index) {
-                                if(fft_transformer.signal_results_[channel_iterator][back_tracking_index] < avg ) {
-                                    signal_detected_at_sample[channel_iterator] = back_tracking_index;
-                                    break;
-                                } else {
-                                   // current_val = fft_transformer.signal_results_[channel_iterator][back_tracking_index];
-                                }
-                            }
-
-                            break;
-                        }
-                    }
-
-
-                }
-
-
-
-                ++sample_num;
-            }
-
-        }
-
-        unsigned int const & (*min) (unsigned int const &, unsigned int const &) = std::min<unsigned>;
-        unsigned int const & (*max) (unsigned int const &, unsigned int const &) = std::max<unsigned>;
-
-        unsigned sample_min = std::accumulate(signal_detected_at_sample.begin(),
-                                              signal_detected_at_sample.end(),
-                                              std::numeric_limits<unsigned>::max(), min);
-        unsigned sample_max = std::accumulate(signal_detected_at_sample.begin(),
-                                              signal_detected_at_sample.end(),
-                                              0, max);
+ 
         
+/*
 
-
-        for(unsigned int mic_index = 0; mic_index < CURRENT_NUM_RECORDED_MICS; ++mic_index) {
+        for(unsigned int mic_index = 0; mic_index < 4; ++mic_index) {
             cached_toas[mic_index] = updated_times[mic_index];
         }
 
         toas_mutex.lock();
-            for(unsigned int mic_index = 0; mic_index < CURRENT_NUM_RECORDED_MICS; ++mic_index) {
+            for(unsigned int mic_index = 0; mic_index < 4; ++mic_index) {
                 toas[mic_index] = cached_toas[mic_index];
             }
             cached_toas.x = 4.0;
 
         toas_mutex.unlock();
+*/
 
 
+        std::array<double, 4> current_frequency_toas = signal_analyzer.get_toas_for(18000);
 
-            for(unsigned int signal_idx = 0; signal_idx < 4; ++signal_idx) {
-                updated_times[signal_idx] = (signal_detected_at_sample[signal_idx] - sample_min) / 44.1000;
-            }
+        double const & (*d_min) (double const &, double const &) = std::min<double>;
+        double const & (*d_max) (double const &, double const &) = std::max<double>;
+
+        double toa_min = std::accumulate(current_frequency_toas.begin(),
+                                              current_frequency_toas.end(),
+                                              std::numeric_limits<double>::max(), d_min);
+        double toa_max = std::accumulate(current_frequency_toas.begin(),
+                                         current_frequency_toas.end(),
+                                         0.0, d_max);
+
+
 
         bool found_positions = false;
 
         glm::vec2 cached_position;
 
-        if(sample_max - sample_min < 500 && sample_max < 99999 ) {
+        std::cout << "toa_min: " << toa_min << "\n";
+        std::cout << "toa_max: " << toa_max << "\n";
+
+        if(toa_max - toa_min < 100.00 ) {
 
             found_positions = true;
-            locator.update_times(updated_times[0], updated_times[1], updated_times[2], updated_times[3]);
+
+
+            std::cout << "toas:\n";
+            std::cout << current_frequency_toas[0] << "\n" <<
+                         current_frequency_toas[1] << "\n" <<
+                         current_frequency_toas[2] << "\n" <<
+                         current_frequency_toas[3] << "\n\n";
+
+            locator.update_times(current_frequency_toas[0], current_frequency_toas[1], current_frequency_toas[2], current_frequency_toas[3]);
             //locator.update_times(0.0,0.001,0.001,0.001);
 
-            std::cout << "Done.\n";
+          //  std::cout << "Done.\n";
             cached_position = locator.locate();
             cached_position.y = 1 - cached_position.y;
             std::cout << "Cached position: " << cached_position.x << ", " << cached_position.y << "\n";
@@ -238,33 +170,34 @@ std::array<unsigned, 4> const Locator::load_recognized_vis_sample_positions() co
 
             std::cout << "\n";
 
-
+/*
             for(unsigned int sample_copy_index = 0; sample_copy_index < 4; ++sample_copy_index) {
                 std::cout<< signal_detected_at_sample[sample_copy_index]  << "\n";
             }
+*/
         }
 
 
-
-
-       
-
+            cached_signal_vis_samples = signal_analyzer.get_signal_samples_for(18000);
 
             for(unsigned int sample_copy_index = 0; sample_copy_index < 4; ++sample_copy_index) {
-                cached_signal_vis_samples[sample_copy_index] = fft_transformer.signal_results_[sample_copy_index];      
-                cached_recognized_vis_sample_pos[sample_copy_index] = signal_detected_at_sample[sample_copy_index];
+                //cached_signal_vis_samples[sample_copy_index] = fft_transformer.signal_results_[sample_copy_index];      
+                //cached_recognized_vis_sample_pos[sample_copy_index] = signal_analyzer.signal_detected_at_sample[sample_copy_index];
             }
 
 
 
 
         if(found_positions) {
-        std::map<unsigned, std::pair<unsigned, glm::vec2> > currently_located_frequencies;
 
-        cached_located_positions[18000] = std::make_pair(7, cached_position);
-        position_mutex.lock();
-        located_positions = cached_located_positions;
-        position_mutex.unlock();
+            //std::cout << "Found position!\n";
+            //std::cin.get();
+            //std::map<unsigned, std::pair<unsigned, glm::vec2> > currently_located_frequencies;
+
+            cached_located_positions[18000] = std::make_pair(7, cached_position);
+            position_mutex.lock();
+            located_positions = cached_located_positions;
+            position_mutex.unlock();
 
         }
 

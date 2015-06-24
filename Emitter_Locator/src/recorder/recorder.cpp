@@ -68,7 +68,6 @@ Config& Recorder::config() {
 
 void Recorder::record() {
 
-  std::cout << "Recording\n";
   // prevent under- or overruns
   std::size_t loops = recording_time_ / config_.period_time();
   if(loops * config_.period_bytes() > buffer_length_) {

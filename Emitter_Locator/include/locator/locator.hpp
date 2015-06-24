@@ -9,7 +9,7 @@
 #include "microphone.hpp"
 #include "recorder.hpp"
 #include "tdoator.hpp"
-#include "FFT_Transformer.h"
+#include "Signal_Analyzer.h"
 #include "buffer_collection.hpp"
 
 class Locator {
@@ -45,14 +45,12 @@ private:
     std::array<std::vector<unsigned int>,4> signal_vis_samples;
     std::array<std::vector<unsigned int>,4> cached_signal_vis_samples;
     
-    unsigned short window_size;
-
     Recorder recorder;
     buffer_collection collector;
-    FFT_Transformer fft_transformer;
-    TDOAtor locator;
 
-    sf::RenderWindow signal_plot_window_;
+    TDOAtor locator;
+    Signal_Analyzer signal_analyzer;
+
  };
 
  #endif //LOCATOR_HPP

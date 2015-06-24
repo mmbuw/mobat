@@ -43,7 +43,7 @@ double TDOAtor::
 dif(glm::vec2 const& p, 
                     Microphone const& mic1, 
                     Microphone const& mic2) const {
-    double dtoa = (mic1.toa - mic2.toa) / 1000.0;
+    double dtoa = (mic1.toa - mic2.toa) ;// 1000.0;
 
     //std::cout<<"betr "<<betrag(p , p_mic_1)<<"    "<<betrag(p , p_mic_2)<<"    "<<c*dtoa<<"\n";
     //return (glm::length(p - mic1.position) - glm::length(p - mic2.position) ) - c_ * dtoa;

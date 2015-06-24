@@ -79,8 +79,8 @@ class FFT_Transformer {
 							  unsigned int buffer_size,
 							  int** buffers);
 
-		std::vector<unsigned int> signal_results_[4];
-		std::map<unsigned, double> fft_cached_results_[4];
+		std::array<std::vector<unsigned int>,4> signal_results_;
+		std::array<std::map<unsigned, double>,4> fft_cached_results_;
 };
 
 #endif

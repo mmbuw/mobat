@@ -118,6 +118,16 @@ window.setSize(windowResolution);
 
             std::map<unsigned, std::pair<unsigned, glm::vec2> > positions = locator.load_position();
             
+            if(positions.size() != 0) {
+                //std::cout << "Size of map: " << positions.size();
+
+                //for(auto const& entry : positions) {
+                  //  std::cout << "Key: " << entry.first <<
+                  //                "Value: " << entry.second.second.x << ", " <<  entry.second.second.y << "\n";
+                //}
+                //std::cin.get();
+            }
+
             if(positions.find(18000) != positions.end()) {
 
                 glm::vec2 current_frequency_position = positions[18000].second;
@@ -125,6 +135,8 @@ window.setSize(windowResolution);
                 smartphonePosition.x = current_frequency_position.x;
                 smartphonePosition.y = 1.0 - current_frequency_position.y;
 
+               // std::cout << "I Want to signal!\n";
+                //std::cin.get();
                 table_visualizer.Signal_Token(18000, sf::Vector2f(smartphonePosition.x, smartphonePosition.y));
             }
 
