@@ -45,7 +45,6 @@ Locator::Locator(unsigned int num_mics):
 
     if(toas_mutex.try_lock()) {
         glm::vec4 temp = toas;
-        //std::cout << "Im trylock if\n";
         toas_mutex.unlock();
         return temp;
     }
@@ -97,15 +96,13 @@ std::array<unsigned, 4> const Locator::load_recognized_vis_sample_positions() co
     while (!shutdown)
     {
 
-                //std::cout << "Started Record Position\n";
-        std::array<unsigned, 4> recognized_sample_pos = {0, 0, 0, 0};
         std::array<unsigned, 4> signal_detected_at_sample = {100000, 100000, 100000, 100000};
 
         if(!recorder.new_recording()) {
             continue;
         }
 
-      std::cout << "Cleared window\n";
+
 
         collector.from_interleaved(recorder.buffer());
 
@@ -127,72 +124,18 @@ std::array<unsigned, 4> const Locator::load_recognized_vis_sample_positions() co
                 fft_transformer.set_analyzation_range(0+offset, window_size+50 + offset);
                 
 
-                unsigned int fft_result = fft_transformer.perform_FFT(channel_iterator);
+                fft_transformer.perform_FFT(channel_iterator);
 
-                if(fft_result == 1 ) {
-                    std::cout << "Signal starts at sample @ channel " << channel_iterator << ": " << i << "\n";
-                    //recognized_sample_pos[channel_iterator] = i;
-                    break;
-                }
 
              
             } 
         }
 
-        unsigned min_sample = std::numeric_limits<unsigned>::max();
-        unsigned max_sample = 0;
 
-        double temp_avg = 0.0;
-        //double average = std::accumulate(recognized_sample_pos.begin(), recognized_sample_pos.end(), 0) / recognized_sample_pos.size();
-
-        unsigned int num_valid_entries = 0;
-
-
-  
-        for(unsigned channel_iterator = 0; channel_iterator < CURRENT_NUM_RECORDED_MICS; ++channel_iterator) {
-
-            unsigned current_channel_sample_pos = recognized_sample_pos[channel_iterator];
-
-            if( current_channel_sample_pos != 0 ) { 
-                if( current_channel_sample_pos < min_sample ) {
-                 min_sample = current_channel_sample_pos;
-                }
-
-                if( current_channel_sample_pos > max_sample ) {
-                    max_sample = current_channel_sample_pos;
-                }
-
-                temp_avg += current_channel_sample_pos;
-                ++num_valid_entries;
-            }
-
-        }
-
-
-
-/*
-        for(unsigned channel_iterator = 0; channel_iterator < CURRENT_NUM_RECORDED_MICS; ++channel_iterator) {
-            unsigned current_channel_sample_pos = recognized_sample_pos[channel_iterator];
-
-            if( current_channel_sample_pos != 0 ) { 
-                temp_sd += std::pow(average-current_channel_sample_pos, 2);
-            }
-        }
-*/
 
 
 
         double updated_times[4];
-        if( max_sample-min_sample < 3000 ) {
-
-
-            std::cout << "Sample diffs: ";
-
-
-            //locator.update_times(0.0003062, 0.0012464, 0.0000, 0.0011279);
-
-
-
 
 
         unsigned starting_sample_threshold =  50;
@@ -241,11 +184,6 @@ std::array<unsigned, 4> const Locator::load_recognized_vis_sample_positions() co
 
 
                         if( num_signal_samples > 300 ) {
-                            //signal_detected_at_sample[channel_iterator] = sample_num;
-
-                            //track backwards 'til the signal increases again
-
-                           // unsigned current_val = sig;
 
 
                             for(int back_tracking_index = sample_num-1; back_tracking_index >= 0; --back_tracking_index) {
@@ -276,7 +214,7 @@ std::array<unsigned, 4> const Locator::load_recognized_vis_sample_positions() co
 
         unsigned sample_min = std::accumulate(signal_detected_at_sample.begin(),
                                               signal_detected_at_sample.end(),
-                                              999999, min);
+                                              std::numeric_limits<unsigned>::max(), min);
         unsigned sample_max = std::accumulate(signal_detected_at_sample.begin(),
                                               signal_detected_at_sample.end(),
                                               0, max);
@@ -323,7 +261,7 @@ std::array<unsigned, 4> const Locator::load_recognized_vis_sample_positions() co
 
 
 
-       }
+       
 
 
             for(unsigned int sample_copy_index = 0; sample_copy_index < 4; ++sample_copy_index) {

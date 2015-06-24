@@ -68,6 +68,10 @@ Draw(sf::RenderWindow& canvas) const {
 	
 	table_.Draw(canvas);
 
+	for(auto const& mic_obj : microphones_) {
+		mic_obj.Draw(canvas);
+	}
+
 	for( auto& id_token_pair : recognized_tokens_ ) {
 		id_token_pair.second.Draw(canvas);
 	}
