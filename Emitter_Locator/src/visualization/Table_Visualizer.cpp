@@ -135,12 +135,23 @@ Recalculate_Geometry() {
 		sf::CircleShape t_ball = ball_.get_Circle();
 
 
-	
+	//std::cout<<"b_x_pos = "<<b_x_pos_<<"  b_y_pos_ =  "<<b_y_pos_<<"\n";
 /*while(circ_circ_intersect(ball_.get_Circle(), right).first || circ_circ_intersect(ball_.get_Circle(), left).first){
 		    b_x_pos_ -= ball_dir_.x;
 		    b_y_pos_ -= ball_dir_.y;
 		    ball_.setPosition(b_x_pos_, b_y_pos_);
 }*/
+
+	if(b_x_pos_ <= 0 || b_x_pos_>=physical_table_size_.x){
+		ball_dir_.x *= -1;
+	}
+
+	if(b_y_pos_ <= 0 || b_y_pos_>=physical_table_size_.y){
+		ball_dir_.y *= -1;
+	}
+
+
+
 		
 #if 1
 	//tor-erkennung
@@ -178,10 +189,10 @@ Recalculate_Geometry() {
 
 
 	// oben unten begrenzung
-	if(b_y_pos_ >= resolution_.y - 2*ball_.get_Circle().getRadius() || b_y_pos_ <= 0)
+	/*if(b_y_pos_ >= resolution_.y - 2*ball_.get_Circle().getRadius() || b_y_pos_ <= 0)
 	{
 	    ball_dir_.y = -ball_dir_.y; //an obere kante gestoßen
-	} 
+	} */
 	
 	b_y_pos_ += ball_dir_.y;
 #endif
