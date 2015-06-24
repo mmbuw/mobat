@@ -132,6 +132,31 @@ void FFT_Transformer::set_analyzation_range(unsigned int start_sample, unsigned 
 	}
 }
 
+void FFT_Transformer::perform_FFT_on_channels(int** signal_buffers, unsigned bytes_per_channel, unsigned window_size) {
+        for (unsigned int channel_iterator = 0; channel_iterator < 4	; ++channel_iterator) {
+            set_FFT_buffers(4, 
+                    bytes_per_channel,
+                (int**)&signal_buffers[channel_iterator]);   
+
+
+            reset_sample_counters(channel_iterator);
+            clear_cached_fft_results(channel_iterator);
+            for(unsigned int i = 0; i < 1500; ++i) {
+                unsigned offset = 1 * i;
+                if(offset > (1400) )
+                    break;
+					
+				set_analyzation_range(0+offset, window_size+50 + offset);
+                
+
+                perform_FFT(channel_iterator);
+
+
+             
+            } 
+        }
+}
+
 void FFT_Transformer::set_FFT_buffers(unsigned int num_buffers, unsigned int buffer_size, int** buffers) {
 	num_audio_buffers_ = num_buffers;
 	audio_buffer_size_ = buffer_size;

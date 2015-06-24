@@ -65,6 +65,9 @@ class FFT_Transformer {
 		void clear_cached_fft_results(unsigned);
 
 		void initialize_execution_plan();
+
+		void perform_FFT_on_channels(int** signal_buffers, unsigned bytes_per_channel, unsigned window_size);
+
 		void set_FFT_input( unsigned int offset);
 		unsigned perform_FFT(unsigned );
 		void print_FFT_result(unsigned int call_idx);

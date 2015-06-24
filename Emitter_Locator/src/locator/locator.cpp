@@ -108,28 +108,9 @@ std::array<unsigned, 4> const Locator::load_recognized_vis_sample_positions() co
 
         recorder.request_recording();
 
-        for (unsigned int channel_iterator = 0; channel_iterator < CURRENT_NUM_RECORDED_MICS; ++channel_iterator) {
-            fft_transformer.set_FFT_buffers(collector.count, 
-                    recorder.buffer_bytes()/collector.count,
-                (int**)&collector[channel_iterator]);   
 
+        fft_transformer.perform_FFT_on_channels((int**)&collector[0], recorder.buffer_bytes()/collector.count, window_size);
 
-            fft_transformer.reset_sample_counters(channel_iterator);
-            fft_transformer.clear_cached_fft_results(channel_iterator);
-            for(unsigned int i = 0; i < 1500; ++i) {
-                unsigned offset = 1 * i;
-                if(offset > (1400) )
-                    break;
-
-                fft_transformer.set_analyzation_range(0+offset, window_size+50 + offset);
-                
-
-                fft_transformer.perform_FFT(channel_iterator);
-
-
-             
-            } 
-        }
 
 
 
