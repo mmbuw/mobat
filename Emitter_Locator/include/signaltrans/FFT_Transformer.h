@@ -41,13 +41,6 @@ class FFT_Transformer {
 
 		unsigned stabilization_counter_;
 
-		double detection_threshold_;
-		unsigned num_samples_below_threshold_;
-		unsigned num_samples_above_threshold_;
-		unsigned counted_samples_;
-		float average_value_;
-		unsigned first_hit_samples_below_threshold_at_;
-
 		double last_x_sample_[10];
 		unsigned int fft_frame_count_;
 
@@ -79,7 +72,7 @@ class FFT_Transformer {
 							  unsigned int buffer_size,
 							  int** buffers);
 
-		std::array<std::vector<unsigned int>,4> signal_results_;
+		std::array<std::vector<double>,4> signal_results_;
 		std::array<std::map<unsigned, double>,4> fft_cached_results_;
 };
 

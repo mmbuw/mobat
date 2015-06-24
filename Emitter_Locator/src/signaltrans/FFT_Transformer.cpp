@@ -104,14 +104,6 @@ FFT_Transformer::~FFT_Transformer() {
 };
 
 void FFT_Transformer::reset_sample_counters(unsigned channel_num) {
-	num_samples_above_threshold_ = 0;
-	num_samples_below_threshold_ = 0;
-	detection_threshold_ = 20;
-	average_value_ = 0.0;
-	counted_samples_ = 0;
-	fft_frame_count_ = 0;
-	first_hit_samples_below_threshold_at_ = 0;
-
 	signal_results_[channel_num].clear();
 }
 
@@ -258,52 +250,6 @@ unsigned int FFT_Transformer::perform_FFT(unsigned channel_num) {
 
 			signal_results_[channel_num].push_back(eighteen_khz_sum_);
 		
-
-			average_value_ += eighteen_khz_sum_;
-			++counted_samples_;
-
-			average_value_ = 0;
-			for(int i = 0; i < 10; ++i) {
-				average_value_ += last_x_sample_[i];
-
-			}
-				//std::cout << "18 khz sum: " << average_value_/10.0 << "\n";
-							//std::cout << "18 khz sum: " << eighteen_khz_sum_ << "\n";
-
-
-				if(average_value_/10.0 > 8.0) {
-
-					//num_samples_below_threshold_ = 0;
-
-					if(num_samples_below_threshold_ > 500) {
-							if(first_hit_samples_below_threshold_at_ == 0) {
-								first_hit_samples_below_threshold_at_ = counted_samples_;
-							}
-
-				
-						if(++num_samples_above_threshold_ >= 10 ) {
-
-						//std::cout << "\n\n18 khz sum: " << num_samples_above_threshold_ << "comparison below: " << num_samples_below_threshold_ << "\n\n";
-						//std::cout << "PEAK DETECTED!\n";
-						//std::cin.get();
-							//return 1;
-						}
-					}
-
-
-				} else if(average_value_/10.0 < 6.0)
-				{ 
-				  ++num_samples_below_threshold_;
-				  //if(num_samples_below_threshold_ > 3700)
-				  		//std::cout << "Pause done\n";	
-
-				 if(num_samples_below_threshold_ % 10 == 0)
-				 //std::cout << "num_samples_below_threshold_: " << num_samples_below_threshold_ << "\n";
-					//std::cout << "\n\nb low: " << num_samples_below_threshold_ << "\n\n";
-				  num_samples_above_threshold_ = 0;
-				}
-			
-
 		} else {
 
 			std::cout << "NaN detected!!!!";

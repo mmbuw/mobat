@@ -9,6 +9,7 @@ Signal_Analyzer::
 Signal_Analyzer() : fft_window_size(256),
  					fft_transformer{fft_window_size} {
     fft_transformer.initialize_execution_plan();
+
 }
 
 Signal_Analyzer::
@@ -193,7 +194,7 @@ get_toas_for(unsigned const frequency) const{
 
 }
 
-std::array<std::vector<unsigned int>,4> const Signal_Analyzer::
+std::array<std::vector<double>,4> const Signal_Analyzer::
 get_signal_samples_for(unsigned const frequency) const{
 
 	return fft_transformer.signal_results_;

@@ -28,7 +28,7 @@ class Signal_Analyzer {
 
     	//returns the fourier transformed and accumulated samples for
     	//the specified frequency
-    	std::array<std::vector<unsigned int>,4> const 
+    	std::array<std::vector<double>,4> const 
     	get_signal_samples_for(unsigned const frequency) const;
 
 		std::array<unsigned, 4> signal_detected_at_sample;

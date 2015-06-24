@@ -18,7 +18,7 @@ class Locator {
 
      std::map<unsigned, std::pair<unsigned, glm::vec2> > load_position() const;
      glm::vec4 const load_toas() const;
-     std::array<std::vector<unsigned int>,4> const load_signal_vis_samples() const;
+     std::array<std::vector<double>,4> const load_signal_vis_samples() const;
      std::array<unsigned, 4> const load_recognized_vis_sample_positions() const;
 
      void record_position();
@@ -42,8 +42,8 @@ private:
     std::array<unsigned, 4> recognized_vis_sample_pos;
     std::array<unsigned, 4> cached_recognized_vis_sample_pos;
 
-    std::array<std::vector<unsigned int>,4> signal_vis_samples;
-    std::array<std::vector<unsigned int>,4> cached_signal_vis_samples;
+    std::array<std::vector<double>,4> signal_vis_samples;
+    std::array<std::vector<double>,4> cached_signal_vis_samples;
     
     Recorder recorder;
     buffer_collection collector;

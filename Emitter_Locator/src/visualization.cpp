@@ -154,7 +154,7 @@ window.setSize(windowResolution);
          
 
 
-        std::array< std::vector<unsigned int>, 4> signal_vis_samples =  locator.load_signal_vis_samples();
+        std::array< std::vector<double>, 4> signal_vis_samples =  locator.load_signal_vis_samples();
         signal_plot_window_.clear(sf::Color(255, 255, 255));
 
         std::array<unsigned, 4> recognized_vis_sample_pos = locator.load_recognized_vis_sample_positions();

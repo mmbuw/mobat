@@ -12,7 +12,12 @@ Locator::Locator(unsigned int num_mics):
  recorder{num_mics, 44100, 130000},
  collector{recorder.buffer_bytes() / num_mics, num_mics},
  locator{330, {0.055, 0.08}, {0.95,  0.09}, {0.925,  1.92} , {0.105,  1.89}}
- {}
+ {
+
+    signal_analyzer.start_listening_to(18000);
+    signal_analyzer.start_listening_to(16000);
+
+ }
 
 
 std::map<unsigned, std::pair<unsigned, glm::vec2> > Locator::
@@ -43,12 +48,12 @@ glm::vec4 const Locator
     }
 } 
 
-std::array<std::vector<unsigned int>,4> const Locator::
+std::array<std::vector<double>,4> const Locator::
 load_signal_vis_samples() const {
     //try to access current signal vis samples
 
     if(signal_vis_samples_mutex.try_lock()) {
-        std::array<std::vector<unsigned int>,4> temp;
+        std::array<std::vector<double>,4> temp;
 
         for(int i = 0; i < 4; ++i) {
             temp[i] = signal_vis_samples[i]; 
