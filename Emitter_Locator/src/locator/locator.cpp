@@ -119,9 +119,9 @@ std::array<unsigned, 4> const Locator::load_recognized_vis_sample_positions() co
 
             fft_transformer.reset_sample_counters(channel_iterator);
             fft_transformer.clear_cached_fft_results(channel_iterator);
-            for(unsigned int i = 0; i < 4000; ++i) {
+            for(unsigned int i = 0; i < 1500; ++i) {
                 unsigned offset = 1 * i;
-                if(offset > (3900) )
+                if(offset > (1400) )
                     break;
 
                 fft_transformer.set_analyzation_range(0+offset, window_size+50 + offset);
@@ -214,14 +214,16 @@ std::array<unsigned, 4> const Locator::load_recognized_vis_sample_positions() co
 
             unsigned sample_num = 0;
 
-            unsigned avg = signal_average[channel_iterator];
+            unsigned peak = signal_average[channel_iterator];
+            unsigned avg = std::accumulate(fft_transformer.signal_results_[channel_iterator].begin(), 
+                                           fft_transformer.signal_results_[channel_iterator].end(), 0) /  fft_transformer.signal_results_[channel_iterator].size();
 
             bool allow_signal_detection = false;
 
                             //signal_detected_at_sample[channel_iterator] = 500;
             for(auto const& sig :fft_transformer.signal_results_[channel_iterator]) {
 
-                if(sig < avg * 0.65) {
+                if(sig < peak * 0.75) {
                     num_signal_samples = 0;
 
                     ++num_pause_samples;
@@ -239,7 +241,7 @@ std::array<unsigned, 4> const Locator::load_recognized_vis_sample_positions() co
 
 
                         if( num_signal_samples > 300 ) {
-                            signal_detected_at_sample[channel_iterator] = sample_num;
+                            //signal_detected_at_sample[channel_iterator] = sample_num;
 
                             //track backwards 'til the signal increases again
 
@@ -247,7 +249,7 @@ std::array<unsigned, 4> const Locator::load_recognized_vis_sample_positions() co
 
 
                             for(int back_tracking_index = sample_num-1; back_tracking_index >= 0; --back_tracking_index) {
-                                if(fft_transformer.signal_results_[channel_iterator][back_tracking_index] < avg * 0.15) {
+                                if(fft_transformer.signal_results_[channel_iterator][back_tracking_index] < avg ) {
                                     signal_detected_at_sample[channel_iterator] = back_tracking_index;
                                     break;
                                 } else {
