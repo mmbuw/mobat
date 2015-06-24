@@ -25,11 +25,11 @@ sf::RenderWindow signal_plot_window_(sf::VideoMode(2400, 400)
 
 // sf::VideoMode fullScreenMode = sf::VideoMode::getDesktopMode();
 
-#ifndef DEBUG_FFT_MODE
+//#ifndef DEBUG_FFT_MODE
 sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
                        , "Table_Vis");
 window.setSize(windowResolution);
-#endif
+//#endif
 
     std::vector<sf::Vector2f> default_microphone_positions_ = {{0.055, 0.08}, {0.95,  0.09}, {0.105,  1.89}, {0.925,  1.92}};
        /* default_microphone_positions_.push_back(sf::Vector2f(0.0,4.0));
@@ -51,22 +51,23 @@ window.setSize(windowResolution);
     
 
 
-    //while (window.isOpen())
-    while(true)
+    while (window.isOpen())
     {
 
         std::array< std::vector<unsigned int>, 4> signal_vis_samples =  locator.load_signal_vis_samples();
         signal_plot_window_.clear(sf::Color(255, 255, 255));
 
+        std::array<unsigned, 4> recognized_vis_sample_pos = locator.load_recognized_vis_sample_positions();
 
-
+        
         for(unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
             unsigned int sample_num = 0;
 
 
-                for(auto const& sig : signal_vis_samples[channel_iterator]) {
+                //for(auto const& sig : signal_vis_samples[channel_iterator]) {
 
-
+                for(unsigned int sample_idx = 0; sample_idx < signal_vis_samples[channel_iterator].size(); sample_idx+=10) {
+                    unsigned int sig = signal_vis_samples[channel_iterator][sample_idx];
 
                     float width = 2400.0f / signal_vis_samples[channel_iterator].size();
 
@@ -75,21 +76,9 @@ window.setSize(windowResolution);
                     sf::RectangleShape data_point(sf::Vector2f(1,sig) );
                     data_point.setPosition( sf::Vector2f( width * sample_num, channel_iterator * 100.0 + (100.0-sig) ) );
 
-                    /*
-                    if(sig < avg * 1.1 && sig > 3.0)
-                        if(sample_num > starting_sample_threshold)
-                            data_point.setFillColor(sf::Color(255, 0, 0) ) ;
-                        else
-                            data_point.setFillColor(sf::Color(0, 0, 0) ) ;
-                    else
-                        if(sample_num > starting_sample_threshold)
-                            data_point.setFillColor(sf::Color(0, 255, 0) );
-                        else
-                            data_point.setFillColor(sf::Color(0, 0, 255) );
-                   */
 
-                       // std::cout << sample_num << " : " << signal_detected_at_sample[channel_iterator] <<  "\n";
-                    if(sample_num <  500 /*signal_detected_at_sample[channel_iterator] */) {
+
+                    if(sample_num <  recognized_vis_sample_pos[channel_iterator] ) {
                         data_point.setFillColor(sf::Color(255, 0, 0) ) ;
                     } else {
                         data_point.setFillColor(sf::Color(0, 255, 0) ) ;          
@@ -102,9 +91,11 @@ window.setSize(windowResolution);
 
 
 
-                    ++sample_num;
+                    sample_num += 10;
                 }
         }
+
+        
 
 
 
@@ -113,7 +104,7 @@ window.setSize(windowResolution);
         signal_plot_window_.display();
        // std::cout << "Started loop\n";
         
-        /*
+        
         sf::Event event;
         while (window.pollEvent(event))
         {
@@ -149,7 +140,7 @@ window.setSize(windowResolution);
                
             }
        }
-           */
+           
         glm::vec2 point = locator.load_position();
         smartphonePosition.x = point.x;
         smartphonePosition.y = 1.0 - point.y;
@@ -159,23 +150,23 @@ window.setSize(windowResolution);
 
 
 
-            //window.clear();
-        //table_visualizer.Recalculate_Geometry();
-            //table_visualizer.Draw(window, toas);
+        window.clear();
+        table_visualizer.Recalculate_Geometry();
+        table_visualizer.Draw(window, toas);
 
    //    std::cout << "toas: " << toas[0] << ", " << toas[1] << ", " << toas[2] << ", " << toas[3] << "\n";
 
         //std::cout << "SP: " << smartphonePosition.x << "; " << smartphonePosition.y << "\n";
-        //table_visualizer.Signal_Token(16000, smartphonePosition);
-        //table_visualizer.Signal_Token(18000, smartphonePosition);
-/*
-        if( 0 == ++frame_counter % 40  ) {
+        table_visualizer.Signal_Token(16000, smartphonePosition);
+        table_visualizer.Signal_Token(18000, smartphonePosition);
+
+        /*if( 0 == ++frame_counter % 40  ) {
          table_visualizer.Signal_Token(16000, sf::Vector2f(smartphonePosition.x/2.0,
                                                             smartphonePosition.y+0.2));
-        }
-*/
+        }*/
+
         table_visualizer.Finalize_Visualization_Frame();
-        //window.display();
+        window.display();
     }
 
 #else //pong mit tastatur

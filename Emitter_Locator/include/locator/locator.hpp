@@ -18,6 +18,7 @@ class Locator {
      glm::vec2 load_position() const;
      glm::vec4 const load_toas() const;
      std::array<std::vector<unsigned int>,4> const load_signal_vis_samples() const;
+     std::array<unsigned, 4> const load_recognized_vis_sample_positions() const;
 
      void record_position();
 
@@ -28,6 +29,7 @@ private:
     mutable std::mutex position_mutex;
     mutable std::mutex toas_mutex;
     mutable std::mutex signal_vis_samples_mutex;
+    mutable std::mutex recognized_vis_sample_pos_mutex;
 
     bool shutdown;
     glm::vec2 position;
@@ -35,6 +37,9 @@ private:
 
     glm::vec4 toas;
     glm::vec4 cached_toas;
+
+    std::array<unsigned, 4> recognized_vis_sample_pos;
+    std::array<unsigned, 4> cached_recognized_vis_sample_pos;
 
     std::array<std::vector<unsigned int>,4> signal_vis_samples;
     std::array<std::vector<unsigned int>,4> cached_signal_vis_samples;
