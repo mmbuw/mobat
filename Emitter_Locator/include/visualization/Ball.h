@@ -20,7 +20,7 @@ class Ball : Drawable_Object {
 
 
 
-	//virtual void Recalculate_Geometry(sf::Vector2f const& resolution) = 0;
+  //virtual void Recalculate_Geometry(sf::Vector2f const& resolution) = 0;
 
   public:
     Ball():
@@ -29,17 +29,21 @@ class Ball : Drawable_Object {
       ball_(0),
       dir_(0, 0)
       {}
-  	Ball(sf::Vector2f const& pos, double rad);
-  	virtual void Draw(sf::RenderWindow& canvas) const;
-  	virtual void Recalculate_Geometry();
-  	sf::CircleShape get_Circle() const;
-  	void set_dir(sf::Vector2f const& dir);
+    Ball(sf::Vector2f const& pos, double rad);
+    virtual void Draw(sf::RenderWindow& canvas) const;
+    virtual void Recalculate_Geometry();
+    sf::CircleShape get_Circle() const;
+    void set_dir(sf::Vector2f const& dir);
     void Set_Fill_Color(sf::Color const& in_fill_color);
     void setPosition(double x, double y);
     sf::Vector2f getPosition() const;
     sf::Vector2f getTablePos() const;
     double getRadius() const;
+  
 
+    void give_new_Circle(sf::CircleShape const& c){ball_ = c;};
+
+    bool should_move_;
     //std::pair<bool, glm::vec2> circ_intersect(sf::CircleShape const& circle) const;
 
     //void get_out_of_da_circle(sf::CircleShape const& t);

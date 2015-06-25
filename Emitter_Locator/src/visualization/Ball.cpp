@@ -12,7 +12,8 @@ Ball(sf::Vector2f const& pos, double rad) :
 							ball_(2*(std::min(physical_table_size_.x, 
 				   physical_table_size_.y) / rad) * pixel_per_meter_),
 							//ball_(rad),
-							dir_(sf::Vector2f(-0.01,10) )
+							dir_(sf::Vector2f(-0.01,10) ),
+							should_move_(true)
 {}
 
 void Ball::
