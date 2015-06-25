@@ -88,6 +88,7 @@ load_recognized_vis_sample_positions() const {
 
     if(frequency_to_record_setter_mutex.try_lock()) {
         frequencies_to_locate = frequencies_to_find;
+
         frequency_to_record_setter_mutex.unlock();
     }
  }
@@ -121,20 +122,6 @@ load_recognized_vis_sample_positions() const {
         signal_analyzer.analyze((int**)&collector[0], recorder.buffer_bytes()/collector.count);
  
         
-/*
-
-        for(unsigned int mic_index = 0; mic_index < 4; ++mic_index) {
-            cached_toas[mic_index] = updated_times[mic_index];
-        }
-
-        toas_mutex.lock();
-            for(unsigned int mic_index = 0; mic_index < 4; ++mic_index) {
-                toas[mic_index] = cached_toas[mic_index];
-            }
-            cached_toas.x = 4.0;
-
-        toas_mutex.unlock();
-*/
 
 
 
@@ -145,12 +132,11 @@ load_recognized_vis_sample_positions() const {
 
         std::map<unsigned,glm::vec2> currently_located_positions;
 
-  
 
         for(unsigned frequency_to_locate : frequencies_to_locate) {
 
 
-            //std::cout <<  "doing something for freq " << frequency_to_locate <<"\n";
+
 
             std::array<double, 4> current_frequency_toas = signal_analyzer.get_toas_for(frequency_to_locate);
 
@@ -164,6 +150,7 @@ load_recognized_vis_sample_positions() const {
                                              current_frequency_toas.end(),
                                              0.0, d_max);
 
+            //std::cout <<  "doing something for freq " << frequency_to_locate <<"min: " << toa_min << "   max: " << toa_max <<"\n";
 
 
             if(toa_max != std::numeric_limits<double>::max() && toa_max - toa_min < 100.00 ) {
@@ -175,6 +162,8 @@ load_recognized_vis_sample_positions() const {
                 //locator.update_times(0.0,0.001,0.001,0.001);
 
               //  std::cout << "Done.\n";
+
+               // std::cout << "Starting locate for frequency " << frequency_to_locate << "\n";
                 currently_located_positions[frequency_to_locate] = locator.locate();
                 currently_located_positions[frequency_to_locate].y = 1 - currently_located_positions[frequency_to_locate].y;
                 std::cout << "Cached position: " << currently_located_positions[frequency_to_locate].x << ", " << currently_located_positions[frequency_to_locate].y << "\n";
@@ -210,6 +199,7 @@ load_recognized_vis_sample_positions() const {
 
             cached_located_positions.clear();
             for(auto const& currently_located_position_entry :  currently_located_positions) {
+                //std::cout << "Putting entry: " << currently_located_position_entry.first << "\n";
                 cached_located_positions[currently_located_position_entry.first] = std::make_pair(7, currently_located_position_entry.second);
             }
 

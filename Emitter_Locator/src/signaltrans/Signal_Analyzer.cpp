@@ -75,7 +75,8 @@ analyze(int** current_audio_buffer, unsigned int bytes_per_channel){
 
 
 		            double avg = std::accumulate(fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].begin(), 
-		                                           fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].end(), 0) /  fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].size();
+		                                           fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].end(), 0) 
+		            								/  fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].size();
 
 		            bool allow_signal_detection = false;
 
@@ -156,8 +157,8 @@ analyze(int** current_audio_buffer, unsigned int bytes_per_channel){
 
 
 
-		        if(sample_max > 9999)
-		        	return;
+		       // if(sample_max > 9999)
+		      // 	return;
 
 
 
@@ -171,7 +172,8 @@ analyze(int** current_audio_buffer, unsigned int bytes_per_channel){
 
 			            is_frequency_toa_mapping_valid[frequency_entry.first] = true;
 			                                   // std::cout << "Found something\n";
-			                                   // std::cin.get();
+											//if(frequency_entry.first == 19000)
+											//	std::cout << "valid: 19khz\n" ;
 
 			        }
 			    }
