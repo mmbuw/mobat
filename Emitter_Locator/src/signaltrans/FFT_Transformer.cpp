@@ -47,9 +47,7 @@ void FFT_Transformer::create_blackmann_harris_window() {
 }
 
 FFT_Transformer::FFT_Transformer(unsigned short fft_window_size) : start_sample_( std::numeric_limits<unsigned int>::max() ),
-																  end_sample_( std::numeric_limits<unsigned int>::max() ),
-																  stabilization_counter_(0),
-																  fft_frame_count_(0) {
+																  end_sample_( std::numeric_limits<unsigned int>::max() ) {
 	/*int fftw_thread_success = fftw_init_threads();
 
 	if(fftw_thread_success == 0) {
@@ -74,9 +72,6 @@ FFT_Transformer::FFT_Transformer(unsigned short fft_window_size) : start_sample_
 		std::cout << "Failed to allocate memory for FFT input buffer\n";
 	}
 
-	for(int i = 0; i < 10; ++i) {
-		last_x_sample_[i] = 0.0;
-	}
 	initialize_execution_plan();
 	//create_hamming_window();
 	//create_blackmann_harris_window();
@@ -104,11 +99,18 @@ FFT_Transformer::~FFT_Transformer() {
 };
 
 void FFT_Transformer::reset_sample_counters(unsigned channel_num) {
-	signal_results_[channel_num].clear();
+
+	for(unsigned iterated_frequency : listening_to_those_frequencies) {
+		signal_results_per_frequency_[iterated_frequency][channel_num].clear();
+		signal_results_per_frequency_[iterated_frequency][channel_num].reserve(5000);
+	}
 }
 
 void FFT_Transformer::clear_cached_fft_results(unsigned channel_num) {
-	fft_cached_results_[channel_num].clear();
+
+	for(unsigned iterated_frequency : listening_to_those_frequencies) {
+		fft_cached_results_per_frequency_	[iterated_frequency][channel_num].clear();
+	}
 }
 
 void FFT_Transformer::initialize_execution_plan() {
@@ -124,7 +126,12 @@ void FFT_Transformer::set_analyzation_range(unsigned int start_sample, unsigned 
 	}
 }
 
+void FFT_Transformer::set_listened_frequencies(std::vector<unsigned> const& listening_to_frequencies) {
+	listening_to_those_frequencies = listening_to_frequencies;
+}
+
 void FFT_Transformer::perform_FFT_on_channels(int** signal_buffers, unsigned bytes_per_channel, unsigned window_size) {
+
         for (unsigned int channel_iterator = 0; channel_iterator < 4	; ++channel_iterator) {
             set_FFT_buffers(4, 
                     bytes_per_channel,
@@ -133,18 +140,15 @@ void FFT_Transformer::perform_FFT_on_channels(int** signal_buffers, unsigned byt
 
             reset_sample_counters(channel_iterator);
             clear_cached_fft_results(channel_iterator);
-            for(unsigned int i = 0; i < 1500; ++i) {
+            for(unsigned int i = 0; i < 5000; ++i) {
                 unsigned offset = 1 * i;
-                if(offset > (1400) )
+                if(offset > (5000) )
                     break;
 					
 				set_analyzation_range(0+offset, window_size+50 + offset);
                 
 
-                perform_FFT(channel_iterator);
-
-
-             
+                perform_FFT(channel_iterator);           
             } 
         }
 }
@@ -177,132 +181,117 @@ void FFT_Transformer::set_FFT_input( unsigned int offset ) {
 
 unsigned int FFT_Transformer::perform_FFT(unsigned channel_num) {
 
-	eighteen_khz_sum_ = 0.0;
+	//only perform an fft, if we listen to at least 1 frequency
+	if(0 != listening_to_those_frequencies.size() ) {
+		frequency_sums_.clear();
+		//eighteen_khz_sum_ = 0.0;
 
 
-	if(start_sample_ > end_sample_ - (fft_window_size_ + 1) )
-		return 0;
+		if(start_sample_ > end_sample_ - (fft_window_size_ + 1) )
+			return 0;
 
-	for(unsigned int offset = start_sample_; offset <= end_sample_ - (fft_window_size_ + 1) ; ++offset ) {
-		//std::cout << "Trying offset " << offset <<"\n";
+		for(unsigned int offset = start_sample_; offset <= end_sample_ - (fft_window_size_ + 1) ; ++offset ) {
+			//std::cout << "Trying offset " << offset <<"\n";
 
-		//if(true) {
-		if(fft_cached_results_[channel_num].find(offset) == fft_cached_results_[channel_num].end() ) {
-			//std::cout << "Window Size: " << fft_window_size_ << "\n";
+			//if(true) {
 
-			set_FFT_input(offset);
-			fftw_execute(fftw_execution_plan_);
+			//just check if the first frequency is cached, then we can safely assume that this is done
+			//for all of the frequencies
 
-			double temp_accum_18khz = 0.0;
-			double normalization_range_value = 0.0;
-			
+			unsigned first_frequency_listened_to = *listening_to_those_frequencies.begin();
+			if( fft_cached_results_per_frequency_[first_frequency_listened_to][channel_num].find(offset) 
+				== fft_cached_results_per_frequency_[first_frequency_listened_to][channel_num].end() ) {
+				//std::cout << "Window Size: " << fft_window_size_ << "\n";
 
-			unsigned int taken_normalization_samples = 0;
-			unsigned int taken_18_khz_samples = 0;
+				set_FFT_input(offset);
+				fftw_execute(fftw_execution_plan_);
 
-			for(unsigned int signal_it = 0;
-				signal_it < (unsigned int) (fft_window_size_ / 2 - 1);
-				++signal_it) {
-					float current_frequency = (signal_it * 44100) / fft_window_size_;
+				//double temp_accum_18khz = 0.0;
 
-						if(current_frequency > 13000.0 && current_frequency < 20002.0 ) {
-							normalization_range_value +=  std::sqrt(fft_result_[signal_it][0]*fft_result_[signal_it][0]) + 
-								  	(fft_result_[signal_it][1]*fft_result_[signal_it][1]) ;
+				//initialize accumulation_vector
+				std::vector<double> temp_accum_results(listening_to_those_frequencies.size(), 0.0);
 
-								  	++taken_normalization_samples;
-						}
+				//double normalization_range_value = 0.0;
+				
 
-						if(current_frequency > 17900.0 && current_frequency < 18102.0 ) {
-						    temp_accum_18khz += std::sqrt(fft_result_[signal_it][0]*fft_result_[signal_it][0]) + 
-								  	(fft_result_[signal_it][1]*fft_result_[signal_it][1]) ;
+				//unsigned int taken_normalization_samples = 0;
+				//unsigned int taken_18_khz_samples = 0;
 
-								  	++taken_18_khz_samples;
-						//std::cout << "Current Frequency: " << current_frequency << ": " << temp_accum_18khz<< "\n";
-						}
+				for(unsigned int signal_it = 0;
+					signal_it < (unsigned int) (fft_window_size_ / 2 - 1);
+					++signal_it) {
+						float current_frequency = (signal_it * 44100) / fft_window_size_;
+	/*
+							if(current_frequency > 13000.0 && current_frequency < 20000.0 ) {
+								normalization_range_value +=  std::sqrt(fft_result_[signal_it][0]*fft_result_[signal_it][0]) + 
+									  	(fft_result_[signal_it][1]*fft_result_[signal_it][1]) ;
 
+									  	++taken_normalization_samples;
+							}
+	*/
 
+							for(unsigned iterated_frequency : listening_to_those_frequencies) {
+								if(current_frequency > ((double)iterated_frequency-100.0) && current_frequency < ((double)iterated_frequency+100.0 ) ) {
+								    /*temp_accum_18khz += std::sqrt(fft_result_[signal_it][0]*fft_result_[signal_it][0]) + 
+										  	(fft_result_[signal_it][1]*fft_result_[signal_it][1]) ;*/
 
+									temp_accum_results[iterated_frequency] += std::sqrt(fft_result_[signal_it][0]*fft_result_[signal_it][0]) + 
+																		  	(fft_result_[signal_it][1]*fft_result_[signal_it][1]) ;
 
-			}
-
-			double current_iteration_khz_sum = temp_accum_18khz / normalization_range_value;
-
-
-			fft_cached_results_[channel_num][offset] =  current_iteration_khz_sum;
-
-			eighteen_khz_sum_ += current_iteration_khz_sum;
-			//std::cout << "Uncached result\n";
-		} else {
-			eighteen_khz_sum_ += fft_cached_results_[channel_num][offset];
-			//std::cout << "Cached result\n";		
-		}
-
-	
-
-	}
-
-		last_x_sample_[(fft_frame_count_%10)] = eighteen_khz_sum_;
-
-		++fft_frame_count_;
+										  	//++taken_18_khz_samples;
+								//std::cout << "Current Frequency: " << current_frequency << ": " << temp_accum_18khz<< "\n";
+								}
+							}
 
 
-		if(!std::isnan(eighteen_khz_sum_)) {
 
-			signal_results_[channel_num].push_back(eighteen_khz_sum_);
-		
-		} else {
-
-			std::cout << "NaN detected!!!!";
-
-			std::cin.get();
-			//return 2;
-		}
-
-		return 0;
-}
-
-void FFT_Transformer::print_FFT_result(unsigned int call_idx) {
-	//unsigned counter = 0;
-	//double normalization_divident = 2048;
-
-//	double normalization_divident = 0.0;
-	double freq_sum = 0.0;
-	
-	for(unsigned int signal_it = 0;
-		signal_it < (unsigned int) (fft_window_size_ / 2 - 1);
-		++signal_it) {
-
-
-		//if( (signal_it * 44100) / fft_window_size_ > 15000.0)
-		if(signal_it >= 59 && signal_it <= 109) {
-			if(signal_it != 0 && signal_it != fft_window_size_/2)
-			freq_sum +=  (fft_result_[signal_it][0]*fft_result_[signal_it][0]) + 
-					  	(fft_result_[signal_it][1]*fft_result_[signal_it][1]) ;
-		}
-
-	}
- 
-
-	double eighteen_khz_area = 0.0;
-	for(unsigned int signal_it = 0;
-		signal_it < (unsigned int) (fft_window_size_ / 2 );
-		++signal_it) {
-
-
-		float current_frequency = (signal_it * 44100) / fft_window_size_;
-		//if(current_frequency > 18000.0 && current_frequency < 18002.0) {
-			float current_amplitude 
-				= (fft_result_[signal_it][0]*fft_result_[signal_it][0]) + 
-				  (fft_result_[signal_it][1]*fft_result_[signal_it][1])  / freq_sum;
-
-				if(current_frequency > 17000.0 && current_frequency < 18500.0 ) {
-
-					eighteen_khz_area += current_amplitude;
 
 				}
-					found_freq_ = true;
+
+				//double current_iteration_khz_sum = temp_accum_18khz;// / normalization_range_value;
+
+
+
+				for(unsigned iterated_frequency : listening_to_those_frequencies) {
+
+					double current_iteration_frequency_khz_sum = temp_accum_results[iterated_frequency];
+					fft_cached_results_per_frequency_[iterated_frequency][channel_num][offset] = current_iteration_frequency_khz_sum;
+
+					frequency_sums_[iterated_frequency] = current_iteration_frequency_khz_sum;
+				}
+
+				//frequency_sums_[]
+				//eighteen_khz_sum_ += current_iteration_khz_sum;
+				//std::cout << "Uncached result\n";
+			} else {
+				for(unsigned iterated_frequency : listening_to_those_frequencies) {
+					frequency_sums_[iterated_frequency] += fft_cached_results_per_frequency_[iterated_frequency][channel_num][offset];
+				}
+				//std::cout << "Cached result\n";		
+			}
+
+
+
+
+		}
+
+		//push back final results for this sample
+		for(unsigned iterated_frequency : listening_to_those_frequencies) {
+			if(!std::isnan(frequency_sums_[iterated_frequency])) {
+
+				signal_results_per_frequency_[iterated_frequency][channel_num].push_back(frequency_sums_[iterated_frequency]);
+			
+			} else {
+
+				std::cout << "NaN detected!!!!";
+
+				std::cin.get();
+				//return 2;
+			}
+		}
+
+
 
 	}
-
-
+	return 0;
 }
