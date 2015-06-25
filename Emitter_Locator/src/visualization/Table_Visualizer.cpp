@@ -47,6 +47,7 @@ Table_Visualizer( sf::Vector2u const& in_canvas_resolution,
 
 	//pseudopong
 
+
 	b_x_pos_ = 0.5;
 	b_y_pos_ = 0.5;
 	//ball_ = Ball(sf::Vector2f(b_x_pos_, b_y_pos_));
@@ -66,6 +67,7 @@ Table_Visualizer::
 
 void Table_Visualizer::
 Draw(sf::RenderWindow& canvas) const {
+	
 	table_.Draw(canvas);
 
 	for( auto& id_token_pair : recognized_tokens_ ) {
@@ -73,11 +75,13 @@ Draw(sf::RenderWindow& canvas) const {
 	}
 
 	ball_.Draw(canvas);
+	
 }
 
 
 void Table_Visualizer::
 Draw(sf::RenderWindow& canvas, glm::vec4 toas) const {
+	
 	table_.Draw(canvas, microphones_, toas );
 
 	for(auto const& mic_obj : microphones_) {
@@ -89,7 +93,7 @@ Draw(sf::RenderWindow& canvas, glm::vec4 toas) const {
 	}
 
 	ball_.Draw(canvas);
-
+	
 
 }
 
@@ -155,15 +159,16 @@ Recalculate_Geometry() {
 		
 #if 1
 	//tor-erkennung
+
 	if(b_x_pos_ < resolution_.y && b_x_pos_ > -2*ball_.get_Circle().getRadius())
 	{
-	    b_x_pos_ += ball_dir_.x;
+	    ball_pos_.x += ball_dir_.x;
 	}    
 	else
 	{
 	   // std::cout<<"TOOOOOORRRRR\n";
-	    if(b_x_pos_ >= resolution_.y)
-	    {
+
+	    if(b_x_pos_ >= resolution_.y){
 	        //tor für spieler left
 	        ball_dir_.x = ball_speed_;
 	        ball_dir_.y = 0;
@@ -176,8 +181,8 @@ Recalculate_Geometry() {
 	        ball_dir_.y = 0;
 	        //++right_goals;
 	    }
-	    b_x_pos_  = resolution_.x/2.0 - ball_.get_Circle().getRadius();
-	    b_y_pos_  = resolution_.y/2.0 - ball_.get_Circle().getRadius();
+	    ball_pos_.x  = resolution_.x/2.0 - ball_.get_Circle().getRadius();
+	    ball_pos_.y  = resolution_.y/2.0 - ball_.get_Circle().getRadius();
 	    
 	    /*l_y_pos  = y_max/2.0 - left.getRadius();
 	    r_y_pos  = y_max/2.0 - right.getRadius();
@@ -189,11 +194,14 @@ Recalculate_Geometry() {
 
 
 	// oben unten begrenzung
+
 	/*if(b_y_pos_ >= resolution_.y - 2*ball_.get_Circle().getRadius() || b_y_pos_ <= 0)
+
 	{
 	    ball_dir_.y = -ball_dir_.y; //an obere kante gestoßen
 	} */
 	
+
 	b_y_pos_ += ball_dir_.y;
 #endif
 	   // b_x_pos_ += ball_dir_.x; //wieder rausnehmen

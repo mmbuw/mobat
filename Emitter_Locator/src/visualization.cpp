@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <thread>
+#include <X11/Xlib.h>
 
 #define NUM_RECORDED_CHANNELS 4
 
@@ -15,10 +16,11 @@ sf::Vector2u windowResolution(800, 800);
 
 int main(int argc, char** argv) {
 
-//sf::VideoMode fullScreenMode = sf::VideoMode::getDesktopMode();
+//XInitThreads();
+// sf::VideoMode fullScreenMode = sf::VideoMode::getDesktopMode();
 sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
-                        , "Table_Vis");
-//window.setSize(windowResolution);
+                       , "Table_Vis");
+window.setSize(windowResolution);
 
     std::vector<sf::Vector2f> default_microphone_positions_ = {{0.055, 0.08}, {0.95,  0.09}, {0.105,  1.89}, {0.925,  1.92}};
        /* default_microphone_positions_.push_back(sf::Vector2f(0.0,4.0));
@@ -37,17 +39,21 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
 
     //unsigned frame_counter = 0;
 #if 0
-    while (window.isOpen())
+    
+    //while (window.isOpen())
+    while(true)
     {
         sf::Event event;
-        while (window.pollEvent(event)){
+      //  while (window.pollEvent(event))
+        {
             if (event.type == sf::Event::Closed)
-                window.close();
+                    exit(1);
+        //        window.close();
 
-2           if (event.type == sf::Event::KeyPressed) {
+            if (event.type == sf::Event::KeyPressed) {
 
-            	if(event.key.code == sf::Keyboard::Escape)
-            		window.close();
+          //  	if(event.key.code == sf::Keyboard::Escape)
+          //  		window.close();
 
             	if(event.key.code == sf::Keyboard::Up 
             		|| event.key.code == sf::Keyboard::Down
@@ -78,13 +84,13 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
         smartphonePosition.y = 1.0 - point.y;
 
 
-        glm::vec4 toas = locator.lo2d_toas();
+        glm::vec4 toas = locator.load_toas();
 
 
 
-        window.clear();
+        //window.clear();
         table_visualizer.Recalculate_Geometry();
-        table_visualizer.Draw(window, toas);
+        //table_visualizer.Draw(window, toas);
 
    //    std::cout << "toas: " << toas[0] << ", " << toas[1] << ", " << toas[2] << ", " << toas[3] << "\n";
 
@@ -97,8 +103,8 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
                                                             smartphonePosition.y+0.2));
         }
 */
-        table_visualizer.Finalize_Visualization_Frame();
-        window.display();
+        //table_visualizer.Finalize_Visualization_Frame();
+        //window.display();
     }
 
 #else //pong mit tastatur
@@ -125,38 +131,22 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
                     window.close();
                     break;*/
 
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-            {
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
                 pl1_dir.y += player_speed;
-                // if(pl2_pos.y > min.y)
-                  // pl2_pos.y += player_speed;
-                std::cout<<"Up pressed\n";
             }
 
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-            {
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
                 pl1_dir.y -= player_speed;
-                // if(pl2_pos.y < max.y /*-2*right.getRadius()*/)
-                    // pl2_pos.y -= player_speed;
-                std::cout<<"Down pressed\n";
             }
 
 
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-            {
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
                 pl1_dir.x += player_speed;
-                // if(pl2_pos.x < max.x /*-2*right.getRadius()*/)
-                    // pl2_pos.x += player_speed;
-                std::cout<<"Right pressed\n";
             }
 
 
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-            {
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
                 pl1_dir.x -= player_speed;
-                // if(pl2_pos.x > min.x)
-                    // pl2_pos.x -= player_speed;
-                std::cout<<"Left pressed\n";
             }
 
             glm::vec2 pl1_new{pl1_pos + pl1_dir};
@@ -164,38 +154,22 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
 
             //left player
 
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::W))
-            {
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
                 pl2_dir.y += player_speed;
-                // if(pl1_pos.y > min.y)
-                    // pl1_pos.y += player_speed;
-                std::cout<<"W pressed\n";
             }
 
 
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-            {
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
                 pl2_dir.y -= player_speed;
-                // if(pl1_pos.y < max.y/*-2*left.getRadius()*/)
-                    // pl1_pos.y -= player_speed;
-                std::cout<<"S pressed\n";
             }
 
 
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-            {
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
                 pl2_dir.x += player_speed;
-                // if(pl1_pos.x  < max.x)
-                    // pl1_pos.x += player_speed;
-                std::cout<<"D pressed\n";
             }
 
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-            {
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
                 pl2_dir.x -= player_speed;
-                // if(pl1_pos.x > min.x)
-                    // pl1_pos.x -= player_speed;
-                std::cout<<"A pressed\n";
             }
                     
             glm::vec2 pl2_new{pl2_pos + pl2_dir};

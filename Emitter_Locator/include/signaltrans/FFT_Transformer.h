@@ -10,6 +10,8 @@
 
 #include <map>
 
+#include <vector>
+
 class FFT_Transformer {
 	private:
 
@@ -48,6 +50,9 @@ class FFT_Transformer {
 
 		double last_x_sample_[10];
 		unsigned int fft_frame_count_;
+
+
+
 		void create_hamming_window();
 		void create_hann_window();
 		void create_blackmann_harris_window();
@@ -56,12 +61,12 @@ class FFT_Transformer {
 		FFT_Transformer(unsigned short fft_frame_size);
 		~FFT_Transformer();
 
-		void reset_sample_counters();
+		void reset_sample_counters(unsigned );
 		void clear_cached_fft_results();
 
 		void initialize_execution_plan();
 		void set_FFT_input( unsigned int offset);
-		unsigned perform_FFT();
+		unsigned perform_FFT(unsigned );
 		void print_FFT_result(unsigned int call_idx);
 
 		void set_analyzation_range(unsigned int start_sample,
@@ -70,6 +75,8 @@ class FFT_Transformer {
 		void set_FFT_buffers( unsigned int num_buffers,
 							  unsigned int buffer_size,
 							  int** buffers);
+
+		std::vector<unsigned int> signal_results_[4];
 };
 
 #endif
