@@ -104,7 +104,7 @@ analyze(int** current_audio_buffer, unsigned int bytes_per_channel){
 
 		                            for(int back_tracking_index = sample_num-1; back_tracking_index >= 0; --back_tracking_index) {
 
-		                                if(fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator][back_tracking_index] < avg ) {
+		                                if(fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator][back_tracking_index] < avg *0.50) {
 		                                    signal_detected_at_sample_per_frequency[frequency_entry.first][channel_iterator] = back_tracking_index;
 
 											//if(frequency_entry.first == 19000)
