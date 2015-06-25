@@ -140,9 +140,9 @@ void FFT_Transformer::perform_FFT_on_channels(int** signal_buffers, unsigned byt
 
             reset_sample_counters(channel_iterator);
             clear_cached_fft_results(channel_iterator);
-            for(unsigned int i = 0; i < 5000; ++i) {
+            for(unsigned int i = 0; i < 1400; ++i) {
                 unsigned offset = 1 * i;
-                if(offset > (5000) )
+                if(offset > (1400) )
                     break;
 					
 				set_analyzation_range(0+offset, window_size+50 + offset);
@@ -181,6 +181,10 @@ void FFT_Transformer::set_FFT_input( unsigned int offset ) {
 
 unsigned int FFT_Transformer::perform_FFT(unsigned channel_num) {
 
+	//dummy insertion
+	//listening_to_those_frequencies.clear();
+	//listening_to_those_frequencies.push_back(18000);
+	//listening_to_those_frequencies.push_back(19000);
 	//only perform an fft, if we listen to at least 1 frequency
 	if(0 != listening_to_those_frequencies.size() ) {
 		frequency_sums_.clear();
@@ -209,9 +213,9 @@ unsigned int FFT_Transformer::perform_FFT(unsigned channel_num) {
 				//double temp_accum_18khz = 0.0;
 
 				//initialize accumulation_vector
-				std::vector<double> temp_accum_results(listening_to_those_frequencies.size(), 0.0);
+				std::map<unsigned, double> temp_accum_results;
 
-				//double normalization_range_value = 0.0;
+				double normalization_range_value = 0.0;
 				
 
 				//unsigned int taken_normalization_samples = 0;
@@ -220,26 +224,23 @@ unsigned int FFT_Transformer::perform_FFT(unsigned channel_num) {
 				for(unsigned int signal_it = 0;
 					signal_it < (unsigned int) (fft_window_size_ / 2 - 1);
 					++signal_it) {
-						float current_frequency = (signal_it * 44100) / fft_window_size_;
-	/*
-							if(current_frequency > 13000.0 && current_frequency < 20000.0 ) {
+						float current_frequency = (signal_it * 44100.0) / fft_window_size_;
+
+
+
+							if(current_frequency > 13000.0 && current_frequency < 20002.0 ) {
 								normalization_range_value +=  std::sqrt(fft_result_[signal_it][0]*fft_result_[signal_it][0]) + 
 									  	(fft_result_[signal_it][1]*fft_result_[signal_it][1]) ;
 
-									  	++taken_normalization_samples;
+									  	//++taken_normalization_samples;
 							}
-	*/
 
 							for(unsigned iterated_frequency : listening_to_those_frequencies) {
 								if(current_frequency > ((double)iterated_frequency-100.0) && current_frequency < ((double)iterated_frequency+100.0 ) ) {
-								    /*temp_accum_18khz += std::sqrt(fft_result_[signal_it][0]*fft_result_[signal_it][0]) + 
-										  	(fft_result_[signal_it][1]*fft_result_[signal_it][1]) ;*/
 
 									temp_accum_results[iterated_frequency] += std::sqrt(fft_result_[signal_it][0]*fft_result_[signal_it][0]) + 
 																		  	(fft_result_[signal_it][1]*fft_result_[signal_it][1]) ;
 
-										  	//++taken_18_khz_samples;
-								//std::cout << "Current Frequency: " << current_frequency << ": " << temp_accum_18khz<< "\n";
 								}
 							}
 
@@ -248,26 +249,20 @@ unsigned int FFT_Transformer::perform_FFT(unsigned channel_num) {
 
 				}
 
-				//double current_iteration_khz_sum = temp_accum_18khz;// / normalization_range_value;
-
-
 
 				for(unsigned iterated_frequency : listening_to_those_frequencies) {
 
-					double current_iteration_frequency_khz_sum = temp_accum_results[iterated_frequency];
+					double current_iteration_frequency_khz_sum = temp_accum_results[iterated_frequency] / normalization_range_value;
 					fft_cached_results_per_frequency_[iterated_frequency][channel_num][offset] = current_iteration_frequency_khz_sum;
 
-					frequency_sums_[iterated_frequency] = current_iteration_frequency_khz_sum;
+					frequency_sums_[iterated_frequency] += current_iteration_frequency_khz_sum;
 				}
 
-				//frequency_sums_[]
-				//eighteen_khz_sum_ += current_iteration_khz_sum;
-				//std::cout << "Uncached result\n";
 			} else {
 				for(unsigned iterated_frequency : listening_to_those_frequencies) {
 					frequency_sums_[iterated_frequency] += fft_cached_results_per_frequency_[iterated_frequency][channel_num][offset];
 				}
-				//std::cout << "Cached result\n";		
+
 			}
 
 
@@ -280,7 +275,7 @@ unsigned int FFT_Transformer::perform_FFT(unsigned channel_num) {
 			if(!std::isnan(frequency_sums_[iterated_frequency])) {
 
 				signal_results_per_frequency_[iterated_frequency][channel_num].push_back(frequency_sums_[iterated_frequency]);
-			
+				//std::cout << "Get results: " << frequency_sums_[iterated_frequency] << "\n";
 			} else {
 
 				std::cout << "NaN detected!!!!";

@@ -25,6 +25,8 @@ class Table_Visualizer : Drawable_Object {
 		//register them with their frequency
 		std::map<unsigned, Recognized_Token_Object> recognized_tokens_;
 
+		std::map<unsigned, sf::Color> token_color_mapping_;
+
 		unsigned token_recognition_timeout_;
 
 		std::set<unsigned> tokens_to_refresh_;
@@ -69,7 +71,7 @@ class Table_Visualizer : Drawable_Object {
 
 		void Set_Microphone_Fill_Color( sf::Color const& in_microphone_fill_color );
 
-		void Set_Token_Fill_Color( sf::Color const& in_microphone_fill_color );
+		void Set_Token_Fill_Color(unsigned frequency, sf::Color const& in_token_fill_color );
 
 		void Set_Token_Recognition_Timeout( unsigned in_timeout_in_ms );
 

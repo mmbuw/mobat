@@ -11,11 +11,11 @@ Locator::Locator(unsigned int num_mics):
  shutdown{false},
  recorder{num_mics, 44100, 130000},
  collector{recorder.buffer_bytes() / num_mics, num_mics},
- locator{330, {0.055, 0.08}, {0.95,  0.09}, {0.925,  1.92} , {0.105,  1.89}}
+ locator{330, {0.06, 0.075}, {0.945,  0.09}, {0.925,  1.915} , {0.06,  1.905}}
  {
 
-    signal_analyzer.start_listening_to(18000);
-    signal_analyzer.start_listening_to(16000);
+    //signal_analyzer.start_listening_to(18000);
+    //signal_analyzer.start_listening_to(19000);
 
  }
 
@@ -84,10 +84,19 @@ load_recognized_vis_sample_positions() const {
 
 
 
+ void Locator::set_frequencies_to_record(std::vector<unsigned> const& frequencies_to_find) {
+
+    if(frequency_to_record_setter_mutex.try_lock()) {
+        frequencies_to_locate = frequencies_to_find;
+        frequency_to_record_setter_mutex.unlock();
+    }
+ }
+
  void Locator::record_position() {
 
     // start recording loop
     auto recording_thread = std::thread{&Recorder::recording_loop, &recorder};
+
 
     while (!shutdown)
     {
@@ -104,16 +113,12 @@ load_recognized_vis_sample_positions() const {
 
         recorder.request_recording();
 
+
+        for (unsigned frequency_to_analyze : frequencies_to_locate) {
+            signal_analyzer.start_listening_to(frequency_to_analyze);
+        }
+
         signal_analyzer.analyze((int**)&collector[0], recorder.buffer_bytes()/collector.count);
-
-
-
-
-
-
-
-
-
  
         
 /*
@@ -132,54 +137,58 @@ load_recognized_vis_sample_positions() const {
 */
 
 
-        std::array<double, 4> current_frequency_toas = signal_analyzer.get_toas_for(18000);
 
-        double const & (*d_min) (double const &, double const &) = std::min<double>;
-        double const & (*d_max) (double const &, double const &) = std::max<double>;
-
-        double toa_min = std::accumulate(current_frequency_toas.begin(),
-                                              current_frequency_toas.end(),
-                                              std::numeric_limits<double>::max(), d_min);
-        double toa_max = std::accumulate(current_frequency_toas.begin(),
-                                         current_frequency_toas.end(),
-                                         0.0, d_max);
 
 
 
         bool found_positions = false;
 
-        glm::vec2 cached_position;
+        std::map<unsigned,glm::vec2> currently_located_positions;
 
-        std::cout << "toa_min: " << toa_min << "\n";
-        std::cout << "toa_max: " << toa_max << "\n";
+  
 
-        if(toa_max - toa_min < 100.00 ) {
-
-            found_positions = true;
+        for(unsigned frequency_to_locate : frequencies_to_locate) {
 
 
-            std::cout << "toas:\n";
-            std::cout << current_frequency_toas[0] << "\n" <<
-                         current_frequency_toas[1] << "\n" <<
-                         current_frequency_toas[2] << "\n" <<
-                         current_frequency_toas[3] << "\n\n";
+            //std::cout <<  "doing something for freq " << frequency_to_locate <<"\n";
 
-            locator.update_times(current_frequency_toas[0], current_frequency_toas[1], current_frequency_toas[2], current_frequency_toas[3]);
-            //locator.update_times(0.0,0.001,0.001,0.001);
+            std::array<double, 4> current_frequency_toas = signal_analyzer.get_toas_for(frequency_to_locate);
 
-          //  std::cout << "Done.\n";
-            cached_position = locator.locate();
-            cached_position.y = 1 - cached_position.y;
-            std::cout << "Cached position: " << cached_position.x << ", " << cached_position.y << "\n";
-            std::cout << "\n";
+            double const & (*d_min) (double const &, double const &) = std::min<double>;
+            double const & (*d_max) (double const &, double const &) = std::max<double>;
 
-            std::cout << "\n";
+            double toa_min = std::accumulate(current_frequency_toas.begin(),
+                                                  current_frequency_toas.end(),
+                                                  std::numeric_limits<double>::max(), d_min);
+            double toa_max = std::accumulate(current_frequency_toas.begin(),
+                                             current_frequency_toas.end(),
+                                             0.0, d_max);
+
+
+
+            if(toa_max != std::numeric_limits<double>::max() && toa_max - toa_min < 100.00 ) {
+
+                found_positions = true;
+
+
+                locator.update_times(current_frequency_toas[0], current_frequency_toas[1], current_frequency_toas[2], current_frequency_toas[3]);
+                //locator.update_times(0.0,0.001,0.001,0.001);
+
+              //  std::cout << "Done.\n";
+                currently_located_positions[frequency_to_locate] = locator.locate();
+                currently_located_positions[frequency_to_locate].y = 1 - currently_located_positions[frequency_to_locate].y;
+                std::cout << "Cached position: " << currently_located_positions[frequency_to_locate].x << ", " << currently_located_positions[frequency_to_locate].y << "\n";
+                std::cout << "\n";
+
+                std::cout << "\n";
+
 
 /*
             for(unsigned int sample_copy_index = 0; sample_copy_index < 4; ++sample_copy_index) {
                 std::cout<< signal_detected_at_sample[sample_copy_index]  << "\n";
             }
 */
+            }
         }
 
 
@@ -199,7 +208,11 @@ load_recognized_vis_sample_positions() const {
             //std::cin.get();
             //std::map<unsigned, std::pair<unsigned, glm::vec2> > currently_located_frequencies;
 
-            cached_located_positions[18000] = std::make_pair(7, cached_position);
+            cached_located_positions.clear();
+            for(auto const& currently_located_position_entry :  currently_located_positions) {
+                cached_located_positions[currently_located_position_entry.first] = std::make_pair(7, currently_located_position_entry.second);
+            }
+
             position_mutex.lock();
             located_positions = cached_located_positions;
             position_mutex.unlock();

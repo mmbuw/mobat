@@ -60,8 +60,8 @@ locate() const {
 
     glm::vec2 test;
 
-    double x_step_length = (max_.x - min_.x) / 1000.0;
-    double y_step_length = (max_.y - min_.y) / 1000.0;
+    double x_step_length = (max_.x - min_.x) / 100.0;
+    double y_step_length = (max_.y - min_.y) / 200.0;
 
 
 

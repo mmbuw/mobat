@@ -21,6 +21,8 @@ class Locator {
      std::array<std::vector<double>,4> const load_signal_vis_samples() const;
      std::array<unsigned, 4> const load_recognized_vis_sample_positions() const;
 
+     void set_frequencies_to_record(std::vector<unsigned> const& frequencies_to_find);
+
      void record_position();
 
      void shut_down();
@@ -31,6 +33,8 @@ private:
     mutable std::mutex toas_mutex;
     mutable std::mutex signal_vis_samples_mutex;
     mutable std::mutex recognized_vis_sample_pos_mutex;
+
+    std::mutex frequency_to_record_setter_mutex;
 
     bool shutdown;
     std::map<unsigned, std::pair<unsigned, glm::vec2> > located_positions;
@@ -45,6 +49,8 @@ private:
     std::array<std::vector<double>,4> signal_vis_samples;
     std::array<std::vector<double>,4> cached_signal_vis_samples;
     
+    std::vector<unsigned> frequencies_to_locate;
+
     Recorder recorder;
     buffer_collection collector;
 

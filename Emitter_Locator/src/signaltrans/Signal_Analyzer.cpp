@@ -21,9 +21,20 @@ void Signal_Analyzer::
 analyze(int** current_audio_buffer, unsigned int bytes_per_channel){
 
 
-	//frequency_toas_mapping.clear();
+	std::vector<unsigned> fft_result_frequencies;
+	for(auto const& frequency_to_transform_entry : frequency_toas_mapping) {
+		fft_result_frequencies.push_back(frequency_to_transform_entry.first);
 
-    signal_detected_at_sample = {100000, 100000, 100000, 100000};
+	}
+
+
+	fft_transformer.set_listened_frequencies(fft_result_frequencies);
+
+
+	signal_detected_at_sample_per_frequency.clear();
+
+
+
 
     fft_transformer.perform_FFT_on_channels((int**)&current_audio_buffer[0], bytes_per_channel, fft_window_size);
 
@@ -35,111 +46,141 @@ analyze(int** current_audio_buffer, unsigned int bytes_per_channel){
 
 
 
-        unsigned signal_average[4] ;
-
-        for(unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
-
-
-            unsigned int const & (*max) (unsigned int const &, unsigned int const &) = std::max<unsigned>;
-            unsigned sum = std::accumulate(fft_transformer.signal_results_[channel_iterator].begin(), 
-                                           fft_transformer.signal_results_[channel_iterator].end(), 0, max);
-            signal_average[channel_iterator] = sum ;/// fft_transformer.signal_results_[channel_iterator].size();
-
-            unsigned num_pause_samples = 0;
-            unsigned num_signal_samples = 0;
-
-            unsigned sample_num = 0;
-
-            unsigned peak = signal_average[channel_iterator];
-            unsigned avg = std::accumulate(fft_transformer.signal_results_[channel_iterator].begin(), 
-                                           fft_transformer.signal_results_[channel_iterator].end(), 0) /  fft_transformer.signal_results_[channel_iterator].size();
-
-            bool allow_signal_detection = false;
-
-                            //signal_detected_at_sample[channel_iterator] = 500;
-            for(auto const& sig :fft_transformer.signal_results_[channel_iterator]) {
-
-                if(sig < peak * 0.75) {
-                    num_signal_samples = 0;
-
-                    ++num_pause_samples;
-
-                } else {
-
-
-                    if(num_pause_samples > starting_sample_threshold) {
-                        allow_signal_detection = true;
-                    }
-
-                    if(allow_signal_detection) {
-                        ++num_signal_samples;
+        double signal_average[4] ;
 
 
 
-                        if( num_signal_samples > 300 ) {
+			for(auto const& frequency_entry : frequency_toas_mapping) {
+
+				//std::cout << "Handling " << frequency_entry.first << "\n";
+
+        	    double const & (*d_max) (double const &, double const &) = std::max<double>;
+
+    				signal_detected_at_sample_per_frequency[frequency_entry.first] = {100000, 100000, 100000, 100000};
 
 
-                            for(int back_tracking_index = sample_num-1; back_tracking_index >= 0; --back_tracking_index) {
-                                if(fft_transformer.signal_results_[channel_iterator][back_tracking_index] < avg ) {
-                                    signal_detected_at_sample[channel_iterator] = back_tracking_index;
+    	    	for(unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
 
 
-                                    break;
-                                } else {
-                                   // current_val = fft_transformer.signal_results_[channel_iterator][back_tracking_index];
-                                }
-                            }
+		            double sum = std::accumulate(fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].begin(), 
+		                                           fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].end(), 0.0, d_max);
+		            signal_average[channel_iterator] = sum ;/// fft_transformer.signal_results_[channel_iterator].size();
 
-                            break;
-                        }
-                    }
+		            unsigned num_pause_samples = 0;
+		            unsigned num_signal_samples = 0;
 
+		            unsigned sample_num = 0;
 
-                }
+		            double peak = signal_average[channel_iterator];
 
 
+		            double avg = std::accumulate(fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].begin(), 
+		                                           fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].end(), 0) /  fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].size();
 
-                ++sample_num;
-            }
+		            bool allow_signal_detection = false;
 
-        }
-
+		            for(auto const& sig : fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator]) {
 
 
-        unsigned int const & (*min) (unsigned int const &, unsigned int const &) = std::min<unsigned>;
-        unsigned int const & (*max) (unsigned int const &, unsigned int const &) = std::max<unsigned>;
+		                if(sig < peak * 0.75) {
+		                    num_signal_samples = 0;
 
-        unsigned sample_min = std::accumulate(signal_detected_at_sample.begin(),
-                                              signal_detected_at_sample.end(),
-                                              std::numeric_limits<unsigned>::max(), min);
+		                    ++num_pause_samples;
 
-        unsigned sample_max = std::accumulate(signal_detected_at_sample.begin(),
-                                              signal_detected_at_sample.end(),
-                                              0, max);
+		                } else {
 
-        if(sample_max > 9999)
-        	return;
+
+		                    if(num_pause_samples > starting_sample_threshold) {
+		                        allow_signal_detection = true;
+		                    }
+
+		                    if(allow_signal_detection) {
+		                        ++num_signal_samples;
 
 
 
-        std::cout << "\n\n\ndetected samples: " <<
-        			signal_detected_at_sample[0] << "\n" << 
-         			signal_detected_at_sample[1] << "\n" << 
-         			signal_detected_at_sample[2] << "\n" << 
-         			signal_detected_at_sample[3] << "\n\n";
+		                        if( num_signal_samples > 300 ) {
 
-        std::cout << "sample_min: " << sample_min << "\n";
 
-        if(sample_max - sample_min < 500 && sample_max < 999999) {
+		                            for(int back_tracking_index = sample_num-1; back_tracking_index >= 0; --back_tracking_index) {
 
-	        for(unsigned int signal_idx = 0; signal_idx < 4; ++signal_idx) {
-	            updated_times[signal_idx] = (signal_detected_at_sample[signal_idx] - sample_min) / 44100.0;
-	            frequency_toas_mapping[18000][signal_idx] = updated_times[signal_idx];
-	                                   // std::cout << "Found something\n";
-	                                   // std::cin.get();
+		                                if(fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator][back_tracking_index] < avg ) {
+		                                    signal_detected_at_sample_per_frequency[frequency_entry.first][channel_iterator] = back_tracking_index;
+
+											//if(frequency_entry.first == 19000)
+											//	std::cout << "19 KHZ @ sample: " << signal_detected_at_sample_per_frequency[frequency_entry.first][channel_iterator] << "\n";
+
+		                                    /*'if(channel_iterator == 0) {
+		                                    	std::cout << "Detected signal\n";
+		                                    	std::cin.get();
+		                                    }*/
+		                                    break;
+		                                } else {
+		                                   // current_val = fft_transformer.signal_results_[channel_iterator][back_tracking_index];
+		                                }
+
+		                            }
+
+		                            break;
+		                        }
+		                    }
+
+
+		                }
+
+
+
+		                ++sample_num;
+		            }
+
+	           	}
 
 	        }
-	    }
+
+
+
+	        unsigned int const & (*min) (unsigned int const &, unsigned int const &) = std::min<unsigned>;
+	        unsigned int const & (*max) (unsigned int const &, unsigned int const &) = std::max<unsigned>;
+
+
+			for(auto const& frequency_entry : frequency_toas_mapping) {
+
+
+		        unsigned sample_min = std::accumulate(signal_detected_at_sample_per_frequency[frequency_entry.first].begin(),
+		                                              signal_detected_at_sample_per_frequency[frequency_entry.first].end(),
+		                                              std::numeric_limits<unsigned>::max(), min);
+
+		        unsigned sample_max = std::accumulate(signal_detected_at_sample_per_frequency[frequency_entry.first].begin(),
+		                                              signal_detected_at_sample_per_frequency[frequency_entry.first].end(),
+		                                              0, max);
+
+
+
+		        if(sample_max > 9999)
+		        	return;
+
+
+
+		        //std::cout << "sample_min: " << sample_min << "\n";
+
+		        if(sample_max-sample_min > 0 && sample_max - sample_min < 500 && sample_max < 999999) {
+
+			        for(unsigned int signal_idx = 0; signal_idx < 4; ++signal_idx) {
+			            updated_times[signal_idx] = (signal_detected_at_sample_per_frequency[frequency_entry.first][signal_idx] - sample_min) / 44100.0;
+			            frequency_toas_mapping[frequency_entry.first][signal_idx] = updated_times[signal_idx];
+
+			            is_frequency_toa_mapping_valid[frequency_entry.first] = true;
+			                                   // std::cout << "Found something\n";
+			                                   // std::cin.get();
+
+			        }
+			    }
+			    else {
+			    	is_frequency_toa_mapping_valid[frequency_entry.first] = false;
+			    }
+			}
+
+	
 
 }
 
@@ -170,32 +211,35 @@ start_listening_to(unsigned const frequency_to_start_listening_to) {
 }
 
 std::array<double, 4> Signal_Analyzer::
-get_toas_for(unsigned const frequency) const{
+get_toas_for(unsigned const frequency) {
+
 
 	std::map<unsigned, std::array<double, 4> >::const_iterator frequency_iterator
 		= frequency_toas_mapping.find(frequency);
 
-		if(frequency_toas_mapping.end() != frequency_iterator) {
+		if( (frequency_toas_mapping.end() != frequency_iterator) && (is_frequency_toa_mapping_valid[frequency]) ) {
 
-			std::cout << "toas in getter: " << 
-				frequency_iterator->second[0] << "\n" <<
-				frequency_iterator->second[1] << "\n" <<
-				frequency_iterator->second[2] << "\n" <<
-				frequency_iterator->second[3] << "\n\n";
-			return frequency_iterator->second;
+			if(frequency_iterator->second[0] != 0.0 
+			|| frequency_iterator->second[1] != 0.0 
+			|| frequency_iterator->second[2] != 0.0
+			|| frequency_iterator->second[3] != 0.0) {
+				return frequency_iterator->second;
+			} else {
+				return {std::numeric_limits<double>::max(),std::numeric_limits<double>::max(),std::numeric_limits<double>::max(),std::numeric_limits<double>::max()};
+			}
 		} 
 
 		//TODO: add "Frequency not registered exception" instead of returning
 		//		an empty array
 		else {
 
-			return std::array<double, 4>();
+			return {std::numeric_limits<double>::max(),std::numeric_limits<double>::max(),std::numeric_limits<double>::max(),std::numeric_limits<double>::max()};
 		}
 
 }
 
 std::array<std::vector<double>,4> const Signal_Analyzer::
-get_signal_samples_for(unsigned const frequency) const{
+get_signal_samples_for(unsigned const frequency) {
 
-	return fft_transformer.signal_results_;
+	return fft_transformer.signal_results_per_frequency_[frequency];
 }

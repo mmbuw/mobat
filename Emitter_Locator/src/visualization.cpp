@@ -31,13 +31,15 @@ sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
 window.setSize(windowResolution);
 //#endif
 
-    std::vector<sf::Vector2f> default_microphone_positions_ = {{0.055, 0.08}, {0.95,  0.09}, {0.925,  1.92}, {0.105,  1.89}};
+    std::vector<sf::Vector2f> default_microphone_positions_ = {{0.06, 0.075}, {0.945,  0.09}, {0.925,  1.915} , {0.06,  1.905}};
 
 
     TTT::Table_Visualizer table_visualizer(windowResolution, sf::Vector2f(1.0, 2.0), default_microphone_positions_);
     table_visualizer.Set_Token_Recognition_Timeout(10000);
 
     Locator locator{4};
+
+    locator.set_frequencies_to_record({18000, 19000});
 
     auto recording_thread = std::thread(&Locator::record_position, &locator);
 
@@ -51,6 +53,9 @@ window.setSize(windowResolution);
 
     double player_speed = 0.03;
         
+
+        table_visualizer.Set_Token_Fill_Color(18000, sf::Color(255,0,0) );
+        table_visualizer.Set_Token_Fill_Color(19000, sf::Color(255,255,0) );
 
         while (window.isOpen())
         {
@@ -128,19 +133,19 @@ window.setSize(windowResolution);
                 //std::cin.get();
             }
 
-            if(positions.find(18000) != positions.end()) {
+            for(auto const& frequency_position_entry : positions ) {     
+                //std::cout << "Frequency_Position_Entry: " << frequency_position_entry.first << "\n";
+                    glm::vec2 current_frequency_position = positions[frequency_position_entry.first].second;
 
-                glm::vec2 current_frequency_position = positions[18000].second;
+                    smartphonePosition.x = current_frequency_position.x;
+                    smartphonePosition.y = 1.0 - current_frequency_position.y;
 
-                smartphonePosition.x = current_frequency_position.x;
-                smartphonePosition.y = 1.0 - current_frequency_position.y;
+                   // std::cout << "I Want to signal!\n";
+                    //std::cin.get();
 
-               // std::cout << "I Want to signal!\n";
-                //std::cin.get();
-                table_visualizer.Signal_Token(18000, sf::Vector2f(smartphonePosition.x, smartphonePosition.y));
+                    //std::cout << "found frequency: " << frequency_position_entry.first << " @ pos: " << smartphonePosition.x << "," << smartphonePosition.y << "\n";
+                    table_visualizer.Signal_Token(frequency_position_entry.first, sf::Vector2f(smartphonePosition.x, smartphonePosition.y));
             }
-
-
 
             table_visualizer.Finalize_Visualization_Frame();
             window.display();

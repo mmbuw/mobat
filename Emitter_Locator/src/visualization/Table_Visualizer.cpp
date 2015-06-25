@@ -42,7 +42,7 @@ Table_Visualizer( sf::Vector2u const& in_canvas_resolution,
 	Resize_Physical_Table( table_dims ); 
 	Set_Table_Fill_Color( in_table_fill_color );
 	Set_Microphone_Fill_Color( in_microphone_fill_color );
-	Set_Token_Fill_Color( in_token_fill_color );
+	//Set_Token_Fill_Color( in_token_fill_color );
 
 
 	//pseudopong
@@ -237,7 +237,10 @@ Set_Microphone_Fill_Color( sf::Color const& in_microphone_fill_color ) {
 }
 
 void Table_Visualizer::
-Set_Token_Fill_Color( sf::Color const& in_token_fill_color ) {
+Set_Token_Fill_Color(unsigned frequency, sf::Color const& in_token_fill_color ) {
+
+	token_color_mapping_[frequency] = in_token_fill_color;
+
 	for( auto& id_token_pair : recognized_tokens_ ) {
 		id_token_pair.second.Set_Fill_Color(in_token_fill_color);
 	}
@@ -259,6 +262,13 @@ Signal_Token(unsigned int in_id, sf::Vector2f const& in_position) {
 	}
 		//std::cout << "Inserting new token with id: " << in_id << "\n";
 		recognized_tokens_[in_id] = Recognized_Token_Object(in_id, in_position); 
+
+		std::map<unsigned, sf::Color>::iterator token_color_mapping_iterator = 
+			token_color_mapping_.find(in_id);
+		if(token_color_mapping_.end() != token_color_mapping_.find(in_id) ) {
+			recognized_tokens_[in_id]
+				.Set_Fill_Color(token_color_mapping_iterator->second);
+		}
 	
 
 }
