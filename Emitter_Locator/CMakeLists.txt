@@ -35,13 +35,13 @@ target_link_libraries(visualization -lm -lsfml-graphics -lsfml-window -lsfml-sys
 
 # output executables
 add_executable(ttt src/visualization.cpp)
-target_link_libraries(ttt recorder signaltrans locator visualization -lX11 )
+target_link_libraries(ttt recorder signaltrans locator visualization -lX11 -lpthread -lm)
 
 
 #request C++11 if on unix, stop at all warnings but ignore specific warning in glm headers
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O3")
 if(UNIX)
-  add_definitions( -std=c++11 -Wall -Werror  -Wno-strict-aliasing -pthread)
+  add_definitions( -std=c++11 -Wall -Werror  -Wno-strict-aliasing -lpthread -lm)
 endif(UNIX)
 
 
