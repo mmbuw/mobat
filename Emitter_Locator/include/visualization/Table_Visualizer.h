@@ -38,6 +38,8 @@ class Table_Visualizer : Drawable_Object {
 		Ball ball_;	//NO TOKEN, change it later
 		sf::Vector2f ball_dir_;
 		double ball_speed_;
+		int right_goals_;
+		int left_goals_;
 
 	public:
 		Table_Visualizer(sf::Vector2u const& in_canvas_resolution = sf::Vector2u(800, 600),

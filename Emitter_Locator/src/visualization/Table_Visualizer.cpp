@@ -53,9 +53,11 @@ Table_Visualizer( sf::Vector2u const& in_canvas_resolution,
 	//b_y_pos_ = 2;
 	//ball_ = Ball(sf::Vector2f(b_x_pos_, b_y_pos_));
 	ball_ = Ball(sf::Vector2f(b_x_pos_, b_y_pos_), ball_size);
-	ball_dir_ = sf::Vector2f(0, 0.001);
+	ball_dir_ = sf::Vector2f(0, 0.01);
 	ball_.Set_Fill_Color(sf::Color::Red);
-	ball_speed_ = 0.001;
+	ball_speed_ = 0.01;
+	right_goals_ = 0;
+	left_goals_ = 0;
 
 
 	//get initial timestamp
@@ -152,15 +154,15 @@ Recalculate_Geometry() {
 		    if(circ_circ_intersect(t_ball, right).first)
 		    {
 		        //rechter spieler schaffts
-		        normal = circ_circ_intersect(t_ball, right).second;
 		        move_ball_out_of_token(right);
+		        normal = circ_circ_intersect(t_ball, right).second;
 		        //ball_dir_.x = 0;
 		    }
 		    else
 		    {
 		        //linker spieler schaffts
-		        normal = circ_circ_intersect(t_ball, left).second;
 		        move_ball_out_of_token(left);
+		        normal = circ_circ_intersect(t_ball, left).second;
 		        //ball_dir_.x = 0;
 		    }
 		    glm::vec2 reflect = glm::reflect( glm::vec2{ball_dir_.x, ball_dir_.y}, normal);
@@ -171,23 +173,35 @@ Recalculate_Geometry() {
 
 #if 1
 //AUs bzw Torerkennung, muss man noch entscheiden, was was ist
-	if(b_x_pos_ <= 0 || b_x_pos_>=physical_table_size_.x){
+	auto b_rad = ball_.getRadius() / pixel_per_meter_;
+
+
+	if(b_x_pos_ <= 0 + b_rad|| b_x_pos_>=physical_table_size_.x - b_rad){
 		ball_dir_.x *= -1;
-		if(b_x_pos_ < 0){
-			b_x_pos_ = 0;	
-		}else if(b_x_pos_ > physical_table_size_.x){
-			b_x_pos_ = physical_table_size_.x;
+		if(b_x_pos_ <= 0 + b_rad){
+			b_x_pos_ = 0 + b_rad;	
+		}else if(b_x_pos_ >= physical_table_size_.x - b_rad){
+			b_x_pos_ = physical_table_size_.x - b_rad;
 		}
 		//ball_.should_move_ = false;
 	}
 
-	if(b_y_pos_ <= 0 || b_y_pos_>=physical_table_size_.y){
-		ball_dir_.y *= -1;
-		if(b_y_pos_ < 0){
-			b_y_pos_ = 0;
-		}else if(b_y_pos_ > physical_table_size_.y){
-			b_y_pos_ = physical_table_size_.y;
+
+//TOOOOOOOR
+	if(b_y_pos_ <= 0 - b_rad || b_y_pos_>=physical_table_size_.y +b_rad){
+		if(b_y_pos_ <= 0- b_rad){
+			ball_dir_.y = ball_speed_;
+			++left_goals_;
+
+		}else if(b_y_pos_ >= physical_table_size_.y + b_rad){
+			ball_dir_.y = -ball_speed_;
+			++right_goals_;
 		}
+		std::cout<<"Left: "<<left_goals_<<"  Right:  "<<right_goals_<<"\n";
+
+		ball_dir_.x = 0;
+			b_y_pos_ = physical_table_size_.y/2.0;
+			b_x_pos_ = physical_table_size_.x/2.0;
 		//ball_.should_move_ = false;
 	}
 
@@ -207,6 +221,7 @@ Recalculate_Geometry() {
 
 		b_x_pos_ += ball_dir_.x;
 		b_y_pos_ += ball_dir_.y;
+
 
 	
 	ball_.should_move_ = true;
@@ -386,7 +401,7 @@ void Table_Visualizer::move_ball_out_of_token(sf::CircleShape const& t){
     b_x_pos_ += tmp.x;
     b_y_pos_ += tmp.y/2.0;
 
-    ball_.setPosition(tmp.x, tmp.y);
+    ball_.setPosition(b_x_pos_, b_y_pos_);
 
 }
 
