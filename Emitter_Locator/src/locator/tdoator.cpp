@@ -45,10 +45,6 @@ dif(glm::vec2 const& p,
                     Microphone const& mic2) const {
     double dtoa = (mic1.toa - mic2.toa) ;// 1000.0;
 
-    //std::cout<<"betr "<<betrag(p , p_mic_1)<<"    "<<betrag(p , p_mic_2)<<"    "<<c*dtoa<<"\n";
-    //return (glm::length(p - mic1.position) - glm::length(p - mic2.position) ) - c_ * dtoa;
-
-    //std::cout << "toa_mic_2: " << dtoa << "\n";
     return dtoa - (glm::length(p - mic1.position) - glm::length(p - mic2.position) ) / c_ ;
 };
 
@@ -71,18 +67,14 @@ locate() const {
             test.y = y;
 
 
-           // std::map<unsigned int, std::map<unsigned int, float> > measured_distance_low_to_high_mic;
             double temp_dif = 0.0;
             
             for(int i = 0; i < 3; ++i) {
                 for(int j = i+1; j < 4; ++j) {
 
 
-                    //if( i == 0 && j == 2) {
-                    //if(mics_[i].toa < 10000 && mics_[j].toa < 10000)
-                        temp_dif += fabs(dif(test, mics_[i], mics_[j]));
-                        //std::cout << "Doing something\n";
-                    //}
+                    temp_dif += fabs(dif(test, mics_[i], mics_[j]));
+
                 }
             }
             
@@ -94,7 +86,7 @@ locate() const {
             temp_dif = 0;
         }
     }
-    //std::cout<<"("<<min_x<<", "<<min_y<<")   "<<min_dif<<"\n";
+
     return {min_x, min_y};
 };
 

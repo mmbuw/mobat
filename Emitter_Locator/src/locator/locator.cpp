@@ -122,12 +122,6 @@ load_recognized_vis_sample_positions() const {
         signal_analyzer.analyze((int**)&collector[0], recorder.buffer_bytes()/collector.count);
  
         
-
-
-
-
-
-
         bool found_positions = false;
 
         std::map<unsigned,glm::vec2> currently_located_positions;
@@ -172,30 +166,14 @@ load_recognized_vis_sample_positions() const {
                 std::cout << "\n";
 
 
-/*
-            for(unsigned int sample_copy_index = 0; sample_copy_index < 4; ++sample_copy_index) {
-                std::cout<< signal_detected_at_sample[sample_copy_index]  << "\n";
-            }
-*/
             }
         }
 
 
             cached_signal_vis_samples = signal_analyzer.get_signal_samples_for(18000);
 
-            for(unsigned int sample_copy_index = 0; sample_copy_index < 4; ++sample_copy_index) {
-                //cached_signal_vis_samples[sample_copy_index] = fft_transformer.signal_results_[sample_copy_index];      
-                //cached_recognized_vis_sample_pos[sample_copy_index] = signal_analyzer.signal_detected_at_sample[sample_copy_index];
-            }
-
-
-
 
         if(found_positions) {
-
-            //std::cout << "Found position!\n";
-            //std::cin.get();
-            //std::map<unsigned, std::pair<unsigned, glm::vec2> > currently_located_frequencies;
 
             cached_located_positions.clear();
             for(auto const& currently_located_position_entry :  currently_located_positions) {
