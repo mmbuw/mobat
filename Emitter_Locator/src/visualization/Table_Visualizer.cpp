@@ -17,7 +17,7 @@ Table_Visualizer( sf::Vector2u const& in_canvas_resolution,
 				  sf::Color const& in_table_fill_color,
 				  sf::Color const& in_microphone_fill_color,
 				  sf::Color const& in_token_fill_color,
-				  double ball_size){
+				  double ball_size) : elapsed_milliseconds_since_last_frame_(0){
 
 	resolution_ = in_canvas_resolution;
 
@@ -317,6 +317,7 @@ Finalize_Visualization_Frame() {
 			refresh_token = true;
 		}
 
+		Calculate_Elapsed_Milliseconds();
 		unsigned int Elapsed_Milliseconds = Get_Elapsed_Milliseconds();
 		
 		if( ! id_token_pair.second
@@ -336,8 +337,8 @@ Finalize_Visualization_Frame() {
 }
 
 
-unsigned Table_Visualizer::
-Get_Elapsed_Milliseconds(){
+void Table_Visualizer::
+Calculate_Elapsed_Milliseconds() {
 	std::chrono::high_resolution_clock::time_point 
 		current_time_stamp = std::chrono::high_resolution_clock::now();
 
@@ -347,7 +348,12 @@ Get_Elapsed_Milliseconds(){
 
 	last_time_stamp_ = current_time_stamp;
 
-	return elapsed_milliseconds.count();
+	elapsed_milliseconds_since_last_frame_ = elapsed_milliseconds.count();
+}
+
+unsigned Table_Visualizer::
+Get_Elapsed_Milliseconds(){
+	return elapsed_milliseconds_since_last_frame_;
 }
 
 std::pair<bool, glm::vec2> Table_Visualizer::circ_circ_intersect(sf::CircleShape const& ball, sf::CircleShape const& paddle) const{

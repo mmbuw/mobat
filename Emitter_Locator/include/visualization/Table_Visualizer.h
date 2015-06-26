@@ -46,7 +46,9 @@ class Table_Visualizer : Drawable_Object {
 		int right_goals_;
 		int left_goals_;
 
+		unsigned elapsed_milliseconds_since_last_frame_;
 
+		void Calculate_Elapsed_Milliseconds();
 	public:
 		Table_Visualizer(sf::Vector2u const& in_canvas_resolution = sf::Vector2u(800, 600),
 						 sf::Vector2f const& table_dims = sf::Vector2f(2.0,1.0), 
@@ -85,6 +87,7 @@ class Table_Visualizer : Drawable_Object {
 		void Signal_Token(unsigned int in_id, sf::Vector2f const& in_position);
 
 		void Finalize_Visualization_Frame();
+
 
 		unsigned Get_Elapsed_Milliseconds();
 
