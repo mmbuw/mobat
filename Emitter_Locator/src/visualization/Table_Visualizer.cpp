@@ -151,35 +151,31 @@ Recalculate_Geometry() {
 
 
 
+		for(auto const& i : recognized_tokens_){
 
-	if(circ_circ_intersect(t_ball, right).first || circ_circ_intersect(t_ball, left).first)
-	{
-    std::cout<<"Treffer!\n";
+				auto token = i.second.get_Circle();
 
-		ball_.should_move_ = false;
+				if(circ_circ_intersect(t_ball, token).first){
+			    std::cout<<"Treffer!\n";
 
-		    glm::vec2 normal;
+					ball_.should_move_ = false;
 
-		    ball_.Set_Fill_Color(sf::Color::Red);
-		    if(circ_circ_intersect(t_ball, right).first)
-		    {
-		        //rechter spieler schaffts
-		        move_ball_out_of_token(right);
-		        normal = circ_circ_intersect(t_ball, right).second;
-		        //ball_dir_.x = 0;
-		    }
-		    else
-		    {
-		        //linker spieler schaffts
-		        move_ball_out_of_token(left);
-		        normal = circ_circ_intersect(t_ball, left).second;
-		        //ball_dir_.x = 0;
-		    }
-		    glm::vec2 reflect = glm::reflect( glm::vec2{ball_dir_.x, ball_dir_.y}, normal);
+					    glm::vec2 normal;
 
-		    ball_dir_.x = reflect.x;
-		    ball_dir_.y = reflect.y;
-	}
+					    move_ball_out_of_token(token);
+					    normal = circ_circ_intersect(t_ball, token).second;
+					    
+					    
+					    glm::vec2 reflect = glm::reflect( glm::vec2{ball_dir_.x, ball_dir_.y}, normal);
+
+					    ball_dir_.x = reflect.x;
+					    ball_dir_.y = reflect.y;
+				}			
+
+		}
+
+
+	
 
 #if 1
 //AUs bzw Torerkennung, muss man noch entscheiden, was was ist
@@ -227,10 +223,11 @@ Recalculate_Geometry() {
 
 	   // b_x_pos_ += ball_dir_.x; //wieder rausnehmen
 
-	
+		//std::cout<<elapsed_microseconds_since_last_frame_<<"\n";
+	double factor = elapsed_microseconds_since_last_frame_ * 1.0;
 
-		b_x_pos_ += ball_dir_.x;
-		b_y_pos_ += ball_dir_.y;
+		b_x_pos_ += ball_dir_.x * factor;
+		b_y_pos_ += ball_dir_.y * factor;
 
 
 	
