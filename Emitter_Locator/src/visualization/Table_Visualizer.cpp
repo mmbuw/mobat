@@ -17,7 +17,7 @@ Table_Visualizer( sf::Vector2u const& in_canvas_resolution,
 				  sf::Color const& in_table_fill_color,
 				  sf::Color const& in_microphone_fill_color,
 				  sf::Color const& in_token_fill_color,
-				  double ball_size) : elapsed_milliseconds_since_last_frame_(0){
+				  double ball_size) : elapsed_microseconds_since_last_frame_(0){
 
 	resolution_ = in_canvas_resolution;
 
@@ -317,12 +317,12 @@ Finalize_Visualization_Frame() {
 			refresh_token = true;
 		}
 
-		Calculate_Elapsed_Milliseconds();
-		unsigned int Elapsed_Milliseconds = Get_Elapsed_Milliseconds();
+		Calculate_Elapsed_Microseconds();
+		unsigned int Elapsed_Microseconds = Get_Elapsed_Microseconds();
 		
 		if( ! id_token_pair.second
 			.Update_Token(refresh_token, 
-						  Elapsed_Milliseconds, 
+						  Elapsed_Microseconds, 
 						  id_token_pair.second.physical_position_) ) {
 			tokens_to_remove.insert(id_token_pair.first);
 		}
@@ -338,22 +338,23 @@ Finalize_Visualization_Frame() {
 
 
 void Table_Visualizer::
-Calculate_Elapsed_Milliseconds() {
+Calculate_Elapsed_Microseconds() {
 	std::chrono::high_resolution_clock::time_point 
 		current_time_stamp = std::chrono::high_resolution_clock::now();
 
-	std::chrono::milliseconds elapsed_milliseconds 
-		= std::chrono::duration_cast<std::chrono::milliseconds>
+	std::chrono::microseconds elapsed_microseconds
+		= std::chrono::duration_cast<std::chrono::microseconds>
 		(current_time_stamp - last_time_stamp_); 
 
 	last_time_stamp_ = current_time_stamp;
 
-	elapsed_milliseconds_since_last_frame_ = elapsed_milliseconds.count();
+	elapsed_microseconds_since_last_frame_ = elapsed_microseconds.count();
 }
 
 unsigned Table_Visualizer::
-Get_Elapsed_Milliseconds(){
-	return elapsed_milliseconds_since_last_frame_;
+Get_Elapsed_Microseconds(){
+
+	return elapsed_microseconds_since_last_frame_;
 }
 
 std::pair<bool, glm::vec2> Table_Visualizer::circ_circ_intersect(sf::CircleShape const& ball, sf::CircleShape const& paddle) const{

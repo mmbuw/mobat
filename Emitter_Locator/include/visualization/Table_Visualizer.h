@@ -46,9 +46,9 @@ class Table_Visualizer : Drawable_Object {
 		int right_goals_;
 		int left_goals_;
 
-		unsigned elapsed_milliseconds_since_last_frame_;
+		unsigned elapsed_microseconds_since_last_frame_;
 
-		void Calculate_Elapsed_Milliseconds();
+		void Calculate_Elapsed_Microseconds();
 	public:
 		Table_Visualizer(sf::Vector2u const& in_canvas_resolution = sf::Vector2u(800, 600),
 						 sf::Vector2f const& table_dims = sf::Vector2f(2.0,1.0), 
@@ -89,7 +89,7 @@ class Table_Visualizer : Drawable_Object {
 		void Finalize_Visualization_Frame();
 
 
-		unsigned Get_Elapsed_Milliseconds();
+		unsigned Get_Elapsed_Microseconds();
 
 		std::pair<bool, glm::vec2> circ_circ_intersect(sf::CircleShape const& ball, sf::CircleShape const& paddle) const;
 
