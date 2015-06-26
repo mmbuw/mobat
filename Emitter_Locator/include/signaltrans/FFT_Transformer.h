@@ -35,22 +35,15 @@ class FFT_Transformer {
 
 		double* window_;
 
-		double eighteen_khz_sum_;
+		//double eighteen_khz_sum_;
+		std::map<unsigned, double> frequency_sums_;
 
-		std::map<unsigned, double> fft_cached_results_;
 
 		unsigned stabilization_counter_;
 
-		double detection_threshold_;
-		unsigned num_samples_below_threshold_;
-		unsigned num_samples_above_threshold_;
-		unsigned counted_samples_;
-		float average_value_;
-		unsigned first_hit_samples_below_threshold_at_;
-
-		double last_x_sample_[10];
 		unsigned int fft_frame_count_;
 
+		std::vector<unsigned> listening_to_those_frequencies;
 
 
 		void create_hamming_window();
@@ -62,12 +55,16 @@ class FFT_Transformer {
 		~FFT_Transformer();
 
 		void reset_sample_counters(unsigned );
-		void clear_cached_fft_results();
+		void clear_cached_fft_results(unsigned);
 
 		void initialize_execution_plan();
+
+		void set_listened_frequencies(std::vector<unsigned> const& listening_to_frequencies);
+
+		void perform_FFT_on_channels(int** signal_buffers, unsigned bytes_per_channel, unsigned window_size);
+
 		void set_FFT_input( unsigned int offset);
 		unsigned perform_FFT(unsigned );
-		void print_FFT_result(unsigned int call_idx);
 
 		void set_analyzation_range(unsigned int start_sample,
 								   unsigned int end_sample);
@@ -76,7 +73,10 @@ class FFT_Transformer {
 							  unsigned int buffer_size,
 							  int** buffers);
 
-		std::vector<unsigned int> signal_results_[4];
+		std::map<unsigned, std::array<std::vector<double>,4> > signal_results_per_frequency_;
+
+		//frequency, 4 channels, for each offset a value of fft sums
+		std::map<unsigned, std::array<std::map<unsigned, double>,4>> fft_cached_results_per_frequency_;
 };
 
 #endif
