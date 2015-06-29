@@ -28,6 +28,8 @@ sf::RenderWindow signal_plot_window_(sf::VideoMode(280, 400)
 //#ifndef DEBUG_FFT_MODE
 sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
                        , "Table_Vis");
+// Limit the framerate to 60 frames per second (this step is optional)
+window.setFramerateLimit(60);
 window.setSize(windowResolution);
 //#endif
 
@@ -39,7 +41,7 @@ window.setSize(windowResolution);
 
     Locator locator{4};
 
-    locator.set_frequencies_to_record({18000, 19000});
+    locator.set_frequencies_to_record({18000, 19000, 100000});
 
     auto recording_thread = std::thread(&Locator::record_position, &locator);
 
@@ -56,7 +58,7 @@ window.setSize(windowResolution);
 
         table_visualizer.Set_Token_Fill_Color(18000, sf::Color(255,0,0) );
         table_visualizer.Set_Token_Fill_Color(19000, sf::Color(255,255,0) );
-
+        table_visualizer.Set_Token_Fill_Color(100000, sf::Color(255,0,255) );
         while (window.isOpen())
         {
             glm::vec2 pl1_dir{0, 0};
@@ -137,6 +139,7 @@ window.setSize(windowResolution);
                     table_visualizer.Signal_Token(frequency_position_entry.first, sf::Vector2f(smartphonePosition.x, smartphonePosition.y));
             }
 
+            //std::cout << "Elapsed Time: " << table_visualizer.Get_Elapsed_Microseconds() << "\n";
             table_visualizer.Finalize_Visualization_Frame();
             window.display();
 

@@ -131,7 +131,6 @@ load_recognized_vis_sample_positions() const {
 
 
 
-
             std::array<double, 4> current_frequency_toas = signal_analyzer.get_toas_for(frequency_to_locate);
 
             double const & (*d_min) (double const &, double const &) = std::min<double>;
@@ -146,7 +145,11 @@ load_recognized_vis_sample_positions() const {
 
             //std::cout <<  "doing something for freq " << frequency_to_locate <<"min: " << toa_min << "   max: " << toa_max <<"\n";
 
-
+                if(frequency_to_locate > 49999)
+                    std::cout << "Toas for 100000 Hz : " << current_frequency_toas[0] << "\n" <<
+                                                            current_frequency_toas[1] << "\n" <<
+                                                            current_frequency_toas[2] << "\n" <<
+                                                            current_frequency_toas[3] << "\n";
             if(toa_max != std::numeric_limits<double>::max() && toa_max - toa_min < 100.00 ) {
 
                 found_positions = true;

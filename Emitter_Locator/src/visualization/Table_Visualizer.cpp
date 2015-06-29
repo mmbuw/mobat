@@ -17,7 +17,7 @@ Table_Visualizer( sf::Vector2u const& in_canvas_resolution,
 				  sf::Color const& in_table_fill_color,
 				  sf::Color const& in_microphone_fill_color,
 				  sf::Color const& in_token_fill_color,
-				  double ball_size) : elapsed_microseconds_since_last_frame_(0){
+				  double ball_size) : elapsed_microseconds_since_last_frame_(16000){
 
 	resolution_ = in_canvas_resolution;
 
@@ -345,12 +345,13 @@ Calculate_Elapsed_Microseconds() {
 
 	last_time_stamp_ = current_time_stamp;
 
+	//std::cout << "Elapsed microseconds: " << elapsed_microseconds.count()<<"\n";
 	elapsed_microseconds_since_last_frame_ = elapsed_microseconds.count();
+	//std::cout << "After: " << elapsed_microseconds_since_last_frame_<<"\n";
 }
 
 unsigned Table_Visualizer::
 Get_Elapsed_Microseconds(){
-
 	return elapsed_microseconds_since_last_frame_;
 }
 
