@@ -377,37 +377,31 @@ void Table_Visualizer::move_ball_out_of_token(sf::CircleShape const& paddle){
     glm::vec2 mid_ball{ball_.getPosition().x + ball_.getRadius(), ball_.getPosition().y + ball_.getRadius()};
     glm::vec2 mid_paddle{paddle.getPosition().x + paddle.getRadius(), paddle.getPosition().y + paddle.getRadius()};
 
-
     mid_ball *= physical_table_size_ / resolution_;
     mid_paddle *= physical_table_size_ / resolution_;
     
-    std::cout<<"paddle: "<<mid_paddle.x << "  "<<mid_paddle.y<<"\n";
-    std::cout<<"ball: "<<mid_ball.x << "  "<<mid_ball.y<<"\n";
-
     auto norm = circ_circ_intersect(ball_.get_Circle(), paddle).second;
-
-    std::cout<<"norm: "<<norm.x << "  "<<norm.y<<"\n";
     
-
-    auto dist = glm::length(mid_ball - mid_paddle)  ;
+    float dist = glm::length(mid_ball - mid_paddle);
     
-    std::cout<<"dist: "<<dist<<"\n";
-
-    
-
-
-    auto tmp = mid_paddle * norm * float(dist);
+    auto tmp = mid_paddle * norm * dist;
     //tmp -= glm::vec2{ball_.getRadius(), ball_.getRadius()};
 
-    std::cout<<"newpos: "<<tmp.x << "  "<<tmp.y<<"\n";
-    
+    glm::vec2 new_ball_pos{mid_paddle + norm * dist};
+    new_ball_pos -= glm::vec2{ball_.getRadius(), ball_.getRadius()};
 
-    
     b_x_pos_ += tmp.x;
     b_y_pos_ += tmp.y/2.0;
-
+    // b_x_pos_ = new_ball_pos.x;
+    // b_y_pos_ = new_ball_pos.y;
+    // ball_.setPosition()
     ball_.setPosition(b_x_pos_, b_y_pos_);
-
+ 
+    std::cout<<"paddle: "<<mid_paddle.x << "  "<<mid_paddle.y<<"\n";
+    std::cout<<"ball: "<<mid_ball.x << "  "<<mid_ball.y<<"\n";
+    std::cout<<"norm: "<<norm.x << "  "<<norm.y<<"\n";
+    std::cout<<"dist: "<<dist<<"\n";
+    std::cout<<"newpos: "<<tmp.x << "  "<<tmp.y<<"\n";
 }
 
 
