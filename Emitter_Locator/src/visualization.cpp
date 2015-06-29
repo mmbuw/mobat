@@ -11,7 +11,7 @@
 #define NUM_RECORDED_CHANNELS 4
 
 sf::Vector2f smartphonePosition(1.0f,0.5f);
-sf::Vector2u windowResolution(800, 800);
+glm::vec2 windowResolution(800, 800);
 
 //#define DEBUG_FFT_MODE
 
@@ -26,15 +26,15 @@ sf::RenderWindow signal_plot_window_(sf::VideoMode(280, 400)
 // sf::VideoMode fullScreenMode = sf::VideoMode::getDesktopMode();
 
 //#ifndef DEBUG_FFT_MODE
-sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
+sf::RenderWindow window(sf::VideoMode(unsigned(windowResolution.x), unsigned(windowResolution.y))
                        , "Table_Vis");
-window.setSize(windowResolution);
+// window.setSize(windowResolution);
 //#endif
 
     std::vector<sf::Vector2f> default_microphone_positions_ = {{0.06, 0.075}, {0.945,  0.09}, {0.925,  1.915} , {0.06,  1.905}};
 
 
-    TTT::Table_Visualizer table_visualizer(windowResolution, sf::Vector2f(1.0, 2.0), default_microphone_positions_);
+    TTT::Table_Visualizer table_visualizer(windowResolution, glm::vec2(1.0, 2.0), default_microphone_positions_);
     table_visualizer.Set_Token_Recognition_Timeout(10000);
 
     Locator locator{4};

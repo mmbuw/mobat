@@ -33,8 +33,6 @@ class Table_Visualizer : Drawable_Object {
 
 		std::chrono::high_resolution_clock::time_point last_time_stamp_;
 
-
-
 		//needed for pesudopong
 		double b_x_pos_;
 		double b_y_pos_;
@@ -50,8 +48,8 @@ class Table_Visualizer : Drawable_Object {
 
 		void Calculate_Elapsed_Microseconds();
 	public:
-		Table_Visualizer(sf::Vector2u const& in_canvas_resolution = sf::Vector2u(800, 600),
-						 sf::Vector2f const& table_dims = sf::Vector2f(2.0,1.0), 
+		Table_Visualizer(glm::vec2 const& in_canvas_resolution = glm::vec2(800, 600),
+						 glm::vec2 const& table_dims = glm::vec2(2.0,1.0), 
 						 std::vector<sf::Vector2f> const& microphone_positions
 						 	= std::vector<sf::Vector2f>(),
 						 sf::Color const& in_table_fill_color 
@@ -68,13 +66,13 @@ class Table_Visualizer : Drawable_Object {
 
 		void Draw(sf::RenderWindow& in_canvas, glm::vec4 toas) const;
 
-		void Resize_Physical_Table(sf::Vector2f const& in_table_dims);
+		void Resize_Physical_Table(glm::vec2 const& in_table_dims);
 
 		void Reset_Microphones(std::vector<Microphone_Object> const& in_microphones);
 
 		void Recalculate_Geometry();
 
-		void Set_Canvas_Resolution( sf::Vector2u const& in_resolution );
+		void Set_Canvas_Resolution(glm::vec2 const& in_resolution );
 
 		void Set_Table_Fill_Color(sf::Color const& in_table_fill_color);
 

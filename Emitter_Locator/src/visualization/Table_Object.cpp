@@ -33,7 +33,7 @@ Draw(sf::RenderWindow& canvas, std::vector<Microphone_Object> const& microphones
 }
 
 void Table_Object::
-Set_Physical_Size(sf::Vector2f const& in_physical_size) {
+Set_Physical_Size(glm::vec2 const& in_physical_size) {
 
 
 	physical_table_size_ = in_physical_size;
@@ -51,10 +51,9 @@ Recalculate_Geometry() {
 
 	table_dims_in_px_  = physical_table_size_ * pixel_per_meter_;
 
-	table_rectangle_shape_.setSize(table_dims_in_px_);
-	table_rectangle_shape_.setPosition( (resolution_.x - table_dims_in_px_.x)/2.0,
-									    (resolution_.y - table_dims_in_px_.y)/2.0
-									 );
+	table_rectangle_shape_.setSize(sf::Vector2f{table_dims_in_px_.x, table_dims_in_px_.y});
+	table_rectangle_shape_.setPosition((resolution_.x - table_dims_in_px_.x)/2.0,
+									    (resolution_.y - table_dims_in_px_.y)/2.0);
 
 }
 
@@ -64,7 +63,7 @@ Set_Fill_Color(sf::Color const& in_fill_color) {
 }
 
 
-sf::Vector2f Table_Object::
+glm::vec2 Table_Object::
 Physical_Size() const {
 	return physical_table_size_;
 }
