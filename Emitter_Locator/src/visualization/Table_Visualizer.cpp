@@ -56,8 +56,8 @@ Table_Visualizer( glm::vec2 const& in_canvas_resolution,
 	//ball_ = Ball(sf::Vector2f(b_x_pos_, b_y_pos_));
 	ball_ = Ball(sf::Vector2f(b_x_pos_, b_y_pos_), ball_size);
 	ball_dir_ = sf::Vector2f(0, 0.01);
-	ball_.Set_Fill_Color(sf::Color::Red);
-	ball_speed_ = 0.01;
+	// ball_.Set_Fill_Color(sf::Color::Red);
+	ball_speed_ = 0.0;
 	right_goals_ = 0;
 	left_goals_ = 0;
 
@@ -142,41 +142,33 @@ Recalculate_Geometry() {
 	}
 */
 
-	if(recognized_tokens_.size() >= 2){
-
-
+	// if(recognized_tokens_.size() >= 2){
 
 		sf::CircleShape left  = recognized_tokens_[16000].get_Circle();	//NO HARDCODED FREQUENCIES!!!!!!!!!!!!
 		sf::CircleShape right = recognized_tokens_[18000].get_Circle();
 		sf::CircleShape t_ball = ball_.get_Circle();
 
-
-
+	    ball_.Set_Fill_Color(sf::Color::Blue);
 		for(auto const& i : recognized_tokens_){
 
 				auto token = i.second.get_Circle();
 
 				if(circ_circ_intersect(t_ball, token).first){
-			    std::cout<<"Treffer!\n";
+			    	std::cout<<"Treffer!\n";
 
 					ball_.should_move_ = false;
 
-					    glm::vec2 normal;
+				    // ball_.Set_Fill_Color(sf::Color::Red);
+				    move_ball_out_of_token(token);
+				    glm::vec2 normal = circ_circ_intersect(t_ball, token).second;
+				    					    
+				    glm::vec2 reflect = glm::reflect( glm::vec2{ball_dir_.x, ball_dir_.y}, normal);
 
-					    move_ball_out_of_token(token);
-					    normal = circ_circ_intersect(t_ball, token).second;
-					    
-					    
-					    glm::vec2 reflect = glm::reflect( glm::vec2{ball_dir_.x, ball_dir_.y}, normal);
-
-					    ball_dir_.x = reflect.x;
-					    ball_dir_.y = reflect.y;
-				}			
+				    ball_dir_.x = reflect.x;
+				    ball_dir_.y = reflect.y;
+				}	
 
 		}
-
-
-	
 
 #if 1
 //AUs bzw Torerkennung, muss man noch entscheiden, was was ist
@@ -224,7 +216,6 @@ Recalculate_Geometry() {
 
 	   // b_x_pos_ += ball_dir_.x; //wieder rausnehmen
 
-		//std::cout<<elapsed_milliseconds_since_last_frame_<<"\n";
 	double factor = elapsed_milliseconds_since_last_frame_ * 1.0;
 
 		b_x_pos_ += ball_dir_.x * factor;
@@ -236,14 +227,8 @@ Recalculate_Geometry() {
 
 	ball_.setPosition(b_x_pos_, b_y_pos_);
 
-	sf::CircleShape asdf;
-	asdf.setPosition(b_x_pos_, b_y_pos_);
-
-	ball_.give_new_Circle(asdf);
-
-
 	ball_.Recalculate_Geometry();
-}
+// }
 
 }
 
@@ -360,12 +345,14 @@ Get_Elapsed_Milliseconds(){
 }
 
 std::pair<bool, glm::vec2> Table_Visualizer::circ_circ_intersect(sf::CircleShape const& ball, sf::CircleShape const& paddle) const{
-    glm::vec2 mid_ball{ball.getPosition().x + ball.getRadius(), ball.getPosition().y + ball.getRadius()};
-    glm::vec2 mid_paddle{paddle.getPosition().x + paddle.getRadius(), paddle.getPosition().y + paddle.getRadius()};
+    glm::vec2 mid_ball{ball.getPosition().x + ball.getRadius(), ball.getPosition().y};
+    // glm::vec2 mid_ball{ball.getPosition().x + ball.getRadius(), ball.getPosition().y + ball.getRadius()};
+    glm::vec2 mid_paddle{paddle.getPosition().x + paddle.getRadius(), paddle.getPosition().y};
+    // glm::vec2 mid_paddle{paddle.getPosition().x + paddle.getRadius(), paddle.getPosition().y + paddle.getRadius()};
 
     double dist = glm::length(mid_ball - mid_paddle);
 
-    bool intersects = (glm::abs(dist) < (ball.getRadius() + paddle.getRadius()));
+    bool intersects = glm::abs(dist) < ball.getRadius() + paddle.getRadius();
 
     //its in global_sys, hence the y coordinates have to be swapped for calulating the normal :(
     mid_ball.y += mid_paddle.y;
@@ -379,8 +366,8 @@ std::pair<bool, glm::vec2> Table_Visualizer::circ_circ_intersect(sf::CircleShape
 
 void Table_Visualizer::move_ball_out_of_token(sf::CircleShape const& paddle){
 	  
-    glm::vec2 mid_ball{ball_.getPosition().x + ball_.getRadius(), ball_.getPosition().y + ball_.getRadius()};
-    glm::vec2 mid_paddle{paddle.getPosition().x + paddle.getRadius(), paddle.getPosition().y + paddle.getRadius()};
+    glm::vec2 mid_ball{ball_.getPosition().x + ball_.getRadius(), ball_.getPosition().y};
+    glm::vec2 mid_paddle{paddle.getPosition().x + paddle.getRadius(), paddle.getPosition().y};
 
     mid_ball *= physical_table_size_ / resolution_;
     mid_paddle *= physical_table_size_ / resolution_;

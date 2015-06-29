@@ -23,7 +23,6 @@ Draw(sf::RenderWindow& canvas) const {
 
 void Ball::
 Recalculate_Geometry() {
-	ball_.setFillColor(sf::Color::Red);
 	sf::Vector2f coordinate_system_origin_in_px 
 		= sf::Vector2f( (resolution_.x - table_dims_in_px_.x)/2.0,
 						 resolution_.y - 
