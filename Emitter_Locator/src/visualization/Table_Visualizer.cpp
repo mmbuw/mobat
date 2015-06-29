@@ -44,18 +44,9 @@ Table_Visualizer( glm::vec2 const& in_canvas_resolution,
 	Set_Microphone_Fill_Color( in_microphone_fill_color );
 	//Set_Token_Fill_Color( in_token_fill_color );
 
-
-	//pseudopong
-
-
-	b_x_pos_ = physical_table_size_.x/2;
-	b_y_pos_ = physical_table_size_.y/2;
-	//b_x_pos_ = 1;
-	//b_y_pos_ = 2;
-
-	//ball_ = Ball(sf::Vector2f(b_x_pos_, b_y_pos_));
-	ball_ = Ball(sf::Vector2f(b_x_pos_, b_y_pos_), ball_size);
-	ball_dir_ = sf::Vector2f(0, 0.01);
+	ball_ = Ball(sf::Vector2f(ball_pos_.x, ball_pos_.y), ball_size);
+	ball_.setPosition(500, 500);
+	ball_dir_ = glm::vec2(0, 0.01);
 	// ball_.Set_Fill_Color(sf::Color::Red);
 	ball_speed_ = 0.0;
 	right_goals_ = 0;
@@ -70,6 +61,8 @@ Table_Visualizer( glm::vec2 const& in_canvas_resolution,
 Table_Visualizer::
 ~Table_Visualizer() {}
 
+	// sf::Vertex lines[] ={sf::Vertex(sf::Vector2f(0, 0), sf::Color::Green), sf::Vertex(sf::Vector2f(1500, 1500), sf::Color::Red)};
+	// sf::Vertex lines2[] ={sf::Vertex(sf::Vector2f(0, 0), sf::Color::Black), sf::Vertex(sf::Vector2f(1500, 1500), sf::Color::White)};
 
 void Table_Visualizer::
 Draw(sf::RenderWindow& canvas) const {
@@ -85,26 +78,10 @@ Draw(sf::RenderWindow& canvas) const {
 	}
 
 	ball_.Draw(canvas);
+
+    // canvas.draw(lines, 2, sf::Lines);
+    // canvas.draw(lines2, 2, sf::Lines);
 	
-}
-
-
-void Table_Visualizer::
-Draw(sf::RenderWindow& canvas, glm::vec4 toas) const {
-	
-	table_.Draw(canvas, microphones_, toas );
-
-	for(auto const& mic_obj : microphones_) {
-		mic_obj.Draw(canvas);
-	}
-
-	for( auto& id_token_pair : recognized_tokens_ ) {
-		id_token_pair.second.Draw(canvas);
-	}
-
-	ball_.Draw(canvas);
-	
-
 }
 
 void Table_Visualizer::
@@ -121,7 +98,6 @@ Reset_Microphones(std::vector<Microphone_Object> const& microphones) {
 void Table_Visualizer::
 Recalculate_Geometry() {
 	
-
 	table_.Recalculate_Geometry();
 
 	for(auto& mic_obj : microphones_) {
@@ -131,8 +107,6 @@ Recalculate_Geometry() {
 	for( auto& id_token_pair : recognized_tokens_ ) {
 		id_token_pair.second.Recalculate_Geometry();
 	}
-
-
 
 // pseudopong zeug
 	//ballschlag
@@ -151,22 +125,19 @@ Recalculate_Geometry() {
 	    ball_.Set_Fill_Color(sf::Color::Blue);
 		for(auto const& i : recognized_tokens_){
 
-				auto token = i.second.get_Circle();
+			auto token = i.second.get_Circle();
 
-				if(circ_circ_intersect(t_ball, token).first){
-			    	std::cout<<"Treffer!\n";
+			if(circ_circ_intersect(t_ball, token).first){
+		    	std::cout<<"Treffer!\n";
 
-					ball_.should_move_ = false;
+				ball_.should_move_ = false;
 
-				    // ball_.Set_Fill_Color(sf::Color::Red);
-				    move_ball_out_of_token(token);
-				    glm::vec2 normal = circ_circ_intersect(t_ball, token).second;
-				    					    
-				    glm::vec2 reflect = glm::reflect( glm::vec2{ball_dir_.x, ball_dir_.y}, normal);
-
-				    ball_dir_.x = reflect.x;
-				    ball_dir_.y = reflect.y;
-				}	
+			    // ball_.Set_Fill_Color(sf::Color::Red);
+			    move_ball_out_of_token(token);
+			    // glm::vec2 normal = circ_circ_intersect(t_ball, token).second;
+			    					    
+			    // ball_dir = glm::reflect(ball_dir_, normal);
+			}	
 
 		}
 
@@ -175,32 +146,31 @@ Recalculate_Geometry() {
 	auto b_rad = ball_.getRadius() / pixel_per_meter_;
 
 
-	if(b_x_pos_ <= 0 + b_rad|| b_x_pos_>=physical_table_size_.x - b_rad){
+	if(ball_pos_.x <= 0 + b_rad|| ball_pos_.x>=physical_table_size_.x - b_rad){
 		ball_dir_.x *= -1;
-		if(b_x_pos_ <= 0 + b_rad){
-			b_x_pos_ = 0 + b_rad;	
-		}else if(b_x_pos_ >= physical_table_size_.x - b_rad){
-			b_x_pos_ = physical_table_size_.x - b_rad;
+		if(ball_pos_.x <= 0 + b_rad){
+			ball_pos_.x = 0 + b_rad;	
+		}else if(ball_pos_.x >= physical_table_size_.x - b_rad){
+			ball_pos_.x = physical_table_size_.x - b_rad;
 		}
 		//ball_.should_move_ = false;
 	}
 
 
 //TOOOOOOOR
-	if(b_y_pos_ <= 0 - b_rad || b_y_pos_>=physical_table_size_.y +b_rad){
-		if(b_y_pos_ <= 0- b_rad){
+	if(ball_pos_.y <= 0 - b_rad || ball_pos_.y>=physical_table_size_.y +b_rad){
+		if(ball_pos_.y <= 0- b_rad){
 			ball_dir_.y = ball_speed_;
 			++left_goals_;
 
-		}else if(b_y_pos_ >= physical_table_size_.y + b_rad){
+		}else if(ball_pos_.y >= physical_table_size_.y + b_rad){
 			ball_dir_.y = -ball_speed_;
 			++right_goals_;
 		}
 		std::cout<<"Left: "<<left_goals_<<"  Right:  "<<right_goals_<<"\n";
 
 		ball_dir_.x = 0;
-			b_y_pos_ = physical_table_size_.y/2.0;
-			b_x_pos_ = physical_table_size_.x/2.0;
+			ball_pos_ = physical_table_size_ / 2.0f;
 		//ball_.should_move_ = false;
 	}
 
@@ -208,26 +178,24 @@ Recalculate_Geometry() {
 
 		
 
-/*	if(b_x_pos_ < resolution_.y && b_x_pos_ > -2*ball_.get_Circle().getRadius())
+/*	if(ball_pos_.x < resolution_.y && ball_pos_.x > -2*ball_.get_Circle().getRadius())
 	{*/
 //	}    
 	
 	
 
-	   // b_x_pos_ += ball_dir_.x; //wieder rausnehmen
+	   // ball_pos_.x += ball_dir_.x; //wieder rausnehmen
 
-	double factor = elapsed_milliseconds_since_last_frame_ * 1.0;
+	float factor = /*elapsed_milliseconds_since_last_frame_ **/ 1.0;
 
-		b_x_pos_ += ball_dir_.x * factor;
-		b_y_pos_ += ball_dir_.y * factor;
+
+		ball_pos_ += ball_dir_ * factor;
 
 
 	
 	ball_.should_move_ = true;
 
-	ball_.setPosition(b_x_pos_, b_y_pos_);
-
-	ball_.Recalculate_Geometry();
+	// ball_.setPosition(ball_pos_.x, ball_pos_.y);
 // }
 
 }
@@ -274,16 +242,16 @@ Signal_Token(unsigned int in_id, sf::Vector2f const& in_position) {
 	if( recognized_tokens_.end() != recognized_tokens_.find(in_id) ) {
 		tokens_to_refresh_.insert(in_id);
 	}
-		recognized_tokens_[in_id] = Recognized_Token_Object(in_id, in_position); 
 
-		std::map<unsigned, sf::Color>::iterator token_color_mapping_iterator = 
-			token_color_mapping_.find(in_id);
-		if(token_color_mapping_.end() != token_color_mapping_.find(in_id) ) {
-			recognized_tokens_[in_id]
-				.Set_Fill_Color(token_color_mapping_iterator->second);
-		}
-	
+	//std::cout << "Inserting new token with id: " << in_id << "\n";
+	recognized_tokens_[in_id] = Recognized_Token_Object(in_id, in_position); 
 
+	std::map<unsigned, sf::Color>::iterator token_color_mapping_iterator = 
+		token_color_mapping_.find(in_id);
+	if(token_color_mapping_.end() != token_color_mapping_.find(in_id) ) {
+		recognized_tokens_[in_id]
+			.Set_Fill_Color(token_color_mapping_iterator->second);
+	}
 }
 
 void Table_Visualizer::
@@ -345,55 +313,41 @@ Get_Elapsed_Milliseconds(){
 }
 
 std::pair<bool, glm::vec2> Table_Visualizer::circ_circ_intersect(sf::CircleShape const& ball, sf::CircleShape const& paddle) const{
-    glm::vec2 mid_ball{ball.getPosition().x + ball.getRadius(), ball.getPosition().y};
-    // glm::vec2 mid_ball{ball.getPosition().x + ball.getRadius(), ball.getPosition().y + ball.getRadius()};
-    glm::vec2 mid_paddle{paddle.getPosition().x + paddle.getRadius(), paddle.getPosition().y};
-    // glm::vec2 mid_paddle{paddle.getPosition().x + paddle.getRadius(), paddle.getPosition().y + paddle.getRadius()};
+    glm::vec2 mid_ball{ball.getPosition().x + ball.getRadius(), ball.getPosition().y + ball.getRadius()};
+    glm::vec2 mid_paddle{paddle.getPosition().x + paddle.getRadius(), paddle.getPosition().y + paddle.getRadius()};
 
     double dist = glm::length(mid_ball - mid_paddle);
 
     bool intersects = glm::abs(dist) < ball.getRadius() + paddle.getRadius();
 
-    //its in global_sys, hence the y coordinates have to be swapped for calulating the normal :(
-    mid_ball.y += mid_paddle.y;
-    mid_paddle.y = mid_ball.y - mid_paddle.y;
-    mid_ball.y = mid_ball.y - mid_paddle.y;
+    glm::vec2 normal{-1.0f, 0.0f};
+    if(intersects) {
 
-    glm::vec2 normal = glm::normalize(mid_ball - mid_paddle);
+	    // lines[0].position = sf::Vector2f(mid_paddle.x, mid_paddle.y);
+	    // lines[1].position = sf::Vector2f(mid_ball.x, mid_ball.y);
+    	
+    	normal = glm::normalize(mid_ball - mid_paddle);
+	    
+    }
 
     return std::pair<bool, glm::vec2>{intersects, normal}; 
 }
 
 void Table_Visualizer::move_ball_out_of_token(sf::CircleShape const& paddle){
 	  
-    glm::vec2 mid_ball{ball_.getPosition().x + ball_.getRadius(), ball_.getPosition().y};
-    glm::vec2 mid_paddle{paddle.getPosition().x + paddle.getRadius(), paddle.getPosition().y};
-
-    mid_ball *= physical_table_size_ / resolution_;
-    mid_paddle *= physical_table_size_ / resolution_;
+    glm::vec2 mid_ball{ball_.getPosition().x + ball_.getRadius(), ball_.getPosition().y + ball_.getRadius()};
+    glm::vec2 mid_paddle{paddle.getPosition().x + paddle.getRadius(), paddle.getPosition().y + paddle.getRadius()};
     
-    auto norm = circ_circ_intersect(ball_.get_Circle(), paddle).second;
-    
-    float dist = glm::length(mid_ball - mid_paddle);
-    
-    auto tmp = mid_paddle * norm * dist;
-    //tmp -= glm::vec2{ball_.getRadius(), ball_.getRadius()};
+    glm::vec2 norm = circ_circ_intersect(ball_.get_Circle(), paddle).second;
 
-    glm::vec2 new_ball_pos{mid_paddle + norm * dist};
-    new_ball_pos -= glm::vec2{ball_.getRadius(), ball_.getRadius()};
+    glm::vec2 new_ball_pos{mid_paddle + norm * float(ball_.getRadius() + paddle.getRadius())};
 
-    b_x_pos_ += tmp.x;
-    b_y_pos_ += tmp.y/2.0;
-    // b_x_pos_ = new_ball_pos.x;
-    // b_y_pos_ = new_ball_pos.y;
-    // ball_.setPosition()
-    ball_.setPosition(b_x_pos_, b_y_pos_);
- 
-    std::cout<<"paddle: "<<mid_paddle.x << "  "<<mid_paddle.y<<"\n";
-    std::cout<<"ball: "<<mid_ball.x << "  "<<mid_ball.y<<"\n";
-    std::cout<<"norm: "<<norm.x << "  "<<norm.y<<"\n";
-    std::cout<<"dist: "<<dist<<"\n";
-    std::cout<<"newpos: "<<tmp.x << "  "<<tmp.y<<"\n";
+	// lines[0].position = sf::Vector2f(mid_ball.x, mid_ball.y);
+ //    lines[1].position = sf::Vector2f(new_ball_pos.x, new_ball_pos.y);
+
+    ball_pos_ = new_ball_pos;
+
+    ball_.setPosition(ball_pos_.x, ball_pos_.y);
 }
 
 

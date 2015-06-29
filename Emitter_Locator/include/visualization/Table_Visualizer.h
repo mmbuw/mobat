@@ -34,10 +34,9 @@ class Table_Visualizer : Drawable_Object {
 		std::chrono::high_resolution_clock::time_point last_time_stamp_;
 
 		//needed for pesudopong
-		double b_x_pos_;
-		double b_y_pos_;
+		glm::vec2 ball_pos_;
 		Ball ball_;	//NO TOKEN, change it later
-		sf::Vector2f ball_dir_;
+		glm::vec2 ball_dir_;
 
 		double ball_speed_;
 
@@ -65,8 +64,6 @@ class Table_Visualizer : Drawable_Object {
 		~Table_Visualizer();
 
 		virtual void Draw(sf::RenderWindow& in_canvas) const;
-
-		void Draw(sf::RenderWindow& in_canvas, glm::vec4 toas) const;
 
 		void Resize_Physical_Table(glm::vec2 const& in_table_dims);
 

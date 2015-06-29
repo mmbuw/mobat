@@ -106,8 +106,11 @@ sf::RenderWindow window(sf::VideoMode(unsigned(windowResolution.x), unsigned(win
 
 
 
+
+
+
             table_visualizer.Draw(window);
-               
+
 
             table_visualizer.Signal_Token(1000, sf::Vector2f(pl2_pos.x, pl2_pos.y));
             //table_visualizer.Signal_Token(2000, sf::Vector2f(pl1_pos.x, pl1_pos.y));
