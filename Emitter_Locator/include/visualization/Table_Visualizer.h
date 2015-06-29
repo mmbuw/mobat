@@ -5,6 +5,7 @@
 #include "Microphone_Object.h"
 #include "Recognized_Token_Object.h"
 #include "Ball.h"
+#include "score.h"
 
 #include <vector>
 #include <map>
@@ -46,6 +47,9 @@ class Table_Visualizer : Drawable_Object {
 		int right_goals_;
 		int left_goals_;
 
+		Score points_;
+		
+
 		unsigned elapsed_microseconds_since_last_frame_;
 
 		void Calculate_Elapsed_Microseconds();
@@ -60,7 +64,7 @@ class Table_Visualizer : Drawable_Object {
 						 	= sf::Color(0,255,0, 125),
 						 sf::Color const& in_token_fill_color 
 						 	= sf::Color(255,0,0),
-						 double ball_size = 15 
+						 double ball_size = 15
 						);
 		~Table_Visualizer();
 
@@ -94,6 +98,8 @@ class Table_Visualizer : Drawable_Object {
 		std::pair<bool, glm::vec2> circ_circ_intersect(sf::CircleShape const& ball, sf::CircleShape const& paddle) const;
 
 		void move_ball_out_of_token(sf::CircleShape const& t);
+
+		std::pair<bool, std::string> game_over();
 };
 
 }; //end TTT

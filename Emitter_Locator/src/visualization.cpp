@@ -1,6 +1,7 @@
 #include "locator.hpp"
 #include "Table_Visualizer.h"
 #include "Drawable_Object.h"
+#include "score.h"
 
 #include <SFML/Graphics.hpp>
 
@@ -16,34 +17,40 @@ sf::Vector2u windowResolution(800, 800);
 //#define DEBUG_FFT_MODE
 
 int main(int argc, char** argv) {
+    bool again = true;
+    std::string winner;
 
-//XInitThreads();
-
-
-sf::RenderWindow signal_plot_window_(sf::VideoMode(280, 400)
-                    , "Transformed_Frequencies");
-
-// sf::VideoMode fullScreenMode = sf::VideoMode::getDesktopMode();
-
-//#ifndef DEBUG_FFT_MODE
-sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
-                       , "Table_Vis");
-window.setSize(windowResolution);
-//#endif
-
-    std::vector<sf::Vector2f> default_microphone_positions_ = {{0.06, 0.075}, {0.945,  0.09}, {0.925,  1.915} , {0.06,  1.905}};
+    while(again){
 
 
-    TTT::Table_Visualizer table_visualizer(windowResolution, sf::Vector2f(1.0, 2.0), default_microphone_positions_);
-    table_visualizer.Set_Token_Recognition_Timeout(10000);
+        //XInitThreads();
 
-    Locator locator{4};
 
-    locator.set_frequencies_to_record({18000, 19000});
+        sf::RenderWindow signal_plot_window_(sf::VideoMode(280, 400)
+                            , "Transformed_Frequencies");
 
-    auto recording_thread = std::thread(&Locator::record_position, &locator);
+        // sf::VideoMode fullScreenMode = sf::VideoMode::getDesktopMode();
 
-    //unsigned frame_counter = 0;
+        //#ifndef DEBUG_FFT_MODE
+        sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
+                               , "Table_Vis");
+        window.setVerticalSyncEnabled(true);
+        window.setSize(windowResolution);
+        //#endif
+
+        std::vector<sf::Vector2f> default_microphone_positions_ = {{0.06, 0.075}, {0.945,  0.09}, {0.925,  1.915} , {0.06,  1.905}};
+
+
+        TTT::Table_Visualizer table_visualizer(windowResolution, sf::Vector2f(1.0, 2.0), default_microphone_positions_);
+        table_visualizer.Set_Token_Recognition_Timeout(10000);
+
+        Locator locator{4};
+
+        locator.set_frequencies_to_record({18000, 19000});
+
+        auto recording_thread = std::thread(&Locator::record_position, &locator);
+
+        //unsigned frame_counter = 0;
 
         glm::vec2 max{TTT::Drawable_Object::get_phys_table_size().x, TTT::Drawable_Object::get_phys_table_size().y};
         glm::vec2 min{0, 0};
@@ -51,14 +58,31 @@ window.setSize(windowResolution);
         glm::vec2 pl1_pos{0.9, 0.5};
         glm::vec2 pl2_pos{0.04, 0.5};
 
-    double player_speed = 0.009;
+        double player_speed = 0.009;
         
 
         table_visualizer.Set_Token_Fill_Color(18000, sf::Color(255,0,0) );
         table_visualizer.Set_Token_Fill_Color(19000, sf::Color(255,255,0) );
 
-        while (window.isOpen())
-        {
+
+
+            window.clear();
+            sf::Text text;
+            sf::Font font;
+            font.loadFromFile("./DejaVuSans.ttf");
+            text.setFont(font);
+            text.setString(winner + "wins!\n If you want to play again enter again. Otherwise enter something else!");
+            text.setCharacterSize(24);
+            text.setColor(sf::Color::Red);            
+            text.setStyle(sf::Text::Bold | sf::Text::Underlined);
+
+
+            window.draw(text);
+            window.display();
+
+
+
+        while (window.isOpen()/* && !table_visualizer.game_over().first*/ /*&& false*/) {
             glm::vec2 pl1_dir{0, 0};
             glm::vec2 pl2_dir{0, 0};
 
@@ -84,7 +108,7 @@ window.setSize(windowResolution);
             glm::vec2 pl1_new{pl1_pos + pl1_dir};
             pl1_pos = glm::clamp(pl1_new, min, max);
 
-            //left player
+             //left player
 
             if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
                 pl2_dir.y += player_speed;
@@ -103,7 +127,7 @@ window.setSize(windowResolution);
             if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
                 pl2_dir.x -= player_speed;
             }
-                    
+                            
             glm::vec2 pl2_new{pl2_pos + pl2_dir};
             pl2_pos = glm::clamp(pl2_new, min, max);
 
@@ -112,10 +136,8 @@ window.setSize(windowResolution);
             window.clear();
             table_visualizer.Recalculate_Geometry();
 
-
-
             table_visualizer.Draw(window);
-               
+                       
 
             table_visualizer.Signal_Token(1000, sf::Vector2f(pl2_pos.x, pl2_pos.y));
             table_visualizer.Signal_Token(2000, sf::Vector2f(pl1_pos.x, pl1_pos.y));
@@ -128,13 +150,13 @@ window.setSize(windowResolution);
 
             for(auto const& frequency_position_entry : positions ) {     
                 //std::cout << "Frequency_Position_Entry: " << frequency_position_entry.first << "\n";
-                    glm::vec2 current_frequency_position = positions[frequency_position_entry.first].second;
+                glm::vec2 current_frequency_position = positions[frequency_position_entry.first].second;
 
-                    smartphonePosition.x = current_frequency_position.x;
-                    smartphonePosition.y = 1.0 - current_frequency_position.y;
+                smartphonePosition.x = current_frequency_position.x;
+                smartphonePosition.y = 1.0 - current_frequency_position.y;
 
 
-                    table_visualizer.Signal_Token(frequency_position_entry.first, sf::Vector2f(smartphonePosition.x, smartphonePosition.y));
+                table_visualizer.Signal_Token(frequency_position_entry.first, sf::Vector2f(smartphonePosition.x, smartphonePosition.y));
             }
 
             table_visualizer.Finalize_Visualization_Frame();
@@ -145,62 +167,92 @@ window.setSize(windowResolution);
 
 
 
-        glm::vec4 toas = locator.load_toas();
-         
+            glm::vec4 toas = locator.load_toas();
+             
 
 
-        std::array< std::vector<double>, 4> signal_vis_samples =  locator.load_signal_vis_samples();
-        signal_plot_window_.clear(sf::Color(255, 255, 255));
+            std::array< std::vector<double>, 4> signal_vis_samples =  locator.load_signal_vis_samples();
+            signal_plot_window_.clear(sf::Color(255, 255, 255));
 
-        std::array<unsigned, 4> recognized_vis_sample_pos = locator.load_recognized_vis_sample_positions();
+            std::array<unsigned, 4> recognized_vis_sample_pos = locator.load_recognized_vis_sample_positions();
 
 
-        sf::RectangleShape data_point;
-        for(unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
+            sf::RectangleShape data_point;
+            for(unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
+
+            
+                    for(unsigned int sample_idx = 0; sample_idx < signal_vis_samples[channel_iterator].size(); sample_idx+=5) {
+                        unsigned int sig = signal_vis_samples[channel_iterator][sample_idx];
+
+                        float width = 280.0f / signal_vis_samples[channel_iterator].size();
+
+                        data_point.setSize(sf::Vector2f(1,sig) );
+                        data_point.setPosition( sf::Vector2f( width * sample_idx, channel_iterator * 100.0 + (100.0-sig) ) );
+                        //convex.setPoint(sample_idx, sf::Vector2f( width * sample_idx, channel_iterator * 100.0 + (100.0-sig) ));
+
+
+                        if(sample_idx <  recognized_vis_sample_pos[channel_iterator] ) {
+                            data_point.setFillColor(sf::Color(255, 0, 0) ) ;
+                        } else {
+                            data_point.setFillColor(sf::Color(0, 255, 0) ) ;          
+                        }
+        
+
+                        signal_plot_window_.draw(data_point);
+
+                    }
+
+
+
+
+
+
+
+            }
 
         
-                for(unsigned int sample_idx = 0; sample_idx < signal_vis_samples[channel_iterator].size(); sample_idx+=5) {
-                    unsigned int sig = signal_vis_samples[channel_iterator][sample_idx];
-
-                    float width = 280.0f / signal_vis_samples[channel_iterator].size();
-
-                    data_point.setSize(sf::Vector2f(1,sig) );
-                    data_point.setPosition( sf::Vector2f( width * sample_idx, channel_iterator * 100.0 + (100.0-sig) ) );
-                    //convex.setPoint(sample_idx, sf::Vector2f( width * sample_idx, channel_iterator * 100.0 + (100.0-sig) ));
 
 
-                    if(sample_idx <  recognized_vis_sample_pos[channel_iterator] ) {
-                        data_point.setFillColor(sf::Color(255, 0, 0) ) ;
-                    } else {
-                        data_point.setFillColor(sf::Color(0, 255, 0) ) ;          
-                    }
+            signal_plot_window_.display();
+
+            winner = table_visualizer.game_over().second;
+
+        //std::cout<<"hihihihhihi\n";
+            }//end of second while --> end of game
+
+
+
+
+
+            locator.shut_down();
+            recording_thread.join();
+
+
+           /* window.clear();
+            sf::Text text;
+            sf::Font font;
+            font.loadFromFile("DejaVuSans.ttf");
+            text.setFont(font);
+            text.setString(winner + "wins!\n If you want to play again enter again. Otherwise enter something else!");
+            text.setCharacterSize(24);
+            text.setColor(sf::Color::Red);            
+            text.setStyle(sf::Text::Bold | sf::Text::Underlined);
+
+
+            window.draw(text);
+            window.display();*/
+
+
+            std::string asdfgh;
+            std::cin>>asdfgh;
+            if(asdfgh == "again")
+                again = true;
+            else
+                again = false;
     
 
-                    signal_plot_window_.draw(data_point);
+    }
 
-                }
-
-
-
-
-
-
-
-        }
-
-    
-
-
-        signal_plot_window_.display();
-
-        }
-
-
-
-
-
-    locator.shut_down();
-    recording_thread.join();
 
     return 0;
 }

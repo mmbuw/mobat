@@ -61,6 +61,23 @@ Table_Visualizer( sf::Vector2u const& in_canvas_resolution,
 	right_goals_ = 0;
 	left_goals_ = 0;
 
+	std::cout<<"TableDim in px: "<<in_canvas_resolution.x << "  " << in_canvas_resolution.y <<"\n";
+
+
+
+	double score_x = double(in_canvas_resolution.x), score_y = double(in_canvas_resolution.y);
+	
+	score_x -= table_dims.x*pixel_per_meter_;
+	score_y -= table_dims.y*pixel_per_meter_;
+
+	score_x /= 3;
+	//score_y /= 2;
+
+	points_ = Score{score_x, score_y};
+
+
+	
+
 
 	//get initial timestamp
 	last_time_stamp_ = std::chrono::high_resolution_clock::now();
@@ -74,6 +91,7 @@ void Table_Visualizer::
 Draw(sf::RenderWindow& canvas) const {
 	
 	table_.Draw(canvas);
+	points_.Draw(canvas);
 
 	for(auto const& mic_obj : microphones_) {
 		mic_obj.Draw(canvas);
@@ -84,6 +102,7 @@ Draw(sf::RenderWindow& canvas) const {
 	}
 
 	ball_.Draw(canvas);
+
 	
 }
 
@@ -102,6 +121,8 @@ Draw(sf::RenderWindow& canvas, glm::vec4 toas) const {
 	}
 
 	ball_.Draw(canvas);
+
+	points_.Draw(canvas);
 	
 
 }
@@ -203,12 +224,14 @@ Recalculate_Geometry() {
 			ball_dir_.y = -ball_speed_;
 			++right_goals_;
 		}
+		points_.update(right_goals_, left_goals_);
 		std::cout<<"Left: "<<left_goals_<<"  Right:  "<<right_goals_<<"\n";
 
 		ball_dir_.x = 0;
 			b_y_pos_ = physical_table_size_.y/2.0;
 			b_x_pos_ = physical_table_size_.x/2.0;
 		//ball_.should_move_ = false;
+		
 	}
 
 #endif
@@ -223,8 +246,9 @@ Recalculate_Geometry() {
 
 	   // b_x_pos_ += ball_dir_.x; //wieder rausnehmen
 
-		//std::cout<<elapsed_microseconds_since_last_frame_<<"\n";
-	double factor = elapsed_microseconds_since_last_frame_ * 1.0;
+	//std::cout<<elapsed_microseconds_since_last_frame_<<"\n";
+
+	double factor = /*elapsed_microseconds_since_last_frame_ * */ 1.0;
 
 		b_x_pos_ += ball_dir_.x * factor;
 		b_y_pos_ += ball_dir_.y * factor;
@@ -428,6 +452,22 @@ void Table_Visualizer::move_ball_out_of_token(sf::CircleShape const& t){
 
     ball_.setPosition(b_x_pos_, b_y_pos_);
 
+}
+
+
+std::pair<bool, std::string> Table_Visualizer::game_over(){
+	int tmp = left_goals_ - right_goals_;
+	if(abs(tmp) <= 1){
+		return {false, "Chuck Norris"};
+	}else{
+
+		if(tmp > 6){
+			return {true, "left"};
+		}else{
+			return {true, "right"};
+		}
+	}	
+	
 }
 
 
