@@ -99,7 +99,6 @@ load_recognized_vis_sample_positions() const {
     // start recording loop
     auto recording_thread = std::thread{&Recorder::recording_loop, &recorder};
 
-
     while (!shutdown)
     {
         if(!recorder.new_recording()) {
@@ -110,21 +109,17 @@ load_recognized_vis_sample_positions() const {
 
         recorder.request_recording();
 
-
         for (unsigned frequency_to_analyze : frequencies_to_locate) {
             signal_analyzer.start_listening_to(frequency_to_analyze);
         }
 
-        signal_analyzer.analyze((int**)&collector[0], recorder.buffer_bytes()/collector.count);
- 
+        signal_analyzer.analyze(collector); 
         
         bool found_positions = false;
 
         std::map<unsigned,glm::vec2> currently_located_positions;
 
-
         for(unsigned frequency_to_locate : frequencies_to_locate) {
-
 
             std::array<double, 4> current_frequency_toas = signal_analyzer.get_toas_for(frequency_to_locate);
 
@@ -150,6 +145,7 @@ load_recognized_vis_sample_positions() const {
             /*
               std::numeric_limits<double>::max() is the value that determines invalid toas. therefore we 
             */
+
             if(toa_max != std::numeric_limits<double>::max() && toa_max - toa_min < 100.00 ) {
 
                 found_positions = true;
@@ -172,10 +168,7 @@ load_recognized_vis_sample_positions() const {
             }
         }
 
-
-            cached_signal_vis_samples = signal_analyzer.get_signal_samples_for(18000);
-
-        //std::cout << "Performed FFT\n";
+        cached_signal_vis_samples = signal_analyzer.get_signal_samples_for(18000);
 
         if(found_positions) {
             std::cout << "\tFound Pos\n";
@@ -199,10 +192,6 @@ load_recognized_vis_sample_positions() const {
         recognized_vis_sample_pos_mutex.lock();
         recognized_vis_sample_pos = cached_recognized_vis_sample_pos;
         recognized_vis_sample_pos_mutex.unlock();
-
-
-
-
 
     }
     // stop recording loop

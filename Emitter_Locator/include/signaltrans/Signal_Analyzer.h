@@ -2,6 +2,7 @@
 #define SIGNAL_ANALYZER_H
 
 #include "FFT_Transformer.h"
+#include "buffer_collection.hpp"
 
 #include <array>
 
@@ -24,8 +25,7 @@ class Signal_Analyzer {
     	  these toas are stored and can be retrieved by 
     	  "get_toas_for(unsigned const frequency)"
         */
-    	void analyze(int** current_audio_buffer, 
-    				 unsigned int bytes_per_channel);
+    	void analyze(buffer_collection const&);
 
     	/*
           unregisters a frequency in order to not analyze it anymore
