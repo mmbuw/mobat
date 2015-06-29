@@ -15,20 +15,20 @@ glm::vec2 windowResolution(800, 800);
 
 int main(int argc, char** argv) {
 sf::RenderWindow signal_plot_window_(sf::VideoMode(280, 400)
-                    , "Transformed_Frequencies");
+                   , "Transformed_Frequencies");
 
 sf::RenderWindow window(sf::VideoMode(unsigned(windowResolution.x), unsigned(windowResolution.y))
                        , "Table_Vis");
 
-// Limit the framerate to 60 frames per second (this step is optional)
-window.setFramerateLimit(60);
-
+    // Limit the framerate to 60 frames per second (this step is optional)
+    window.setFramerateLimit(60);
+    unsigned latest_received_timestamp = 0;
 
     std::vector<sf::Vector2f> default_microphone_positions_ = {{0.06, 0.075}, {0.945,  0.09}, {0.925,  1.915} , {0.06,  1.905}};
 
 
     TTT::Table_Visualizer table_visualizer(windowResolution, glm::vec2(1.0, 2.0), default_microphone_positions_);
-    table_visualizer.Set_Token_Recognition_Timeout(10000);
+    table_visualizer.Set_Token_Recognition_Timeout(5000000);
 
     Locator locator{4};
 
@@ -110,26 +110,40 @@ window.setFramerateLimit(60);
                
 
             table_visualizer.Signal_Token(1000, sf::Vector2f(pl2_pos.x, pl2_pos.y));
-            table_visualizer.Signal_Token(2000, sf::Vector2f(pl1_pos.x, pl1_pos.y));
+            //table_visualizer.Signal_Token(2000, sf::Vector2f(pl1_pos.x, pl1_pos.y));
 
 
             std::map<unsigned, std::pair<unsigned, glm::vec2> > positions = locator.load_position();
             
             if(positions.size() != 0) {
-            }
+                //std::cout << "Started getting posses: \n";
 
-            for(auto const& frequency_position_entry : positions ) {     
-                //std::cout << "Frequency_Position_Entry: " << frequency_position_entry.first << "\n";
-                    glm::vec2 current_frequency_position = positions[frequency_position_entry.first].second;
+                unsigned current_iteration_timestamp_peak = 0;
+                for(auto const& frequency_position_entry : positions ) {     
 
-                    smartphonePosition.x = current_frequency_position.x;
-                    smartphonePosition.y = 1.0 - current_frequency_position.y;
+                    if(latest_received_timestamp < positions[frequency_position_entry.first].first) {
+                        current_iteration_timestamp_peak = positions[frequency_position_entry.first].first;
 
+                        glm::vec2 current_frequency_position = positions[frequency_position_entry.first].second;
 
-                    table_visualizer.Signal_Token(frequency_position_entry.first, sf::Vector2f(smartphonePosition.x, smartphonePosition.y));
+                        smartphonePosition.x = current_frequency_position.x;
+                        smartphonePosition.y = 1.0 - current_frequency_position.y;
+
+                        table_visualizer
+                            .Signal_Token(frequency_position_entry.first, 
+                                          sf::Vector2f(smartphonePosition.x, 
+                                                       smartphonePosition.y));
+                    }
+                }
+
+                if(current_iteration_timestamp_peak > latest_received_timestamp) {
+                    latest_received_timestamp = current_iteration_timestamp_peak;
+                }
+
             }
 
             table_visualizer.Finalize_Visualization_Frame();
+
             window.display();
 
 
@@ -140,8 +154,9 @@ window.setFramerateLimit(60);
         glm::vec4 toas = locator.load_toas();
          
 
-
         std::array< std::vector<double>, 4> signal_vis_samples =  locator.load_signal_vis_samples();
+       
+        
         signal_plot_window_.clear(sf::Color(255, 255, 255));
 
         std::array<unsigned, 4> recognized_vis_sample_pos = locator.load_recognized_vis_sample_positions();
@@ -150,7 +165,6 @@ window.setFramerateLimit(60);
         sf::RectangleShape data_point;
         for(unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
 
-        
                 for(unsigned int sample_idx = 0; sample_idx < signal_vis_samples[channel_iterator].size(); sample_idx+=5) {
                     unsigned int sig = signal_vis_samples[channel_iterator][sample_idx];
 
@@ -171,22 +185,14 @@ window.setFramerateLimit(60);
 
                 }
 
-
-
-
-
-
-
         }
 
     
 
 
         signal_plot_window_.display();
-
+        
         }
-
-
 
 
 

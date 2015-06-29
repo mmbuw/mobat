@@ -17,7 +17,7 @@ Table_Visualizer( glm::vec2 const& in_canvas_resolution,
 				  sf::Color const& in_table_fill_color,
 				  sf::Color const& in_microphone_fill_color,
 				  sf::Color const& in_token_fill_color,
-				  double ball_size) : elapsed_microseconds_since_last_frame_(16000){
+				  double ball_size) : elapsed_milliseconds_since_last_frame_(0) {
 
 	resolution_ = in_canvas_resolution;
 
@@ -64,6 +64,7 @@ Table_Visualizer( glm::vec2 const& in_canvas_resolution,
 
 	//get initial timestamp
 	last_time_stamp_ = std::chrono::high_resolution_clock::now();
+	//elapsed_milliseconds_since_last_frame_ = frame_timer_.getElapsedTime();
 }
 
 Table_Visualizer::
@@ -223,8 +224,8 @@ Recalculate_Geometry() {
 
 	   // b_x_pos_ += ball_dir_.x; //wieder rausnehmen
 
-		//std::cout<<elapsed_microseconds_since_last_frame_<<"\n";
-	double factor = elapsed_microseconds_since_last_frame_ * 1.0;
+		//std::cout<<elapsed_milliseconds_since_last_frame_<<"\n";
+	double factor = elapsed_milliseconds_since_last_frame_ * 1.0;
 
 		b_x_pos_ += ball_dir_.x * factor;
 		b_y_pos_ += ball_dir_.y * factor;
@@ -286,10 +287,8 @@ void Table_Visualizer::
 Signal_Token(unsigned int in_id, sf::Vector2f const& in_position) {
 
 	if( recognized_tokens_.end() != recognized_tokens_.find(in_id) ) {
-		//std::cout << "Insert token id: " << in_id << "\n";
 		tokens_to_refresh_.insert(in_id);
 	}
-		//std::cout << "Inserting new token with id: " << in_id << "\n";
 		recognized_tokens_[in_id] = Recognized_Token_Object(in_id, in_position); 
 
 		std::map<unsigned, sf::Color>::iterator token_color_mapping_iterator = 
@@ -304,22 +303,24 @@ Signal_Token(unsigned int in_id, sf::Vector2f const& in_position) {
 
 void Table_Visualizer::
 Finalize_Visualization_Frame() {
+	Calculate_Elapsed_Milliseconds();
+	unsigned int Elapsed_Milliseconds = Get_Elapsed_Milliseconds();
+	
 	std::set<unsigned> tokens_to_remove;
 
 	for( auto& id_token_pair : recognized_tokens_ ) {
-		//std::cout << "lt: " << id_token_pair.second.remaining_life_time_in_ms_ << "\n";
+
 		bool refresh_token = false;
 		if(tokens_to_refresh_.end() != 
 		   tokens_to_refresh_.find(id_token_pair.first) ) {
 			refresh_token = true;
 		}
 
-		Calculate_Elapsed_Microseconds();
-		unsigned int Elapsed_Microseconds = Get_Elapsed_Microseconds();
+
 		
 		if( ! id_token_pair.second
 			.Update_Token(refresh_token, 
-						  Elapsed_Microseconds, 
+						  Elapsed_Milliseconds, 
 						  id_token_pair.second.physical_position_) ) {
 			tokens_to_remove.insert(id_token_pair.first);
 		}
@@ -335,24 +336,27 @@ Finalize_Visualization_Frame() {
 
 
 void Table_Visualizer::
-Calculate_Elapsed_Microseconds() {
+Calculate_Elapsed_Milliseconds() {
 	std::chrono::high_resolution_clock::time_point 
-		current_time_stamp = std::chrono::high_resolution_clock::now();
+	current_time_stamp = std::chrono::high_resolution_clock::now();
 
-	std::chrono::microseconds elapsed_microseconds
-		= std::chrono::duration_cast<std::chrono::microseconds>
+	std::chrono::milliseconds elapsed_milliseconds
+		= std::chrono::duration_cast<std::chrono::milliseconds>
 		(current_time_stamp - last_time_stamp_); 
 
 	last_time_stamp_ = current_time_stamp;
 
-	//std::cout << "Elapsed microseconds: " << elapsed_microseconds.count()<<"\n";
-	elapsed_microseconds_since_last_frame_ = elapsed_microseconds.count();
-	//std::cout << "After: " << elapsed_microseconds_since_last_frame_<<"\n";
+	//std::cout << "Elapsed milliseconds: " << elapsed_milliseconds.count()<<"\n";
+	elapsed_milliseconds_since_last_frame_ = elapsed_milliseconds.count();
+	//std::cout << "After: " << elapsed_milliseconds_since_last_frame_<<"\n";*/
+
+	//elapsed_milliseconds_since_last_frame_ = frame_timer_.getElapsedTime();
+	//frame_timer_.restart();
 }
 
 unsigned Table_Visualizer::
-Get_Elapsed_Microseconds(){
-	return elapsed_microseconds_since_last_frame_;
+Get_Elapsed_Milliseconds(){
+	return elapsed_milliseconds_since_last_frame_;//.asMilliseconds();
 }
 
 std::pair<bool, glm::vec2> Table_Visualizer::circ_circ_intersect(sf::CircleShape const& ball, sf::CircleShape const& paddle) const{

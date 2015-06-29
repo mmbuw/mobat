@@ -11,7 +11,8 @@ Locator::Locator(unsigned int num_mics):
  shutdown{false},
  recorder{num_mics, 44100, 130000},
  collector{recorder.buffer_bytes() / num_mics, num_mics},
- locator{330, {0.06, 0.075}, {0.945,  0.09}, {0.925,  1.915} , {0.06,  1.905}}
+ locator{330, {0.06, 0.075}, {0.945,  0.09}, {0.925,  1.915} , {0.06,  1.905}},
+ locator_frame_counter_(1)
  {
 
     //signal_analyzer.start_listening_to(18000);
@@ -101,14 +102,9 @@ load_recognized_vis_sample_positions() const {
 
     while (!shutdown)
     {
-
-
-
         if(!recorder.new_recording()) {
             continue;
         }
-
-
 
         collector.from_interleaved(recorder.buffer());
 
@@ -130,7 +126,6 @@ load_recognized_vis_sample_positions() const {
         for(unsigned frequency_to_locate : frequencies_to_locate) {
 
 
-
             std::array<double, 4> current_frequency_toas = signal_analyzer.get_toas_for(frequency_to_locate);
 
             double const & (*d_min) (double const &, double const &) = std::min<double>;
@@ -145,11 +140,16 @@ load_recognized_vis_sample_positions() const {
 
             //std::cout <<  "doing something for freq " << frequency_to_locate <<"min: " << toa_min << "   max: " << toa_max <<"\n";
 
-                if(frequency_to_locate > 49999)
+            /*if(frequency_to_locate > 49999)
                     std::cout << "Toas for 100000 Hz : " << current_frequency_toas[0] << "\n" <<
                                                             current_frequency_toas[1] << "\n" <<
                                                             current_frequency_toas[2] << "\n" <<
                                                             current_frequency_toas[3] << "\n";
+            */
+
+            /*
+              std::numeric_limits<double>::max() is the value that determines invalid toas. therefore we 
+            */
             if(toa_max != std::numeric_limits<double>::max() && toa_max - toa_min < 100.00 ) {
 
                 found_positions = true;
@@ -163,10 +163,10 @@ load_recognized_vis_sample_positions() const {
                // std::cout << "Starting locate for frequency " << frequency_to_locate << "\n";
                 currently_located_positions[frequency_to_locate] = locator.locate();
                 currently_located_positions[frequency_to_locate].y = 1 - currently_located_positions[frequency_to_locate].y;
-                std::cout << "Cached position: " << currently_located_positions[frequency_to_locate].x << ", " << currently_located_positions[frequency_to_locate].y << "\n";
-                std::cout << "\n";
+                //std::cout << "Cached position: " << currently_located_positions[frequency_to_locate].x << ", " << currently_located_positions[frequency_to_locate].y << "\n";
+                //std::cout << "\n";
 
-                std::cout << "\n";
+                //std::cout << "\n";
 
 
             }
@@ -175,13 +175,15 @@ load_recognized_vis_sample_positions() const {
 
             cached_signal_vis_samples = signal_analyzer.get_signal_samples_for(18000);
 
+        //std::cout << "Performed FFT\n";
 
         if(found_positions) {
-
+            std::cout << "\tFound Pos\n";
+            ++locator_frame_counter_;
             cached_located_positions.clear();
             for(auto const& currently_located_position_entry :  currently_located_positions) {
                 //std::cout << "Putting entry: " << currently_located_position_entry.first << "\n";
-                cached_located_positions[currently_located_position_entry.first] = std::make_pair(7, currently_located_position_entry.second);
+                cached_located_positions[currently_located_position_entry.first] = std::make_pair(  locator_frame_counter_ , currently_located_position_entry.second);
             }
 
             position_mutex.lock();

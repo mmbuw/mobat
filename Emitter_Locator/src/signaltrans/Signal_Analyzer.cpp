@@ -21,14 +21,22 @@ void Signal_Analyzer::
 analyze(int** current_audio_buffer, unsigned int bytes_per_channel){
 
 
+
 	std::vector<unsigned> fft_result_frequencies;
 	for(auto const& frequency_to_transform_entry : frequency_toas_mapping) {
+		/*
+		  filter frequencies that are below a reasonable 
+		  threshold in order to create some virtual space
+		  for special detections (like knock detecion)
+		*/
 		if(frequency_to_transform_entry.first < 50000.0f)
 		fft_result_frequencies.push_back(frequency_to_transform_entry.first);
 
 	}
 
-
+	/*
+	  forward the frequencies to the fft-transformer in order
+	  to prepare normalized buffers for these frequencies*/
 	fft_transformer.set_listened_frequencies(fft_result_frequencies);
 
 
@@ -63,7 +71,7 @@ analyze(int** current_audio_buffer, unsigned int bytes_per_channel){
 						for(unsigned int i = 0; i < bytes_per_channel; ++i ) {
 							if(current_audio_buffer[channel_it][i] > std::numeric_limits<int>::max()-1000 /* 2147000000*/) {
 								
-								std::cout << "Channel " << channel_it << " detected at: " << i << "\n";
+								//std::cout << "Channel " << channel_it << " detected at: " << i << "\n";
 								signal_detected_at_sample_per_frequency[frequency_entry.first][channel_it] = i;
 								break;
 								//std::cout << current_audio_buffer[channel_it][i] << "\n";
@@ -71,7 +79,7 @@ analyze(int** current_audio_buffer, unsigned int bytes_per_channel){
 							}
 						}
 					}
-					std::cout << "\n";
+					//std::cout << "\n";
 
 				} else {
 		
@@ -186,8 +194,8 @@ analyze(int** current_audio_buffer, unsigned int bytes_per_channel){
 
 		        //std::cout << "sample_min: " << sample_min << "\n";
 			if(frequency_entry.first > 50000) {
-				std::cout << "Doing something\n";
-				std::cout << "sample min: " << sample_min << "  sample_max: " << sample_max << "\n";  
+				//std::cout << "Doing something\n";
+				//std::cout << "sample min: " << sample_min << "  sample_max: " << sample_max << "\n";  
 			}
 
 		        if(sample_max-sample_min > 0 && sample_max - sample_min < 500 && sample_max < 999999) {
@@ -230,10 +238,8 @@ stop_listening_to(unsigned const frequency_to_stop_listening_to) {
 //only frequencies we register are taken into account for the analyzation
 void Signal_Analyzer::
 start_listening_to(unsigned const frequency_to_start_listening_to) {
-
 	//just overwrite the slot, even if there's already an entry for
 	//the frequency
-
 	frequency_toas_mapping[frequency_to_start_listening_to]
 		= std::array<double,4>();
 }
