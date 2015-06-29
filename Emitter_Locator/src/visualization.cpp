@@ -11,32 +11,23 @@
 #define NUM_RECORDED_CHANNELS 4
 
 sf::Vector2f smartphonePosition(1.0f,0.5f);
-sf::Vector2u windowResolution(800, 800);
-
-//#define DEBUG_FFT_MODE
+glm::vec2 windowResolution(800, 800);
 
 int main(int argc, char** argv) {
-
-//XInitThreads();
-
-
 sf::RenderWindow signal_plot_window_(sf::VideoMode(280, 400)
                     , "Transformed_Frequencies");
 
-// sf::VideoMode fullScreenMode = sf::VideoMode::getDesktopMode();
-
-//#ifndef DEBUG_FFT_MODE
-sf::RenderWindow window(sf::VideoMode(windowResolution.x, windowResolution.y)
+sf::RenderWindow window(sf::VideoMode(unsigned(windowResolution.x), unsigned(windowResolution.y))
                        , "Table_Vis");
+
 // Limit the framerate to 60 frames per second (this step is optional)
 window.setFramerateLimit(60);
-window.setSize(windowResolution);
-//#endif
+
 
     std::vector<sf::Vector2f> default_microphone_positions_ = {{0.06, 0.075}, {0.945,  0.09}, {0.925,  1.915} , {0.06,  1.905}};
 
 
-    TTT::Table_Visualizer table_visualizer(windowResolution, sf::Vector2f(1.0, 2.0), default_microphone_positions_);
+    TTT::Table_Visualizer table_visualizer(windowResolution, glm::vec2(1.0, 2.0), default_microphone_positions_);
     table_visualizer.Set_Token_Recognition_Timeout(10000);
 
     Locator locator{4};
@@ -45,7 +36,6 @@ window.setSize(windowResolution);
 
     auto recording_thread = std::thread(&Locator::record_position, &locator);
 
-    //unsigned frame_counter = 0;
 
         glm::vec2 max{TTT::Drawable_Object::get_phys_table_size().x, TTT::Drawable_Object::get_phys_table_size().y};
         glm::vec2 min{0, 0};
@@ -139,7 +129,6 @@ window.setSize(windowResolution);
                     table_visualizer.Signal_Token(frequency_position_entry.first, sf::Vector2f(smartphonePosition.x, smartphonePosition.y));
             }
 
-            //std::cout << "Elapsed Time: " << table_visualizer.Get_Elapsed_Microseconds() << "\n";
             table_visualizer.Finalize_Visualization_Frame();
             window.display();
 
@@ -169,7 +158,6 @@ window.setSize(windowResolution);
 
                     data_point.setSize(sf::Vector2f(1,sig) );
                     data_point.setPosition( sf::Vector2f( width * sample_idx, channel_iterator * 100.0 + (100.0-sig) ) );
-                    //convex.setPoint(sample_idx, sf::Vector2f( width * sample_idx, channel_iterator * 100.0 + (100.0-sig) ));
 
 
                     if(sample_idx <  recognized_vis_sample_pos[channel_iterator] ) {

@@ -6,13 +6,13 @@
 namespace TTT {
 
 float Drawable_Object::pixel_per_meter_ = 0.0f;
-sf::Vector2f Drawable_Object::table_dims_in_px_ = sf::Vector2f(0.0f, 0.0f);
-sf::Vector2f Drawable_Object::physical_table_size_ = sf::Vector2f(0.0f, 0.0f);
-sf::Vector2u Drawable_Object::resolution_ = sf::Vector2u(0,0);
+glm::vec2 Drawable_Object::table_dims_in_px_ = glm::vec2(0.0f, 0.0f);
+glm::vec2 Drawable_Object::physical_table_size_ = glm::vec2(0.0f, 0.0f);
+glm::vec2 Drawable_Object::resolution_ = glm::vec2(0,0);
 
 Table_Visualizer::
-Table_Visualizer( sf::Vector2u const& in_canvas_resolution,
-				  sf::Vector2f const& table_dims,
+Table_Visualizer( glm::vec2 const& in_canvas_resolution,
+				  glm::vec2 const& table_dims,
 				  std::vector<sf::Vector2f> const& microphone_positions,
 				  sf::Color const& in_table_fill_color,
 				  sf::Color const& in_microphone_fill_color,
@@ -107,7 +107,7 @@ Draw(sf::RenderWindow& canvas, glm::vec4 toas) const {
 }
 
 void Table_Visualizer::
-Resize_Physical_Table(sf::Vector2f const& Table_Dims ) {
+Resize_Physical_Table(glm::vec2 const& Table_Dims ) {
 	table_.Set_Physical_Size(Table_Dims);
 }
 
@@ -247,7 +247,7 @@ Recalculate_Geometry() {
 }
 
 void Table_Visualizer::
-Set_Canvas_Resolution( sf::Vector2u const& in_resolution ) {
+Set_Canvas_Resolution(glm::vec2 const& in_resolution ) {
 	resolution_ = in_resolution;
 }
 
@@ -356,79 +356,53 @@ Get_Elapsed_Microseconds(){
 }
 
 std::pair<bool, glm::vec2> Table_Visualizer::circ_circ_intersect(sf::CircleShape const& ball, sf::CircleShape const& paddle) const{
-    double x1 = ball.getPosition().x + ball.getRadius(), y1 = ball.getPosition().y /*+ ball.getRadius()*/;
-    double x2 = paddle.getPosition().x + paddle.getRadius(), y2 = paddle.getPosition().y /*+ paddle.getRadius()*/;
+    glm::vec2 mid_ball{ball.getPosition().x + ball.getRadius(), ball.getPosition().y + ball.getRadius()};
+    glm::vec2 mid_paddle{paddle.getPosition().x + paddle.getRadius(), paddle.getPosition().y + paddle.getRadius()};
 
-
-
-    glm::vec2 mid_ball{x1,y1};
-    glm::vec2 mid_paddle{x2,y2};
     double dist = glm::length(mid_ball - mid_paddle);
-    //double dist = glm::length(mid_paddle - mid_ball);
 
+    bool intersects = (glm::abs(dist) < (ball.getRadius() + paddle.getRadius()));
 
-
-    
-
-    bool tmp1 = (dist < (ball.getRadius() + paddle.getRadius() ) && dist > abs(ball.getRadius() - paddle.getRadius()));
-    
-
-    //its in global_sys, hence the y coordinates have to be swapped for claculating the normal :(
+    //its in global_sys, hence the y coordinates have to be swapped for calulating the normal :(
     mid_ball.y += mid_paddle.y;
     mid_paddle.y = mid_ball.y - mid_paddle.y;
     mid_ball.y = mid_ball.y - mid_paddle.y;
 
     glm::vec2 normal = glm::normalize(mid_ball - mid_paddle);
 
-
-    return std::pair<bool, glm::vec2>{tmp1, normal}; 
-
+    return std::pair<bool, glm::vec2>{intersects, normal}; 
 }
 
-void Table_Visualizer::move_ball_out_of_token(sf::CircleShape const& t){
-	 
-	double x1 = t.getPosition().x + t.getRadius(), y1 = t.getPosition().y + t.getRadius();
-    double x2 = ball_.getPosition().x + ball_.getRadius(), y2 = ball_.getPosition().y + ball_.getRadius();
+void Table_Visualizer::move_ball_out_of_token(sf::CircleShape const& paddle){
+	  
+    glm::vec2 mid_ball{ball_.getPosition().x + ball_.getRadius(), ball_.getPosition().y + ball_.getRadius()};
+    glm::vec2 mid_paddle{paddle.getPosition().x + paddle.getRadius(), paddle.getPosition().y + paddle.getRadius()};
+
+    mid_ball *= physical_table_size_ / resolution_;
+    mid_paddle *= physical_table_size_ / resolution_;
     
-
-
-    x1 *= (physical_table_size_.x / resolution_.x);
-    y1 *= (physical_table_size_.y / resolution_.y);
-    x2 *= (physical_table_size_.x / resolution_.x);
-    y2 *= (physical_table_size_.y / resolution_.y);
-
-
-    glm::vec2 mid_paddle{x1,y1};
-    glm::vec2 mid_ball{x2,y2};
-
+    auto norm = circ_circ_intersect(ball_.get_Circle(), paddle).second;
     
-    std::cout<<"paddle: "<<mid_paddle.x << "  "<<mid_paddle.y<<"\n";
-    std::cout<<"ball: "<<mid_ball.x << "  "<<mid_ball.y<<"\n";
-
-    auto norm = circ_circ_intersect(ball_.get_Circle(), t).second;
-
-    std::cout<<"norm: "<<norm.x << "  "<<norm.y<<"\n";
+    float dist = glm::length(mid_ball - mid_paddle);
     
-
-    auto dist = glm::length(mid_ball - mid_paddle)  ;
-    
-    std::cout<<"dist: "<<dist<<"\n";
-
-    
-
-
-    auto tmp = mid_paddle * norm * float(dist);
+    auto tmp = mid_paddle * norm * dist;
     //tmp -= glm::vec2{ball_.getRadius(), ball_.getRadius()};
 
-    std::cout<<"newpos: "<<tmp.x << "  "<<tmp.y<<"\n";
-    
+    glm::vec2 new_ball_pos{mid_paddle + norm * dist};
+    new_ball_pos -= glm::vec2{ball_.getRadius(), ball_.getRadius()};
 
-    
     b_x_pos_ += tmp.x;
     b_y_pos_ += tmp.y/2.0;
-
+    // b_x_pos_ = new_ball_pos.x;
+    // b_y_pos_ = new_ball_pos.y;
+    // ball_.setPosition()
     ball_.setPosition(b_x_pos_, b_y_pos_);
-
+ 
+    std::cout<<"paddle: "<<mid_paddle.x << "  "<<mid_paddle.y<<"\n";
+    std::cout<<"ball: "<<mid_ball.x << "  "<<mid_ball.y<<"\n";
+    std::cout<<"norm: "<<norm.x << "  "<<norm.y<<"\n";
+    std::cout<<"dist: "<<dist<<"\n";
+    std::cout<<"newpos: "<<tmp.x << "  "<<tmp.y<<"\n";
 }
 
 
