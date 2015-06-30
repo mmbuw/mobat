@@ -82,6 +82,8 @@ Update_Token(bool in_was_recognized,
 		}
 
 		remaining_life_time_in_ms_-=in_passed_time_in_ms;
+
+		//std::cout << "Remaining life time for token with id " << id_ << "   ms: " << remaining_life_time_in_ms_;
 		Update_Alpha_Value(remaining_life_time_in_ms_/(float)life_time_in_ms_);
 		return true;
 }

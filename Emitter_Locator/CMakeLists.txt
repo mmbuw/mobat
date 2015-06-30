@@ -15,7 +15,7 @@ target_link_libraries(recorder -lasound)
 # signaltransformation
 file(GLOB SIGNALTRANS_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/signaltrans/*.cpp)
 add_library(signaltrans STATIC ${SIGNALTRANS_SOURCES})
-target_include_directories(signaltrans PUBLIC include/signaltrans)
+target_include_directories(signaltrans PUBLIC include/signaltrans include/locator)
 # requires fftw3-dev and libsndfile1-dev
 target_link_libraries(signaltrans -lfftw3_threads -lfftw3 -lm -lsndfile)
 

@@ -18,8 +18,8 @@ class Table_Object : Drawable_Object {
 		virtual void Recalculate_Geometry();
 		void Set_Fill_Color(sf::Color const& in_fill_color);
 
-		void Set_Physical_Size(sf::Vector2f const& in_dimensions);
-		sf::Vector2f Physical_Size() const;
+		void Set_Physical_Size(glm::vec2 const& in_dimensions);
+		glm::vec2 Physical_Size() const;
 
 };
 

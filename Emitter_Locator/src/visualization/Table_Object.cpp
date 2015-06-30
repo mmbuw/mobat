@@ -2,6 +2,12 @@
 #include <iostream>
 namespace TTT {
 
+float Drawable_Object::pixel_per_meter_ = 0.0f;
+glm::vec2 Drawable_Object::table_dims_in_px_ = glm::vec2(0.0f, 0.0f);
+glm::vec2 Drawable_Object::physical_table_size_ = glm::vec2(0.0f, 0.0f);
+glm::vec2 Drawable_Object::pixel_table_offset_ = glm::vec2(0.0f, 0.0f);
+glm::vec2 Drawable_Object::resolution_ = glm::vec2(0,0);
+
 void Table_Object::
 Draw(sf::RenderWindow& canvas) const {
 		canvas.draw(table_rectangle_shape_);
@@ -33,7 +39,7 @@ Draw(sf::RenderWindow& canvas, std::vector<Microphone_Object> const& microphones
 }
 
 void Table_Object::
-Set_Physical_Size(sf::Vector2f const& in_physical_size) {
+Set_Physical_Size(glm::vec2 const& in_physical_size) {
 
 
 	physical_table_size_ = in_physical_size;
@@ -41,20 +47,9 @@ Set_Physical_Size(sf::Vector2f const& in_physical_size) {
 
 void Table_Object::
 Recalculate_Geometry() {
-	//ensure 5% of border at each side
-	sf::Vector2f res_with_margin = //resolution;
-				sf::Vector2f(resolution_.x - 0.1*resolution_.x,
-							 resolution_.y - 0.1*resolution_.y);
 
-	pixel_per_meter_ = std::min(res_with_margin.x / physical_table_size_.x, 
-								res_with_margin.y / physical_table_size_.y);
-
-	table_dims_in_px_  = physical_table_size_ * pixel_per_meter_;
-
-	table_rectangle_shape_.setSize(table_dims_in_px_);
-	table_rectangle_shape_.setPosition( (resolution_.x - table_dims_in_px_.x)/2.0,
-									    (resolution_.y - table_dims_in_px_.y)/2.0
-									 );
+	table_rectangle_shape_.setSize(sf::Vector2f{table_dims_in_px_.x, table_dims_in_px_.y});
+	table_rectangle_shape_.setPosition(sf::Vector2f(pixel_table_offset_.x, pixel_table_offset_.y));
 
 }
 
@@ -64,7 +59,7 @@ Set_Fill_Color(sf::Color const& in_fill_color) {
 }
 
 
-sf::Vector2f Table_Object::
+glm::vec2 Table_Object::
 Physical_Size() const {
 	return physical_table_size_;
 }

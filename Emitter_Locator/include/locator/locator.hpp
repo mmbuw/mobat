@@ -57,6 +57,7 @@ private:
     TDOAtor locator;
     Signal_Analyzer signal_analyzer;
 
+    unsigned locator_frame_counter_;
  };
 
  #endif //LOCATOR_HPP

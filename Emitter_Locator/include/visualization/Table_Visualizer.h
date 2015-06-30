@@ -34,28 +34,30 @@ class Table_Visualizer : Drawable_Object {
 
 		std::chrono::high_resolution_clock::time_point last_time_stamp_;
 
-
-
 		//needed for pesudopong
-		double b_x_pos_;
-		double b_y_pos_;
-		Ball ball_;	//NO TOKEN, change it later
-		sf::Vector2f ball_dir_;
+		glm::vec2 ball_pos_;
+		Ball ball_;	
+		glm::vec2 ball_dir_;
 
-		double ball_speed_;
-
+		float ball_speed_;
+		bool move_ball_;
+		bool ball_reset_;
 		int right_goals_;
 		int left_goals_;
+
 
 		Score points_;
 		
 
-		unsigned elapsed_microseconds_since_last_frame_;
 
-		void Calculate_Elapsed_Microseconds();
+		unsigned elapsed_milliseconds_since_last_frame_;
+
+		void Calculate_Elapsed_Milliseconds();
+
+
 	public:
-		Table_Visualizer(sf::Vector2u const& in_canvas_resolution = sf::Vector2u(800, 600),
-						 sf::Vector2f const& table_dims = sf::Vector2f(2.0,1.0), 
+		Table_Visualizer(glm::vec2 const& in_canvas_resolution = glm::vec2(800, 600),
+						 glm::vec2 const& table_dims = glm::vec2(2.0,1.0), 
 						 std::vector<sf::Vector2f> const& microphone_positions
 						 	= std::vector<sf::Vector2f>(),
 						 sf::Color const& in_table_fill_color 
@@ -70,15 +72,11 @@ class Table_Visualizer : Drawable_Object {
 
 		virtual void Draw(sf::RenderWindow& in_canvas) const;
 
-		void Draw(sf::RenderWindow& in_canvas, glm::vec4 toas) const;
-
-		void Resize_Physical_Table(sf::Vector2f const& in_table_dims);
-
 		void Reset_Microphones(std::vector<Microphone_Object> const& in_microphones);
 
 		void Recalculate_Geometry();
 
-		void Set_Canvas_Resolution( sf::Vector2u const& in_resolution );
+		void Set_Canvas_Resolution(glm::vec2 const& in_resolution );
 
 		void Set_Table_Fill_Color(sf::Color const& in_table_fill_color);
 
@@ -93,7 +91,7 @@ class Table_Visualizer : Drawable_Object {
 		void Finalize_Visualization_Frame();
 
 
-		unsigned Get_Elapsed_Microseconds();
+		unsigned Get_Elapsed_Milliseconds();
 
 		std::pair<bool, glm::vec2> circ_circ_intersect(sf::CircleShape const& ball, sf::CircleShape const& paddle) const;
 
