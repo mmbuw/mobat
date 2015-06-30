@@ -15,11 +15,27 @@ class Drawable_Object {
 		virtual void Draw(sf::RenderWindow& canvas) const = 0;
 		//virtual void Recalculate_Geometry(sf::Vector2f const& resolution) = 0;
 		static glm::vec2 const& get_phys_table_size() { return physical_table_size_;};
+
+		static void recalculate_measures() {
+			//ensure 5% of border at each side
+			sf::Vector2f res_with_margin = //resolution;
+						sf::Vector2f(resolution_.x - 0.1*resolution_.x,
+									 resolution_.y - 0.1*resolution_.y);
+
+			pixel_per_meter_ = std::min(res_with_margin.x / physical_table_size_.x, 
+										res_with_margin.y / physical_table_size_.y);
+
+			table_dims_in_px_  = physical_table_size_ * pixel_per_meter_;
+
+			pixel_table_offset_ = glm::vec2{(resolution_.x - table_dims_in_px_.x)/2.0,
+									    (resolution_.y - table_dims_in_px_.y)/2.0};
+		}
 	protected:
 
 		//scaling factor for the elements attributes
 		static float pixel_per_meter_;
 		static glm::vec2 physical_table_size_;
+		static glm::vec2 pixel_table_offset_;
 		static glm::vec2 table_dims_in_px_;
 		static glm::vec2 resolution_;
 

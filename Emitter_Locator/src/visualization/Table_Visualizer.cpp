@@ -2,13 +2,7 @@
 
 #include <iostream>
 
-
 namespace TTT {
-
-float Drawable_Object::pixel_per_meter_ = 0.0f;
-glm::vec2 Drawable_Object::table_dims_in_px_ = glm::vec2(0.0f, 0.0f);
-glm::vec2 Drawable_Object::physical_table_size_ = glm::vec2(0.0f, 0.0f);
-glm::vec2 Drawable_Object::resolution_ = glm::vec2(0,0);
 
 Table_Visualizer::
 Table_Visualizer( glm::vec2 const& in_canvas_resolution,
@@ -35,34 +29,33 @@ Table_Visualizer( glm::vec2 const& in_canvas_resolution,
 			default_microphone_positions_.push_back(sf::Vector2f(table_dims.x, table_dims.y));
 
 		for(auto const& pos : default_microphone_positions_) {
-		microphones_.push_back(Microphone_Object(id_counter++, pos) );
+			microphones_.push_back(Microphone_Object(id_counter++, pos) );
 		}
 	}
 	
-	Resize_Physical_Table( table_dims ); 
+	table_.Set_Physical_Size(table_dims);
+	recalculate_measures();
 	Set_Table_Fill_Color( in_table_fill_color );
 	Set_Microphone_Fill_Color( in_microphone_fill_color );
 	//Set_Token_Fill_Color( in_token_fill_color );
 
 	ball_ = Ball(sf::Vector2f(ball_pos_.x, ball_pos_.y), ball_size);
-	ball_.setPosition(500, 500);
-	ball_dir_ = glm::vec2(0, 0.01);
-	// ball_.Set_Fill_Color(sf::Color::Red);
-	ball_speed_ = 0.0;
+	ball_.Set_Fill_Color(sf::Color::Blue);
+
+	ball_pos_ = glm::vec2{pixel_table_offset_ + table_dims_in_px_ * 0.5f};
+	ball_dir_ = glm::vec2{0.0f, 1.0f};
+	ball_speed_ = 3.0f;
 	right_goals_ = 0;
 	left_goals_ = 0;
-
+	move_ball_ = false;
+	ball_reset_ = true;
 
 	//get initial timestamp
 	last_time_stamp_ = std::chrono::high_resolution_clock::now();
-	//elapsed_milliseconds_since_last_frame_ = frame_timer_.getElapsedTime();
 }
 
 Table_Visualizer::
 ~Table_Visualizer() {}
-
-	// sf::Vertex lines[] ={sf::Vertex(sf::Vector2f(0, 0), sf::Color::Green), sf::Vertex(sf::Vector2f(1500, 1500), sf::Color::Red)};
-	// sf::Vertex lines2[] ={sf::Vertex(sf::Vector2f(0, 0), sf::Color::Black), sf::Vertex(sf::Vector2f(1500, 1500), sf::Color::White)};
 
 void Table_Visualizer::
 Draw(sf::RenderWindow& canvas) const {
@@ -78,17 +71,7 @@ Draw(sf::RenderWindow& canvas) const {
 	}
 
 	ball_.Draw(canvas);
-
-    // canvas.draw(lines, 2, sf::Lines);
-    // canvas.draw(lines2, 2, sf::Lines);
-	
 }
-
-void Table_Visualizer::
-Resize_Physical_Table(glm::vec2 const& Table_Dims ) {
-	table_.Set_Physical_Size(Table_Dims);
-}
-
 
 void Table_Visualizer::
 Reset_Microphones(std::vector<Microphone_Object> const& microphones) {
@@ -118,86 +101,68 @@ Recalculate_Geometry() {
 
 	// if(recognized_tokens_.size() >= 2){
 
-		sf::CircleShape left  = recognized_tokens_[16000].get_Circle();	//NO HARDCODED FREQUENCIES!!!!!!!!!!!!
-		sf::CircleShape right = recognized_tokens_[18000].get_Circle();
-		sf::CircleShape t_ball = ball_.get_Circle();
+	sf::CircleShape left  = recognized_tokens_[16000].get_Circle();	//NO HARDCODED FREQUENCIES!!!!!!!!!!!!
+	sf::CircleShape right = recognized_tokens_[18000].get_Circle();
+	sf::CircleShape t_ball = ball_.get_Circle();
 
-	    ball_.Set_Fill_Color(sf::Color::Blue);
-		for(auto const& i : recognized_tokens_){
+	for(auto const& i : recognized_tokens_){
 
-			auto token = i.second.get_Circle();
-
-			if(circ_circ_intersect(t_ball, token).first){
-		    	std::cout<<"Treffer!\n";
-
-				ball_.should_move_ = false;
-
-			    // ball_.Set_Fill_Color(sf::Color::Red);
-			    move_ball_out_of_token(token);
-			    // glm::vec2 normal = circ_circ_intersect(t_ball, token).second;
-			    					    
-			    // ball_dir = glm::reflect(ball_dir_, normal);
-			}	
-
-		}
-
-#if 1
-//AUs bzw Torerkennung, muss man noch entscheiden, was was ist
-	auto b_rad = ball_.getRadius() / pixel_per_meter_;
-
-
-	if(ball_pos_.x <= 0 + b_rad|| ball_pos_.x>=physical_table_size_.x - b_rad){
-		ball_dir_.x *= -1;
-		if(ball_pos_.x <= 0 + b_rad){
-			ball_pos_.x = 0 + b_rad;	
-		}else if(ball_pos_.x >= physical_table_size_.x - b_rad){
-			ball_pos_.x = physical_table_size_.x - b_rad;
-		}
-		//ball_.should_move_ = false;
+		auto token = i.second.get_Circle();
+		auto intersection = circ_circ_intersect(t_ball, token);
+		if(intersection.first){
+		    move_ball_out_of_token(token);
+			
+			if(!move_ball_) {
+				move_ball_ = true;
+				ball_dir_ = intersection.second;
+			}
+			else {
+		    	ball_dir_ = glm::reflect(ball_dir_, intersection.second);
+			} 					    
+		}	
 	}
 
+	float b_rad = ball_.getRadius();
 
-//TOOOOOOOR
-	if(ball_pos_.y <= 0 - b_rad || ball_pos_.y>=physical_table_size_.y +b_rad){
-		if(ball_pos_.y <= 0- b_rad){
-			ball_dir_.y = ball_speed_;
+	glm::vec2 table_min{pixel_table_offset_ + glm::vec2{b_rad}};
+	glm::vec2 table_max{pixel_table_offset_ + table_dims_in_px_ - glm::vec2{b_rad}};
+	// border reflection
+	if(ball_pos_.x <= table_min.x || ball_pos_.x >= table_max.x){
+
+		if(ball_pos_.x <= table_min.x){
+			ball_pos_.x = table_min.x;	
+			ball_dir_ = glm::reflect(ball_dir_, glm::vec2{1.0f ,0.0f});
+		}
+		else{
+			ball_pos_.x = table_max.x;
+			ball_dir_ = glm::reflect(ball_dir_, glm::vec2{-1.0f ,0.0f});
+		}
+	}
+	// goal detection
+	if(ball_pos_.y <= table_min.y - b_rad * 2.0f || ball_pos_.y >= table_max.y + b_rad * 2.0f){
+		if(ball_pos_.y <= table_min.y - b_rad * 2.0f){
 			++left_goals_;
-
-		}else if(ball_pos_.y >= physical_table_size_.y + b_rad){
-			ball_dir_.y = -ball_speed_;
+		}
+		else{
 			++right_goals_;
 		}
 		std::cout<<"Left: "<<left_goals_<<"  Right:  "<<right_goals_<<"\n";
 
-		ball_dir_.x = 0;
-			ball_pos_ = physical_table_size_ / 2.0f;
-		//ball_.should_move_ = false;
+		ball_dir_ = glm::vec2{0};
+		ball_pos_ = pixel_table_offset_ + table_dims_in_px_* 0.5f;
+		move_ball_ = false;
+		ball_reset_ = true;
 	}
 
-#endif
+	if(move_ball_ || ball_reset_) {
 
-		
+		ball_pos_ += ball_dir_ * float(elapsed_milliseconds_since_last_frame_ / 16.0f) * ball_speed_;
 
-/*	if(ball_pos_.x < resolution_.y && ball_pos_.x > -2*ball_.get_Circle().getRadius())
-	{*/
-//	}    
+		ball_reset_ = false;
 	
-	
-
-	   // ball_pos_.x += ball_dir_.x; //wieder rausnehmen
-
-	float factor = /*elapsed_milliseconds_since_last_frame_ **/ 1.0;
-
-
-		ball_pos_ += ball_dir_ * factor;
-
-
-	
-	ball_.should_move_ = true;
-
-	// ball_.setPosition(ball_pos_.x, ball_pos_.y);
+		ball_.setPosition(ball_pos_.x, ball_pos_.y);
+	} 
 // }
-
 }
 
 void Table_Visualizer::
@@ -299,12 +264,7 @@ Calculate_Elapsed_Milliseconds() {
 
 	last_time_stamp_ = current_time_stamp;
 
-	//std::cout << "Elapsed milliseconds: " << elapsed_milliseconds.count()<<"\n";
 	elapsed_milliseconds_since_last_frame_ = elapsed_milliseconds.count();
-	//std::cout << "After: " << elapsed_milliseconds_since_last_frame_<<"\n";*/
-
-	//elapsed_milliseconds_since_last_frame_ = frame_timer_.getElapsedTime();
-	//frame_timer_.restart();
 }
 
 unsigned Table_Visualizer::
@@ -316,18 +276,13 @@ std::pair<bool, glm::vec2> Table_Visualizer::circ_circ_intersect(sf::CircleShape
     glm::vec2 mid_ball{ball.getPosition().x + ball.getRadius(), ball.getPosition().y + ball.getRadius()};
     glm::vec2 mid_paddle{paddle.getPosition().x + paddle.getRadius(), paddle.getPosition().y + paddle.getRadius()};
 
-    double dist = glm::length(mid_ball - mid_paddle);
+    float dist = glm::length(mid_ball - mid_paddle);
 
-    bool intersects = glm::abs(dist) < ball.getRadius() + paddle.getRadius();
+    bool intersects = dist < ball.getRadius() + paddle.getRadius();
 
     glm::vec2 normal{-1.0f, 0.0f};
-    if(intersects) {
-
-	    // lines[0].position = sf::Vector2f(mid_paddle.x, mid_paddle.y);
-	    // lines[1].position = sf::Vector2f(mid_ball.x, mid_ball.y);
-    	
+    if(intersects) {	
     	normal = glm::normalize(mid_ball - mid_paddle);
-	    
     }
 
     return std::pair<bool, glm::vec2>{intersects, normal}; 
@@ -342,12 +297,7 @@ void Table_Visualizer::move_ball_out_of_token(sf::CircleShape const& paddle){
 
     glm::vec2 new_ball_pos{mid_paddle + norm * float(ball_.getRadius() + paddle.getRadius())};
 
-	// lines[0].position = sf::Vector2f(mid_ball.x, mid_ball.y);
- //    lines[1].position = sf::Vector2f(new_ball_pos.x, new_ball_pos.y);
-
     ball_pos_ = new_ball_pos;
-
-    ball_.setPosition(ball_pos_.x, ball_pos_.y);
 }
 
 

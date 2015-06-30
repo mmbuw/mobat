@@ -7,8 +7,7 @@ namespace TTT {
 Ball::
 Ball(sf::Vector2f const& pos, double rad) :
 							ball_(rad),
-							dir_(sf::Vector2f(-0.01,10)),
-							should_move_(true)
+							dir_(sf::Vector2f(-0.01,10))
 {
 	ball_.setPosition(pos);
 }

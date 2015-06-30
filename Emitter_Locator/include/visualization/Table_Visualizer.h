@@ -38,8 +38,9 @@ class Table_Visualizer : Drawable_Object {
 		Ball ball_;	//NO TOKEN, change it later
 		glm::vec2 ball_dir_;
 
-		double ball_speed_;
-
+		float ball_speed_;
+		bool move_ball_;
+		bool ball_reset_;
 		int right_goals_;
 		int left_goals_;
 
@@ -47,7 +48,6 @@ class Table_Visualizer : Drawable_Object {
 
 		void Calculate_Elapsed_Milliseconds();
 
-		//sf::Clock frame_timer_;
 	public:
 		Table_Visualizer(glm::vec2 const& in_canvas_resolution = glm::vec2(800, 600),
 						 glm::vec2 const& table_dims = glm::vec2(2.0,1.0), 
@@ -64,8 +64,6 @@ class Table_Visualizer : Drawable_Object {
 		~Table_Visualizer();
 
 		virtual void Draw(sf::RenderWindow& in_canvas) const;
-
-		void Resize_Physical_Table(glm::vec2 const& in_table_dims);
 
 		void Reset_Microphones(std::vector<Microphone_Object> const& in_microphones);
 

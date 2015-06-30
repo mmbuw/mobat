@@ -33,14 +33,9 @@ class Ball : Drawable_Object {
   
 
     void give_new_Circle(sf::CircleShape const& c){ball_ = c;};
-
-    bool should_move_;
     //std::pair<bool, glm::vec2> circ_intersect(sf::CircleShape const& circle) const;
 
     //void get_out_of_da_circle(sf::CircleShape const& t);
-
-
-
 };
 };
 
