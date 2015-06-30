@@ -111,6 +111,7 @@ int main(int argc, char** argv) {
                     pl2_dir.x += player_speed;
                 }
 
+
                 if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
                     pl2_dir.x -= player_speed;
                 }
@@ -162,10 +163,11 @@ int main(int argc, char** argv) {
 
                 }
 
-                table_visualizer.Finalize_Visualization_Frame();
 
-// std::cout<<"HASHASKHSAKHASKH\n";
-                window.display();
+                table_visualizer.update_tokens();
+
+                window.display();   
+
 
 
 
@@ -175,6 +177,7 @@ int main(int argc, char** argv) {
 
                 glm::vec4 toas = locator.load_toas();
                  
+
 
                 std::array< std::vector<double>, 4> signal_vis_samples =  locator.load_signal_vis_samples();
        
@@ -250,7 +253,6 @@ int main(int argc, char** argv) {
             }
 
         
-
 
 
 
