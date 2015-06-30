@@ -33,10 +33,10 @@ buffer_collection::~buffer_collection() {
 
 //copy data from interleaved buffer, assumes that the sourcesize equals length * count 
 void buffer_collection::from_interleaved(unsigned char* source) {
-
+	// fill each channel
 	for(std::size_t current_buffer = 0; current_buffer < count; ++current_buffer) {
-
-	   for(std::size_t buffer_offset_pos = 0; buffer_offset_pos < length /4; ++buffer_offset_pos) {
+		// and each int
+	   for(std::size_t buffer_offset_pos = 0; buffer_offset_pos < length; ++buffer_offset_pos) {
 
 			buffers[current_buffer][buffer_offset_pos] 
 				= 0x0 
