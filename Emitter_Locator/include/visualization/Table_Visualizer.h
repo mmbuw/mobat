@@ -100,6 +100,8 @@ class Table_Visualizer : Drawable_Object {
 		void move_ball_out_of_token(sf::CircleShape const& t);
 
 		std::pair<bool, std::string> game_over();
+
+		void restart();
 };
 
 }; //end TTT

@@ -457,11 +457,11 @@ void Table_Visualizer::move_ball_out_of_token(sf::CircleShape const& t){
 
 std::pair<bool, std::string> Table_Visualizer::game_over(){
 	int tmp = left_goals_ - right_goals_;
-	if(abs(tmp) <= 1){
+	if(abs(tmp) < 3){
 		return {false, "Chuck Norris"};
 	}else{
 
-		if(tmp > 6){
+		if(tmp > 3){
 			return {true, "left"};
 		}else{
 			return {true, "right"};
@@ -470,5 +470,11 @@ std::pair<bool, std::string> Table_Visualizer::game_over(){
 	
 }
 
+
+
+void Table_Visualizer::restart(){
+	
+	unsigned int id_counter = 0;
+}
 
 }; //namespace TTT
