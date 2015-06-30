@@ -38,7 +38,10 @@ class Table_Visualizer : Drawable_Object {
 		Ball ball_;	//NO TOKEN, change it later
 		glm::vec2 ball_dir_;
 
+		float ball_speed_min_;
+		float ball_speed_max_;
 		float ball_speed_;
+		float ball_acceleration_;
 		bool move_ball_;
 		bool ball_reset_;
 		int right_goals_;
@@ -81,7 +84,7 @@ class Table_Visualizer : Drawable_Object {
 
 		void Signal_Token(unsigned int in_id, sf::Vector2f const& in_position);
 
-		void Finalize_Visualization_Frame();
+		void update_tokens();
 
 
 		unsigned Get_Elapsed_Milliseconds();

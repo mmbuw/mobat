@@ -15,6 +15,7 @@ class Drawable_Object {
 		virtual void Draw(sf::RenderWindow& canvas) const = 0;
 		//virtual void Recalculate_Geometry(sf::Vector2f const& resolution) = 0;
 		static glm::vec2 const& get_phys_table_size() { return physical_table_size_;};
+		static void set_phys_table_size(glm::vec2 const& size) {physical_table_size_ = size;};
 
 		static void recalculate_measures() {
 			//ensure 5% of border at each side

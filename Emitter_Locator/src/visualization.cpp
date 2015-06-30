@@ -99,15 +99,8 @@ sf::RenderWindow window(sf::VideoMode(unsigned(windowResolution.x), unsigned(win
             glm::vec2 pl2_new{pl2_pos + pl2_dir};
             pl2_pos = glm::clamp(pl2_new, min, max);
 
-
-
             window.clear();
             table_visualizer.Recalculate_Geometry();
-
-
-
-
-
 
             table_visualizer.Draw(window);
 
@@ -145,13 +138,9 @@ sf::RenderWindow window(sf::VideoMode(unsigned(windowResolution.x), unsigned(win
 
             }
 
-            table_visualizer.Finalize_Visualization_Frame();
+            table_visualizer.update_tokens();
 
             window.display();
-
-
-
-
 
 
         glm::vec4 toas = locator.load_toas();
@@ -190,14 +179,9 @@ sf::RenderWindow window(sf::VideoMode(unsigned(windowResolution.x), unsigned(win
 
         }
 
-    
-
-
         signal_plot_window_.display();
         
-        }
-
-
+    }
 
     locator.shut_down();
     recording_thread.join();
