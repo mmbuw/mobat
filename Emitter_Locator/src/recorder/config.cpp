@@ -177,11 +177,11 @@ unsigned Config::channels() const {
 
 std::size_t Config::period_bytes() const {
   // frames per period * channels * samplesize(depending on format)
-  int sample_bits = snd_pcm_hw_params_get_sbits(params_);
-  if(sample_bits < 0) {
-    std::cerr << "no format specified, cant compute period size - " << snd_strerror(sample_bits) << std::endl;
+  int sample_bytes = snd_pcm_hw_params_get_sbits(params_) / 8;
+  if(sample_bytes < 0) {
+    std::cerr << "no format specified, cant compute period size - " << snd_strerror(sample_bytes) << std::endl;
   }
-  return period_frames() * channels_ * sample_bits;
+  return period_frames() * channels_ * sample_bytes;
 }
 
 std::size_t Config::period_time() const {
