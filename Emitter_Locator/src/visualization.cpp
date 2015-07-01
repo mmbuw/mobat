@@ -191,7 +191,7 @@ int main(int argc, char** argv) {
                 sf::RectangleShape data_point;
                 for(unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
 
-                    for(unsigned int sample_idx = 0; sample_idx < signal_vis_samples[channel_iterator].size(); sample_idx+=5) {
+                    for(unsigned int sample_idx = 0; sample_idx < signal_vis_samples[channel_iterator].size(); sample_idx+=30) {
                         unsigned int sig = signal_vis_samples[channel_iterator][sample_idx];
 
 
@@ -215,7 +215,7 @@ int main(int argc, char** argv) {
             
 
                         signal_plot_window_.draw(data_point);
-
+                        
                     
                     }
                 }

@@ -50,20 +50,25 @@ dif(glm::vec2 const& p,
 
 glm::vec2 TDOAtor::
 locate() const {
+
+
     double min_x = min_.x;
     double min_y = min_.y;
-    double min_dif = 10000000;
+  //  double min_dif = 10000000;
 
     glm::vec2 test;
 
     double x_step_length = (max_.x - min_.x) / 100.0;
     double y_step_length = (max_.y - min_.y) / 200.0;
 
+    std::map<unsigned, std::map<unsigned, double> > xy_counter_to_error_mapping;
+    unsigned x_counter = 0;
+    unsigned y_counter = 0;
 
-
-    for(double x = min_.x; x <= max_.x; x += x_step_length/*x=x+10*/ ) {
+    for(double x = min_.x; x <= max_.x; x += x_step_length, ++x_counter/*x=x+10*/ ) {
         test.x = x;
-        for(double y = min_.y; y <= max_.y; y += y_step_length/*y=y+10*/) {
+        y_counter = 0;
+        for(double y = min_.y; y <= max_.y; y += y_step_length, ++y_counter/*y=y+10*/) {
             test.y = y;
 
 
@@ -78,15 +83,71 @@ locate() const {
                 }
             }
             
-            if(temp_dif < min_dif) {
-                min_dif = temp_dif;
-                min_x = x;
-                min_y = y;
-            }
+            xy_counter_to_error_mapping[x_counter][y_counter] = temp_dif;
+            /*
+              if(temp_dif < min_dif) {
+                  min_dif = temp_dif;
+                  min_x = x;
+                  min_y = y;
+              }
+            */
             temp_dif = 0;
         }
     }
 
-    return {min_x, min_y};
+    unsigned largest_x = x_counter - 1;
+    unsigned largest_y = y_counter - 1;
+
+    double least_error = std::numeric_limits<double>::max();
+    unsigned least_error_x_count = 0;
+    unsigned least_error_y_count = 0;
+    x_counter = 0;
+    y_counter = 0;
+
+
+    /*
+         +  : sample points
+        --- : horizontal axis between sample points
+         |  : vertical axis between sample points
+         o  : possible new position
+
+        +---+---+---+---+---+
+        | o | o | o | o | o |
+        +---+---+---+---+---+
+        | o | o | o | o | o |
+        +---+---+---+---+---+
+        | o | o | o | o | o |
+        +---+---+---+---+---+
+
+        compute the error between 4 corners in order to determine a 
+        point in-between in order to avoid jumping within the cell
+    */
+
+    for(unsigned x_it = 0; x_it < largest_x; ++x_it) {
+
+        for(unsigned y_it = 0; y_it < largest_y; ++y_it) {
+
+            double tile_error =  xy_counter_to_error_mapping[x_it][y_it] 
+                               + xy_counter_to_error_mapping[x_it][y_it+1]
+                               + xy_counter_to_error_mapping[x_it+1][y_it]
+                               + xy_counter_to_error_mapping[x_it+1][y_it+1];//*(y_iterator+1) + ( (*(xy_iterator+1)) )
+
+            if (tile_error < least_error) {
+                least_error = tile_error;
+                least_error_x_count = x_it;
+                least_error_y_count = y_it;
+            }
+
+            //++y_counter;
+        }
+
+        //++x_counter;
+    }
+
+    //std::cout << "Returning: "  << min_x + least_error_x_count * x_step_length << ", " << min_y + least_error_y_count * y_step_length << "\n";
+    return {min_x + least_error_x_count * x_step_length, 
+            min_y + least_error_y_count * y_step_length}; 
+
+    //return {min_x, min_y};
 };
 

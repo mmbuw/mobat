@@ -168,7 +168,7 @@ load_recognized_vis_sample_positions() const {
             }
         }
 
-        cached_signal_vis_samples = signal_analyzer.get_signal_samples_for(18000);
+        cached_signal_vis_samples = signal_analyzer.get_signal_samples_for(19000);
 
         if(found_positions) {
             std::cout << "\tFound Pos\n";
@@ -185,10 +185,13 @@ load_recognized_vis_sample_positions() const {
 
         }
 
+
         signal_vis_samples_mutex.lock();
         signal_vis_samples = cached_signal_vis_samples;
         signal_vis_samples_mutex.unlock();
 
+
+        cached_recognized_vis_sample_pos = signal_analyzer.get_vis_sample_pos_for(19000);
         recognized_vis_sample_pos_mutex.lock();
         recognized_vis_sample_pos = cached_recognized_vis_sample_pos;
         recognized_vis_sample_pos_mutex.unlock();

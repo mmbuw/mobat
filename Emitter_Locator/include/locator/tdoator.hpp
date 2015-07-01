@@ -5,6 +5,11 @@
 
 #include <map>
 
+struct ErrorOf2DPos {
+    double error_;
+    glm::vec2 pos_;
+};
+
 class TDOAtor{
   public:
 

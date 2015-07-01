@@ -130,19 +130,18 @@ void FFT_Transformer::set_listened_frequencies(std::vector<unsigned> const& list
 	listening_to_those_frequencies = listening_to_frequencies;
 }
 
-void FFT_Transformer::perform_FFT_on_channels(int** signal_buffers, unsigned bytes_per_channel, unsigned window_size) {
-
+void FFT_Transformer::perform_FFT_on_channels(int** signal_buffers, unsigned ints_per_channel, unsigned window_size) {
         for (unsigned int channel_iterator = 0; channel_iterator < 4	; ++channel_iterator) {
             set_FFT_buffers(4, 
-                    bytes_per_channel,
+                    ints_per_channel,
                 (int**)&signal_buffers[channel_iterator]);   
 
 
             reset_sample_counters(channel_iterator);
             clear_cached_fft_results(channel_iterator);
-            for(unsigned int i = 0; i < 1400; ++i) {
+            for(unsigned int i = 0; i < (ints_per_channel/2 - 50); ++i) {
                 unsigned offset = 1 * i;
-                if(offset > (1400) )
+                if(offset > (ints_per_channel/2 - 50) )
                     break;
 					
 				set_analyzation_range(0+offset, window_size+50 + offset);
