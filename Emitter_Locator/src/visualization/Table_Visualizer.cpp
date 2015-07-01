@@ -18,7 +18,7 @@ Table_Visualizer( glm::vec2 const& in_canvas_resolution,
     unsigned int id_counter = 0;
 
     if(!microphone_positions.empty()) {
-        for(auto const& pos : microphone_positions ) {
+        for(auto const& pos : microphone_positions) {
             microphones_.push_back(Microphone_Object(id_counter++, pos) );
         }
     } else {
@@ -37,6 +37,12 @@ Table_Visualizer( glm::vec2 const& in_canvas_resolution,
     recalculate_measures();
     Set_Table_Fill_Color( in_table_fill_color );
     Set_Microphone_Fill_Color( in_microphone_fill_color );
+
+    table_.Recalculate_Geometry();
+
+    for(auto& mic_obj : microphones_) {
+        mic_obj.Recalculate_Geometry();
+    }
 
     ball_ = Ball(sf::Vector2f(ball_pos_.x, ball_pos_.y), ball_size);
     ball_.Set_Fill_Color(sf::Color::Blue);
@@ -84,12 +90,6 @@ Reset_Microphones(std::vector<Microphone_Object> const& microphones) {
 
 void Table_Visualizer::
 Recalculate_Geometry() {
-    
-    table_.Recalculate_Geometry();
-
-    for(auto& mic_obj : microphones_) {
-        mic_obj.Recalculate_Geometry();
-    }
 
     for( auto& id_token_pair : recognized_tokens_ ) {
         id_token_pair.second.Recalculate_Geometry();
