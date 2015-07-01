@@ -5,10 +5,10 @@
 namespace TTT {
 
 Score::Score(double x_max, double y_max){
+	sf::Vector2f size{20,20};
 	for(unsigned i = 0; i < points_.size(); ++i){
-		sf::Vector2f size{20,20};
 		if(i < 3){
-		std::cout<<"Hallo\n";
+
 			points_[i].setFillColor(sf::Color::Blue);
 		}else{
 			points_[i].setFillColor(sf::Color::Red);
@@ -60,6 +60,18 @@ update(int r_goals, int l_goals) {
 	}
 	
 
+}
+
+void Score::
+reset(){
+	for(unsigned i = 0; i < points_.size(); ++i){
+		if(i < 3){
+
+			points_[i].setFillColor(sf::Color::Blue);
+		}else{
+			points_[i].setFillColor(sf::Color::Red);
+		}
+	}
 }
 
 

@@ -347,9 +347,16 @@ std::pair<bool, std::string> Table_Visualizer::game_over(){
 
 
 void Table_Visualizer::restart(){
+	//go back to start
+
 	
-	// unsigned int id_counter = 0;
-	// ++id_counter;
+	ball_pos_ = glm::vec2{pixel_table_offset_ + table_dims_in_px_ * 0.5f};	
+	ball_dir_ = glm::vec2{0.0f, 1.0f};
+	ball_speed_ = ball_speed_min_;
+	ball_acceleration_ = 1.2f;
+	right_goals_ = 0;
+	left_goals_ = 0;
+	points_.reset();
 }
 
 }; //namespace TTT
