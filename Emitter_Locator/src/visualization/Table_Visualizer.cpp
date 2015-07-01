@@ -37,23 +37,11 @@ Table_Visualizer( glm::vec2 const& in_canvas_resolution,
     recalculate_measures();
     Set_Table_Fill_Color( in_table_fill_color );
     Set_Microphone_Fill_Color( in_microphone_fill_color );
-    //Set_Token_Fill_Color( in_token_fill_color );
 
     ball_ = Ball(sf::Vector2f(ball_pos_.x, ball_pos_.y), ball_size);
     ball_.Set_Fill_Color(sf::Color::Blue);
-
-    ball_pos_ = glm::vec2{pixel_table_offset_ + table_dims_in_px_ * 0.5f};
-    ball_dir_ = glm::vec2{0.0f, 1.0f};
-    ball_speed_min_ = 2.0f;
-    ball_speed_ = ball_speed_min_;
-    ball_speed_max_ = 5.0f;
-    ball_acceleration_ = 1.2f;
-    move_ball_ = false;
-    ball_reset_ = true;
-    right_goals_ = 0;
-    left_goals_ = 0;
-
-
+    // initialize variables 
+    restart();
     //scoreboard
    /* double score_x = double(in_canvas_resolution.x), score_y = double(in_canvas_resolution.y);
     
@@ -62,13 +50,6 @@ Table_Visualizer( glm::vec2 const& in_canvas_resolution,
 
     score_x /= 3;*/
     //score_y /= 2;
-
-    points_ = Score{pixel_table_offset_.x + table_dims_in_px_.x / 7, resolution_.y};
-
-
-    //get initial timestamp
-    last_time_stamp_ = std::chrono::high_resolution_clock::now();
-
 }
 
 Table_Visualizer::
@@ -130,6 +111,7 @@ Recalculate_Geometry() {
         auto intersection = circ_circ_intersect(t_ball, token);
         if(intersection.first){
             
+            move_ball_out_of_token(token);
             if(!move_ball_) {
                 move_ball_ = true;
                 ball_dir_ = intersection.second;
@@ -139,7 +121,6 @@ Recalculate_Geometry() {
                 ball_speed_ *= ball_acceleration_;
 
             }                       
-            move_ball_out_of_token(token);
         }   
     }
 
@@ -347,7 +328,21 @@ std::pair<bool, std::string> Table_Visualizer::game_over(){
 
 
 void Table_Visualizer::restart(){
-	
+	ball_pos_ = glm::vec2{pixel_table_offset_ + table_dims_in_px_ * 0.5f};
+    ball_dir_ = glm::vec2{0.0f, 1.0f};
+    ball_speed_min_ = 2.0f;
+    ball_speed_ = ball_speed_min_;
+    ball_speed_max_ = 5.0f;
+    ball_acceleration_ = 1.2f;
+    move_ball_ = false;
+    ball_reset_ = true;
+    right_goals_ = 0;
+    left_goals_ = 0;
+
+    points_ = Score{pixel_table_offset_.x + table_dims_in_px_.x / 7, resolution_.y};
+    //get initial timestamp
+    last_time_stamp_ = std::chrono::high_resolution_clock::now();
+
 	// unsigned int id_counter = 0;
 	// ++id_counter;
 }
