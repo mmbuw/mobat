@@ -33,7 +33,7 @@ Recalculate_Geometry() {
 
 
 	float token_radius 
-		= 2*(std::min(physical_table_size_.x, 
+		= 5*(std::min(physical_table_size_.x, 
 				   physical_table_size_.y) / 50.0f) * pixel_per_meter_;  
 	token_circle_shape_
 		.setPosition(coordinate_system_origin_in_px.x + physical_position_.x*pixel_per_meter_  - token_radius,

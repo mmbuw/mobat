@@ -40,10 +40,10 @@ void buffer_collection::from_interleaved(unsigned char* source) {
 
 			buffers[current_buffer][buffer_offset_pos] 
 				= 0x0 
-				| source[buffer_offset_pos * (count*4)      + current_buffer * 4 ]  << 0
-				| source[buffer_offset_pos * (count*4) + 1  + current_buffer * 4 ]  << 8
-				| source[buffer_offset_pos * (count*4) + 2  + current_buffer * 4 ]  << 16
-				| source[buffer_offset_pos * (count*4) + 3  + current_buffer * 4 ]  << 24;
+				| source[buffer_offset_pos * (count*4)      + current_buffer * 4 ]  <<  0
+				| source[buffer_offset_pos * (count*4) + 1  + current_buffer * 4 ]  <<  8
+				| source[buffer_offset_pos * (count*4) + 2  + current_buffer * 4 ]  <<  16
+				| source[buffer_offset_pos * (count*4) + 3  + current_buffer * 4 ]  <<  24;
 		}
 	}
 }

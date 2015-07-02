@@ -16,10 +16,11 @@ glm::vec2 windowResolution(800, 800);
 
 int main(int argc, char** argv) {
 
+    unsigned vis_frame_count = 0;
     
     std::string winner;
 
-
+    std::map<unsigned, std::array<std::pair<bool, glm::vec2>,10> > positions_to_average;
 
     
 
@@ -70,7 +71,7 @@ int main(int argc, char** argv) {
     
 
         while (window.isOpen()) {
-            if(!table_visualizer.game_over().first ){
+            if(!table_visualizer.game_over().first){
                 glm::vec2 pl1_dir{0, 0};
                 glm::vec2 pl2_dir{0, 0};
 
@@ -123,13 +124,10 @@ int main(int argc, char** argv) {
                 window.clear();
                 table_visualizer.Recalculate_Geometry();
 
-
-
-
                 table_visualizer.Draw(window);
 
 
-                table_visualizer.Signal_Token(1000, sf::Vector2f(pl2_pos.x, pl2_pos.y));
+                //table_visualizer.Signal_Token(1000, sf::Vector2f(pl2_pos.x, pl2_pos.y));
                 //table_visualizer.Signal_Token(2000, sf::Vector2f(pl1_pos.x, pl1_pos.y));
 
 
@@ -151,9 +149,10 @@ int main(int argc, char** argv) {
                             smartphonePosition.y = 1.0 - current_frequency_position.y;
 
                             table_visualizer
-                                .Signal_Token(frequency_position_entry.first, 
-                                              sf::Vector2f(smartphonePosition.x, 
-                                                           smartphonePosition.y));
+                                .Signal_Token(frequency_position_entry.first,    
+
+                                    sf::Vector2f(smartphonePosition.x, 
+                                                 smartphonePosition.y));
                         }
                     }
 
@@ -161,6 +160,11 @@ int main(int argc, char** argv) {
                         latest_received_timestamp = current_iteration_timestamp_peak;
                     }
 
+                } else {
+                    //for(auto const& frequency_position_entry : positions ) {
+                        //positions_to_average[frequency_position_entry][vis_frame_count % 10] 
+                        //= std::make_pair(false, glm::vec2(0.0, 0.0));
+                    //}
                 }
 
 
@@ -169,43 +173,25 @@ int main(int argc, char** argv) {
                 window.display();   
 
 
-
-
-
-
-
-
                 glm::vec4 toas = locator.load_toas();
                  
-
-
                 std::array< std::vector<double>, 4> signal_vis_samples =  locator.load_signal_vis_samples();
-       
         
                 signal_plot_window_.clear(sf::Color(255, 255, 255));
 
-
                 std::array<unsigned, 4> recognized_vis_sample_pos = locator.load_recognized_vis_sample_positions();
-
 
                 sf::RectangleShape data_point;
                 for(unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
 
-                    for(unsigned int sample_idx = 0; sample_idx < signal_vis_samples[channel_iterator].size(); sample_idx+=30) {
+                    for(unsigned int sample_idx = 0; sample_idx < signal_vis_samples[channel_iterator].size(); sample_idx+=20) {
                         unsigned int sig = signal_vis_samples[channel_iterator][sample_idx];
 
 
                         float width = 280.0f / signal_vis_samples[channel_iterator].size();
 
-
-
-
-
-
                         data_point.setSize(sf::Vector2f(1,sig) );
                         data_point.setPosition( sf::Vector2f( width * sample_idx, channel_iterator * 100.0 + (100.0-sig) ) );
-
-
 
                         if(sample_idx <  recognized_vis_sample_pos[channel_iterator] ) {
                             data_point.setFillColor(sf::Color(255, 0, 0) ) ;
@@ -213,18 +199,10 @@ int main(int argc, char** argv) {
                             data_point.setFillColor(sf::Color(0, 255, 0) ) ;          
                         }
             
-
                         signal_plot_window_.draw(data_point);
-                        
                     
                     }
                 }
-
-
-
-
-
-
 
                 signal_plot_window_.display();
 
@@ -247,37 +225,16 @@ int main(int argc, char** argv) {
                 window.draw(text);*/
                 window.display();
 
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Return)) {
+                    table_visualizer.restart();
+                }
 
-                table_visualizer.restart();
-            
+                ++vis_frame_count;
             }
-
-        
-
-
-
-
-
-
-        }//end of second while --> end of game
-
-
-
-
+        }
 
         locator.shut_down();
         recording_thread.join();
  
-
-
-
-        
-
-
-
-
-
-
-    
     return 0;
 }

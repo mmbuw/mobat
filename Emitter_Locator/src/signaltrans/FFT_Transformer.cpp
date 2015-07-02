@@ -139,9 +139,9 @@ void FFT_Transformer::perform_FFT_on_channels(int** signal_buffers, unsigned int
 
             reset_sample_counters(channel_iterator);
             clear_cached_fft_results(channel_iterator);
-            for(unsigned int i = 0; i < (ints_per_channel/2 - 50); ++i) {
+            for(unsigned int i = 0; i < (ints_per_channel/4 - 50); ++i) {
                 unsigned offset = 1 * i;
-                if(offset > (ints_per_channel/2 - 50) )
+                if(offset > (ints_per_channel/4 - 50) )
                     break;
 					
 				set_analyzation_range(0+offset, window_size+50 + offset);

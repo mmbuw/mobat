@@ -68,7 +68,12 @@ analyze(buffer_collection const& collector){
 
         } else {
 
+
+        	//double peaks[4];
+        	//double mins[4];
+        	//double ranges[4];
             double const & (*d_max) (double const &, double const &) = std::max<double>;
+            double const & (*d_min) (double const &, double const &) = std::min<double>;
 
             signal_detected_at_sample_per_frequency[frequency_entry.first] = {100000, 100000, 100000, 100000};
 
@@ -78,12 +83,25 @@ analyze(buffer_collection const& collector){
                                                fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].end(), 0.0, d_max);
                 signal_average[channel_iterator] = sum ;/// fft_transformer.signal_results_[channel_iterator].size();
 
-                unsigned num_pause_samples = 0;
+               // unsigned num_pause_samples = 0;
                 //unsigned num_signal_samples = 0;
 
                 unsigned sample_num = 0;
 
                 double peak = signal_average[channel_iterator];
+
+                //peaks[channel_iterator] = peak;
+
+               
+                double min = std::accumulate(fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].begin(), 
+                                               fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].end(), std::numeric_limits<double>::max(), d_min);
+
+				
+				//mins[channel_iterator] = min;
+               	//double range = peak - min;
+
+               //	ranges[channel_iterator] = range;
+                
                 /*
                 double avg = std::accumulate(fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].begin(), 
                                                fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].end(), 0) 
@@ -91,31 +109,80 @@ analyze(buffer_collection const& collector){
 
                 bool allow_signal_detection = false;
 */
+
+                unsigned sample_vector_size = fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].size();
+              	
+              	unsigned processed_samples = 0;
+
+                for(auto& sig : fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator]) {
+                	if( processed_samples >= (sample_vector_size - 1) ) {
+                		break;
+                	} else {
+                		if(peak-min > 5.0) {
+                			sig =  100.0 * (sig - min) / (peak - min);
+
+                			if( sig < 40.0)
+                				sig = 0; 
+                		}
+                		else {
+                			sig = 0.0;
+                		}
+                	}
+                	++processed_samples;
+                }
+
+
+                double normalized_peak = 100.0;
+                //double normalized_min = 0.0;
+
+                bool found_low_value = false;
+
                 for(auto const& sig : fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator]) {
 
                 		//std::cout << "signal: "<< sig << "   peak: " << peak << "\n";
-                        if(sig >= 0.95*peak) {
-                            signal_detected_at_sample_per_frequency[frequency_entry.first][channel_iterator] = sample_num;
-                            vis_sample_pos_mapping[frequency_entry.first][channel_iterator] = sample_num;
 
-                           break;
-                        }          
-
+/*
                     if(sig < peak * 0.75) {
                       //  num_signal_samples = 0;
 
 
-                        ++num_pause_samples;
+                        //++num_pause_samples;
+                    } else*/
 
-                    } else {
 
-                        if(sig >= 0.85*peak) {
-                            signal_detected_at_sample_per_frequency[frequency_entry.first][channel_iterator] = sample_num;
-                            vis_sample_pos_mapping[frequency_entry.first][channel_iterator] = sample_num;
+                    //unsigned num_signal_samples = 0;
+                    if( sample_num > 300 && sig > 0 &&  sig <= 0.99*normalized_peak ) {
+                    	found_low_value = true;
+                    }
 
-                           break;
-                        }          
+                    if ( true == found_low_value ) {
 
+                   		 unsigned num_signal_samples = 0;
+
+                   		 if(sig >= 0.99*normalized_peak) {
+
+
+  		                 		 
+
+	                    	unsigned int apex_finder = sample_num;// + 200 ;
+	                    	/*
+	                    	for(apex_finder = sample_num ; apex_finder > 0; --apex_finder ) {
+	                    		if( fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator][apex_finder] < 0.2*normalized_peak )
+	                    			break;
+	                    	}
+							*/
+	                    	//apex_finder = sample_num;
+
+	                    	//if(apex_finder > 700) {
+	                        	signal_detected_at_sample_per_frequency[frequency_entry.first][channel_iterator] = apex_finder; //+ 1000;
+	                        	vis_sample_pos_mapping[frequency_entry.first][channel_iterator] = apex_finder;// + 1000;
+	          	
+	                        //}
+
+	                       break;
+                       
+                   		 	++num_signal_samples;
+                   		 }
 
                         /*
                         if(num_pause_samples > starting_sample_threshold) {
@@ -174,14 +241,65 @@ analyze(buffer_collection const& collector){
                                 break;
                             }
                         }
-                        */
-
-                    }
+                       */
+ 
+                    } else {
+                            signal_detected_at_sample_per_frequency[frequency_entry.first][channel_iterator] = sample_num;
+                            vis_sample_pos_mapping[frequency_entry.first][channel_iterator] = sample_num;	
+                    }     
 
                     ++sample_num;
                 }
 
+
+
+                /*
+                for(apex_finder = sample_num + 700; apex_finder > 0; --apex_finder ) {
+                	if( fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator][apex_finder] < 0.7*sig )
+                    	break;
+                 }
+						*/
+                //unsigned sample_pos_1 = vis_sample_pos_mapping[frequency_entry.first][0];
+                //unsigned sample_pos_2
+
+
             }
+
+                unsigned sample_pos_array[4];
+
+               	unsigned averaged_sample_pos = 0;
+                for(unsigned int sp_it = 0; sp_it < 4; ++sp_it) {
+                	sample_pos_array[sp_it] = vis_sample_pos_mapping[frequency_entry.first][sp_it];
+
+                	if(sample_pos_array[sp_it] > averaged_sample_pos) {
+                		averaged_sample_pos += sample_pos_array[sp_it];
+                	}
+                }
+
+                averaged_sample_pos /= 4.0;
+
+                unsigned closeness = std::numeric_limits<unsigned>::max();
+                unsigned closest_sample_pos = 0;
+
+                for(unsigned int sp_it = 0; sp_it < 4; ++sp_it) {
+
+                	if( std::abs(sample_pos_array[sp_it] - averaged_sample_pos) < closeness ) {
+                		closest_sample_pos = sample_pos_array[sp_it];
+                		closeness =  std::abs(sample_pos_array[sp_it] - averaged_sample_pos);
+                	}
+                }
+
+
+                for(unsigned channel_it = 0; channel_it < 4; ++channel_it) {
+                   	unsigned apex_finder = closest_sample_pos;
+                    for(apex_finder = closest_sample_pos; apex_finder > 0; --apex_finder ) {
+                    	if( fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_it][apex_finder] < 1.0 )
+                    		break;
+                    	}
+						
+                        signal_detected_at_sample_per_frequency[frequency_entry.first][channel_it] = apex_finder;
+                        vis_sample_pos_mapping[frequency_entry.first][channel_it] = apex_finder;		
+            	}
 
         }
 

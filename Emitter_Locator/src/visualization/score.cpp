@@ -8,7 +8,6 @@ Score::Score(double x_max, double y_max){
 	for(unsigned i = 0; i < points_.size(); ++i){
 		sf::Vector2f size{20,20};
 		if(i < 3){
-		std::cout<<"Hallo\n";
 			points_[i].setFillColor(sf::Color::Blue);
 		}else{
 			points_[i].setFillColor(sf::Color::Red);

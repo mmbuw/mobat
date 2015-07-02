@@ -58,8 +58,8 @@ locate() const {
 
     glm::vec2 test;
 
-    double x_step_length = (max_.x - min_.x) / 100.0;
-    double y_step_length = (max_.y - min_.y) / 200.0;
+    double x_step_length = (max_.x - min_.x) / 200.0;
+    double y_step_length = (max_.y - min_.y) / 400.0;
 
     std::map<unsigned, std::map<unsigned, double> > xy_counter_to_error_mapping;
     unsigned x_counter = 0;
