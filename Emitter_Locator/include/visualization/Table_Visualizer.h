@@ -89,7 +89,7 @@ class Table_Visualizer : Drawable_Object {
 
 		void Set_Token_Recognition_Timeout( unsigned in_timeout_in_ms );
 
-		void Signal_Token(unsigned int in_id, sf::Vector2f const& in_position);
+		void Signal_Token(unsigned int in_id, glm::vec2 const& in_position);
 
 		void update_tokens();
 

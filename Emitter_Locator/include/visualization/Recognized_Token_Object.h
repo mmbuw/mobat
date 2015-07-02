@@ -24,10 +24,10 @@ class Recognized_Token_Object : Drawable_Object {
 		unsigned life_time_in_ms_;
 		unsigned remaining_life_time_in_ms_;
 
-		sf::Vector2f physical_position_;
+		glm::vec2 physical_position_;
 		
 		Recognized_Token_Object(unsigned in_id = 0, 
-								sf::Vector2f in_position = sf::Vector2f(-500.0, -500.0),
+								glm::vec2 in_position = glm::vec2(-500.0, -500.0),
 								unsigned in_life_time_in_ms = 10000);
 		virtual void Draw(sf::RenderWindow& canvas) const;
 		virtual void Recalculate_Geometry();
@@ -41,8 +41,8 @@ class Recognized_Token_Object : Drawable_Object {
 		bool 
 		Update_Token(bool in_was_recognized, 
 					 unsigned in_passed_time_in_ms, 
-					 sf::Vector2f const& in_position 
-					 	= sf::Vector2f(0.0f,0.0f));
+					 glm::vec2 const& in_position 
+					 	= glm::vec2(0.0f,0.0f));
 
 		unsigned Get_Id() const;
 
