@@ -2,14 +2,6 @@
 #include <iostream>
 namespace TTT {
 
-float Drawable_Object::pixel_per_meter_ = 0.0f;
-glm::vec2 Drawable_Object::table_dims_in_px_ = glm::vec2(0.0f, 0.0f);
-glm::vec2 Drawable_Object::physical_table_size_ = glm::vec2(0.0f, 0.0f);
-glm::vec2 Drawable_Object::pixel_table_offset_ = glm::vec2(0.0f, 0.0f);
-glm::vec2 Drawable_Object::resolution_ = glm::vec2(0,0);
-glm::vec2 Drawable_Object::up_ = glm::vec2(0,0);
-glm::vec2 Drawable_Object::right_ = glm::vec2(0,0);
-
 void Table_Object::
 Draw(sf::RenderWindow& canvas) const {
 		canvas.draw(table_rectangle_shape_);
