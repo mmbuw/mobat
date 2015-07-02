@@ -5,15 +5,11 @@
 namespace TTT {
 
 Table_Visualizer::
-Table_Visualizer( glm::vec2 const& in_canvas_resolution,
-                  glm::vec2 const& table_dims,
-                  std::vector<glm::vec2> const& microphone_positions,
+Table_Visualizer(std::vector<glm::vec2> const& microphone_positions,
                   sf::Color const& in_table_fill_color,
                   sf::Color const& in_microphone_fill_color,
                   sf::Color const& in_token_fill_color,
                   double ball_size) : elapsed_milliseconds_since_last_frame_(0) {
-
-    resolution_ = in_canvas_resolution;
 
     unsigned int id_counter = 0;
 
@@ -24,19 +20,21 @@ Table_Visualizer( glm::vec2 const& in_canvas_resolution,
     } else {
         std::vector<glm::vec2> default_microphone_positions_;
             default_microphone_positions_.push_back(glm::vec2{0.0,0.0});
-            default_microphone_positions_.push_back(glm::vec2{0.0, table_dims.y});
-            default_microphone_positions_.push_back(glm::vec2{table_dims.x,0.0});
-            default_microphone_positions_.push_back(glm::vec2{table_dims.x, table_dims.y});
+            default_microphone_positions_.push_back(glm::vec2{0.0, physical_table_size_.y});
+            default_microphone_positions_.push_back(glm::vec2{physical_table_size_.x,0.0});
+            default_microphone_positions_.push_back(glm::vec2{physical_table_size_.x, physical_table_size_.y});
 
         for(auto const& pos : default_microphone_positions_) {
             microphones_.push_back(Microphone_Object(id_counter++, pos) );
         }
     }
     
-    set_phys_table_size(table_dims);
-    recalculate_measures();
     Set_Table_Fill_Color( in_table_fill_color );
     Set_Microphone_Fill_Color( in_microphone_fill_color );
+
+    projection_shape_.setPosition(to_pixel_space(projection_offset_));
+    projection_shape_.setSize(to_pixel_space(projection_size_));
+    projection_shape_.setFillColor(sf::Color::Green);
 
     table_.Recalculate_Geometry();
 
@@ -60,6 +58,7 @@ Draw(sf::RenderWindow& canvas) const {
 
 	
 	table_.Draw(canvas);
+    canvas.draw(projection_shape_);
 	points_.Draw(canvas);
 
 

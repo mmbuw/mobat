@@ -48,20 +48,15 @@ class Table_Visualizer : Drawable_Object {
 		int right_goals_;
 		int left_goals_;
 
-
 		Score points_;
-		
-
 
 		unsigned elapsed_milliseconds_since_last_frame_;
 
 		void Calculate_Elapsed_Milliseconds();
 
-
+		sf::RectangleShape projection_shape_;
 	public:
-		Table_Visualizer(glm::vec2 const& in_canvas_resolution = glm::vec2(800, 600),
-						 glm::vec2 const& table_dims = glm::vec2(2.0,1.0), 
-						 std::vector<glm::vec2> const& microphone_positions
+		Table_Visualizer(std::vector<glm::vec2> const& microphone_positions
 						 	= std::vector<glm::vec2>(),
 						 sf::Color const& in_table_fill_color 
 						 	= sf::Color(82,159,153),
