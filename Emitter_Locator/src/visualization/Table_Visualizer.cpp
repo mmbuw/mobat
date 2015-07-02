@@ -45,7 +45,8 @@ Table_Visualizer(std::vector<glm::vec2> const& microphone_positions,
     ball_ = Ball(sf::Vector2f(ball_pos_.x, ball_pos_.y), ball_size);
     ball_.Set_Fill_Color(sf::Color::Blue);
     // initialize variables 
-    points_ = Score{pixel_table_offset_.x + table_dims_in_px_.x / 7, resolution_.y};
+    points_ = Score{{pixel_table_offset_.x + pixel_table_size_.x / 7, pixel_table_offset_.y + pixel_table_size_ .y * 0.5 - 10},
+    				{pixel_table_offset_.x + pixel_table_size_.x * 6 / 7, pixel_table_offset_.y + pixel_table_size_.y * 0.5 + 10}};
     restart();
     
 }
@@ -121,7 +122,7 @@ Recalculate_Geometry() {
     float b_rad = ball_.getRadius();
 
     glm::vec2 table_min{pixel_table_offset_ + glm::vec2{b_rad}};
-    glm::vec2 table_max{pixel_table_offset_ + table_dims_in_px_ - glm::vec2{b_rad}};
+    glm::vec2 table_max{pixel_table_offset_ + pixel_table_size_ - glm::vec2{b_rad}};
     // border reflection
     if(ball_pos_.x <= table_min.x || ball_pos_.x >= table_max.x){
 
@@ -146,7 +147,7 @@ Recalculate_Geometry() {
         std::cout<<"Left: "<<left_goals_<<"  Right:  "<<right_goals_<<"\n";
 
         ball_dir_ = glm::vec2{0};
-        ball_pos_ = pixel_table_offset_ + table_dims_in_px_* 0.5f;
+        ball_pos_ = pixel_table_offset_ + pixel_table_size_* 0.5f;
         move_ball_ = false;
         ball_reset_ = true;
     }
@@ -323,7 +324,7 @@ std::pair<bool, std::string> Table_Visualizer::game_over(){
 void Table_Visualizer::restart(){
 
 
-	ball_pos_ = glm::vec2{pixel_table_offset_ + table_dims_in_px_ * 0.5f};
+	ball_pos_ = glm::vec2{pixel_table_offset_ + pixel_table_size_ * 0.5f};
     ball_dir_ = glm::vec2{0.0f, 1.0f};
     ball_speed_min_ = 2.0f;
     ball_speed_ = ball_speed_min_;

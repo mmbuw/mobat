@@ -30,7 +30,7 @@ class Drawable_Object {
 		static float pixel_per_meter_;
 		static glm::vec2 physical_table_size_;
 		static glm::vec2 pixel_table_offset_;
-		static glm::vec2 table_dims_in_px_;
+		static glm::vec2 pixel_table_size_;
 		static glm::vec2 resolution_;
 		static glm::vec2 right_;
 		static glm::vec2 up_;
