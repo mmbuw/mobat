@@ -23,7 +23,7 @@ class Drawable_Object {
 
 
 		static sf::Vector2f to_pixel_space(glm::vec2 const& pos, float radius = 0.0f);
-		static sf::Vector2f to_projection_space(glm::vec2 pos);
+		static sf::Vector2f to_projection_space(glm::vec2 pos, float radius = 0.0f);
 		static sf::Vector2f to_projection_size(glm::vec2 const& size);
 
 	// protected:
@@ -38,7 +38,8 @@ class Drawable_Object {
 		static glm::vec2 up_;
 		static glm::vec2 physical_projection_offset_;
 		static glm::vec2 pixel_projection_offset_;
-		static glm::vec2 projection_size_;
+		static glm::vec2 physical_projection_size_;
+		static glm::vec2 pixel_projection_size_;
 		static float pixel_per_projection_;
 };
 

@@ -56,12 +56,11 @@ int main(int argc, char** argv) {
 
 // game
     std::string winner;
-    glm::vec2 max{TTT::Drawable_Object::physical_table_size_};
-    glm::vec2 min{0, 0};
+    glm::vec2 field_max{TTT::Drawable_Object::physical_projection_offset_ + TTT::Drawable_Object::physical_projection_size_ + glm::vec2{-0.02f, 0.02f}};
+    glm::vec2 field_min{TTT::Drawable_Object::physical_projection_offset_ + glm::vec2{0.02f, 0.06f}};
         
-    glm::vec2 pl1_pos{TTT::Drawable_Object::get_phys_table_size() * glm::vec2{0.5f, 0.6f}};
-    glm::vec2 pl2_pos{TTT::Drawable_Object::get_phys_table_size() * glm::vec2{0.5f, 0.3f}};
-    // glm::vec2 pl2_pos{0.04, 0.5};
+    glm::vec2 pl1_pos{TTT::Drawable_Object::physical_projection_offset_ + TTT::Drawable_Object::physical_projection_size_ * glm::vec2{0.5f, 0.6f}};
+    glm::vec2 pl2_pos{TTT::Drawable_Object::physical_projection_offset_ + TTT::Drawable_Object::physical_projection_size_ * glm::vec2{0.5f, 0.3f}};
 
     double player_speed = 0.009;
         
@@ -91,7 +90,7 @@ int main(int argc, char** argv) {
                 }
 
                 glm::vec2 pl1_new{pl1_pos + pl1_dir};
-                pl1_pos = glm::clamp(pl1_new, min, max);
+                pl1_pos = glm::clamp(pl1_new, field_min, field_max);
 
                  //left player
 
@@ -115,7 +114,7 @@ int main(int argc, char** argv) {
 
 
                 glm::vec2 pl2_new{pl2_pos + pl2_dir};
-                pl2_pos = glm::clamp(pl2_new, min, max);
+                pl2_pos = glm::clamp(pl2_new, field_min, field_max);
 
                 window.clear();
                 table_visualizer.Recalculate_Geometry();
@@ -123,8 +122,8 @@ int main(int argc, char** argv) {
                 table_visualizer.Draw(window);
 
 
-                table_visualizer.Signal_Token(1000, glm::vec2(pl2_pos.x, pl2_pos.y));
-                //table_visualizer.Signal_Token(2000, sf::Vector2f(pl1_pos.x, pl1_pos.y));
+                // table_visualizer.Signal_Token(2000, pl1_pos);
+                table_visualizer.Signal_Token(1000, pl2_pos);
 
 
                 std::map<unsigned, std::pair<unsigned, glm::vec2> > positions = locator.load_position();
