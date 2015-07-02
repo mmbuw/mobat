@@ -1,5 +1,5 @@
 #include "Table_Object.h"
-#include <iostream>
+
 namespace TTT {
 
 void Table_Object::

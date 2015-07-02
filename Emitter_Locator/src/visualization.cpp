@@ -40,9 +40,8 @@ int main(int argc, char** argv) {
 
     glm::vec2 table_dims{1.0, 2.0};
     // initialize measures for drawing & simulation 
-    TTT::Drawable_Object::set_phys_table_size(table_dims);
+    TTT::Drawable_Object::physical_table_size_ = table_dims;
     TTT::Drawable_Object::set_resolution(windowResolution);
-    TTT::Drawable_Object::recalculate_measures();
     TTT::Drawable_Object::set_projection(glm::vec2{0.25, 0.5}, glm::vec2{0.5, 1.0});
 
     TTT::Table_Visualizer table_visualizer(default_microphone_positions_);

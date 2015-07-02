@@ -24,7 +24,7 @@ Draw(sf::RenderWindow& canvas) const {
 
 void Recognized_Token_Object::
 Recalculate_Geometry() {
-	float radius = 0.04f * pixel_per_meter_;
+	float radius = 0.02f * pixel_per_projection_;
 	token_circle_shape_.setPosition(to_projection_space(physical_position_, radius));
 	token_circle_shape_.setRadius(radius);
 }

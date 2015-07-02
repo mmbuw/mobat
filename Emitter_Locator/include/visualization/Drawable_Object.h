@@ -3,7 +3,6 @@
 
 #include <SFML/Graphics.hpp>
 #include <glm/vec2.hpp>
-#include <limits>
 
 namespace TTT{
 
@@ -19,20 +18,13 @@ class Drawable_Object {
 		static void set_projection(glm::vec2 const& origin, glm::vec2 const& size);
 		static void set_resolution(glm::vec2 const& res);
 
-		static void recalculate_measures();
-
-
-		static sf::Vector2f to_pixel_space(glm::vec2 const& pos, float radius = 0.0f);
 		static sf::Vector2f to_projection_space(glm::vec2 pos, float radius = 0.0f);
 		static sf::Vector2f to_projection_size(glm::vec2 const& size);
 
 	// protected:
 
 		//scaling factor for the elements attributes
-		static float pixel_per_meter_;
 		static glm::vec2 physical_table_size_;
-		static glm::vec2 pixel_table_offset_;
-		static glm::vec2 pixel_table_size_;
 		static glm::vec2 resolution_;
 		static glm::vec2 right_;
 		static glm::vec2 up_;
