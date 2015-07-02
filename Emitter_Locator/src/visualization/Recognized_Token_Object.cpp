@@ -5,7 +5,7 @@ namespace TTT {
 
 Recognized_Token_Object::
 Recognized_Token_Object(unsigned in_id, 
-						sf::Vector2f in_position, 
+						glm::vec2 in_position, 
 						unsigned in_life_time_in_ms ) 
 						: id_(in_id),
 						  life_time_in_ms_(in_life_time_in_ms),
@@ -26,18 +26,10 @@ Draw(sf::RenderWindow& canvas) const {
 
 void Recognized_Token_Object::
 Recalculate_Geometry() {
-	sf::Vector2f coordinate_system_origin_in_px 
-		= sf::Vector2f( (resolution_.x - table_dims_in_px_.x)/2.0,
-						 resolution_.y - 
-						 ((resolution_.y - table_dims_in_px_.y)/2.0) );
-
-
 	float token_radius 
 		= 5*(std::min(physical_table_size_.x, 
 				   physical_table_size_.y) / 50.0f) * pixel_per_meter_;  
-	token_circle_shape_
-		.setPosition(coordinate_system_origin_in_px.x + physical_position_.x*pixel_per_meter_  - token_radius,
-					 coordinate_system_origin_in_px.y - (physical_position_.y*pixel_per_meter_ + token_radius) );
+	token_circle_shape_.setPosition(to_pixel_space(physical_position_, token_radius));
 
 	token_circle_shape_.setRadius( token_radius );
 }
@@ -64,7 +56,7 @@ Set_Life_Time(unsigned in_life_time_in_ms) {
 bool Recognized_Token_Object::
 Update_Token(bool in_was_recognized, 
 			 unsigned in_passed_time_in_ms, 
-			 sf::Vector2f const& in_position) {
+			 glm::vec2 const& in_position) {
 
 		//std::cout << "Token Update, Decrease Life Time: " << !in_was_recognized << "\n";
 

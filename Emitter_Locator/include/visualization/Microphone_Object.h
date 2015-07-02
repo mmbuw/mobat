@@ -3,8 +3,6 @@
 
 #include "Drawable_Object.h"
 
-
-
 namespace TTT {
 
 class Microphone_Object : Drawable_Object {
@@ -16,7 +14,7 @@ class Microphone_Object : Drawable_Object {
 	public:
 		sf::Vector2f physical_position_;
 		
-		Microphone_Object(unsigned in_id, sf::Vector2f in_position );
+		Microphone_Object(unsigned in_id, sf::Vector2f const& in_position );
 		virtual void Draw(sf::RenderWindow& canvas) const;
 		virtual void Recalculate_Geometry();
 

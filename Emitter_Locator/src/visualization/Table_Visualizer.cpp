@@ -18,7 +18,7 @@ Table_Visualizer( glm::vec2 const& in_canvas_resolution,
     unsigned int id_counter = 0;
 
     if(!microphone_positions.empty()) {
-        for(auto const& pos : microphone_positions ) {
+        for(auto const& pos : microphone_positions) {
             microphones_.push_back(Microphone_Object(id_counter++, pos) );
         }
     } else {
@@ -38,18 +38,18 @@ Table_Visualizer( glm::vec2 const& in_canvas_resolution,
     Set_Table_Fill_Color( in_table_fill_color );
     Set_Microphone_Fill_Color( in_microphone_fill_color );
 
+    table_.Recalculate_Geometry();
+
+    for(auto& mic_obj : microphones_) {
+        mic_obj.Recalculate_Geometry();
+    }
+
     ball_ = Ball(sf::Vector2f(ball_pos_.x, ball_pos_.y), ball_size);
     ball_.Set_Fill_Color(sf::Color::Blue);
     // initialize variables 
+    points_ = Score{pixel_table_offset_.x + table_dims_in_px_.x / 7, resolution_.y};
     restart();
-    //scoreboard
-   /* double score_x = double(in_canvas_resolution.x), score_y = double(in_canvas_resolution.y);
     
-    score_x -= table_dims.x*pixel_per_meter_;
-    score_y -= table_dims.y*pixel_per_meter_;
-
-    score_x /= 3;*/
-    //score_y /= 2;
 }
 
 Table_Visualizer::
@@ -84,12 +84,6 @@ Reset_Microphones(std::vector<Microphone_Object> const& microphones) {
 
 void Table_Visualizer::
 Recalculate_Geometry() {
-    
-    table_.Recalculate_Geometry();
-
-    for(auto& mic_obj : microphones_) {
-        mic_obj.Recalculate_Geometry();
-    }
 
     for( auto& id_token_pair : recognized_tokens_ ) {
         id_token_pair.second.Recalculate_Geometry();
@@ -211,7 +205,7 @@ Set_Token_Recognition_Timeout( unsigned in_timeout_in_ms ) {
 }
 
 void Table_Visualizer::
-Signal_Token(unsigned int in_id, sf::Vector2f const& in_position) {
+Signal_Token(unsigned int in_id, glm::vec2 const& in_position) {
 
     if( recognized_tokens_.end() != recognized_tokens_.find(in_id) ) {
         tokens_to_refresh_.insert(in_id);
@@ -328,6 +322,8 @@ std::pair<bool, std::string> Table_Visualizer::game_over(){
 
 
 void Table_Visualizer::restart(){
+
+
 	ball_pos_ = glm::vec2{pixel_table_offset_ + table_dims_in_px_ * 0.5f};
     ball_dir_ = glm::vec2{0.0f, 1.0f};
     ball_speed_min_ = 2.0f;
@@ -339,12 +335,11 @@ void Table_Visualizer::restart(){
     right_goals_ = 0;
     left_goals_ = 0;
 
-    points_ = Score{pixel_table_offset_.x + table_dims_in_px_.x / 7, resolution_.y};
+	points_.reset();
+    
     //get initial timestamp
     last_time_stamp_ = std::chrono::high_resolution_clock::now();
 
-	// unsigned int id_counter = 0;
-	// ++id_counter;
 }
 
 }; //namespace TTT

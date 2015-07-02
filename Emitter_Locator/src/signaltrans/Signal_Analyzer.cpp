@@ -77,7 +77,16 @@ analyze(buffer_collection const& collector){
 
             signal_detected_at_sample_per_frequency[frequency_entry.first] = {100000, 100000, 100000, 100000};
 
+
+
             for(unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
+
+            unsigned sample_vector_size = fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].size();
+			unsigned processed_samples = 0;
+
+
+
+
 
                 double sum = std::accumulate(fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].begin(), 
                                                fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].end(), 0.0, d_max);
@@ -110,18 +119,22 @@ analyze(buffer_collection const& collector){
                 bool allow_signal_detection = false;
 */
 
-                unsigned sample_vector_size = fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].size();
+                sample_vector_size = fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].size();
               	
-              	unsigned processed_samples = 0;
+              	processed_samples = 0;
 
+              	//double last_value = fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator][0];
                 for(auto& sig : fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator]) {
                 	if( processed_samples >= (sample_vector_size - 1) ) {
                 		break;
                 	} else {
-                		if(peak-min > 5.0) {
-                			sig =  100.0 * (sig - min) / (peak - min);
 
-                			if( sig < 40.0)
+
+                		double power = 20;
+                		if(peak-min > 5.0) {
+                			sig =  100.0 * (pow(sig,power) - pow(min,power)) / (pow(peak,power) - pow(min,power));
+
+                			if( sig < 5.0)
                 				sig = 0; 
                 		}
                 		else {
@@ -293,7 +306,7 @@ analyze(buffer_collection const& collector){
                 for(unsigned channel_it = 0; channel_it < 4; ++channel_it) {
                    	unsigned apex_finder = closest_sample_pos;
                     for(apex_finder = closest_sample_pos; apex_finder > 0; --apex_finder ) {
-                    	if( fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_it][apex_finder] < 1.0 )
+                    	if( fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_it][apex_finder] < 10.0 )
                     		break;
                     	}
 						

@@ -25,6 +25,7 @@ class Score{
     Score(double x_max, double y_max);
     void Draw(sf::RenderWindow& canvas) const;
     void update(int r_goals, int l_goals); //changes colors according to given scores
+    void reset();
     
     
     
