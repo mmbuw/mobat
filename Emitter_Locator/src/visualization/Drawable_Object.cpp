@@ -55,7 +55,7 @@ void Drawable_Object::recalculate_measures() {
 sf::Vector2f Drawable_Object::to_pixel_space(glm::vec2 const& pos, float radius) {
     glm::vec2 pixel_pos{
      right_ * (pixel_table_offset_.x + pos.x * pixel_per_meter_  - radius)
-     + up_ * (resolution_.y - (pixel_table_offset_.y + pos.y * pixel_per_meter_ + radius))};
+     + up_ * (resolution_.y - (pixel_table_offset_.y + pos.y * pixel_per_meter_) - radius)};
     return sf::Vector2f{pixel_pos.x, pixel_pos.y};
 }
 

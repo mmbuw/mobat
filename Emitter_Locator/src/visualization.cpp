@@ -17,9 +17,14 @@ sf::Vector2f smartphonePosition(1.0f,0.5f);
 glm::vec2 windowResolution(800, 800);
 
 int main(int argc, char** argv) {
+// calculation
+    Locator locator{4};
 
-    std::string winner;
+    locator.set_frequencies_to_record({18000, 19000, 100000});
 
+    auto recording_thread = std::thread(&Locator::record_position, &locator);
+
+// visualisation
     sf::RenderWindow signal_plot_window_(sf::VideoMode(280, 400)
                        , "Transformed_Frequencies");
 
@@ -33,42 +38,33 @@ int main(int argc, char** argv) {
 
     std::vector<glm::vec2> default_microphone_positions_ = {{0.06, 0.075}, {0.945,  0.09}, {0.925,  1.915} , {0.06,  1.905}};
 
-
     glm::vec2 table_dims{1.0, 2.0};
     // initialize measures for drawing & simulation 
     TTT::Drawable_Object::set_phys_table_size(table_dims);
     TTT::Drawable_Object::set_resolution(windowResolution);
     TTT::Drawable_Object::recalculate_measures();
-    TTT::Drawable_Object::set_projection(TTT::Drawable_Object::pixel_table_offset_ / TTT::Drawable_Object::pixel_per_meter_ + glm::vec2{0.25, 0.5}, glm::vec2{0.5, 1.0});
+    TTT::Drawable_Object::set_projection(glm::vec2{0.25, 0.5}, glm::vec2{0.5, 1.0});
 
     TTT::Table_Visualizer table_visualizer(default_microphone_positions_);
     table_visualizer.Set_Token_Recognition_Timeout(5000000);
-
-    Locator locator{4};
-
-
-    locator.set_frequencies_to_record({18000, 19000, 100000});
-
-
-    auto recording_thread = std::thread(&Locator::record_position, &locator);
-
-
-
-    glm::vec2 max{TTT::Drawable_Object::get_phys_table_size().x, TTT::Drawable_Object::get_phys_table_size().y};
-    glm::vec2 min{0, 0};
-        
-    glm::vec2 pl1_pos{0.9, 0.5};
-    glm::vec2 pl2_pos{TTT::Drawable_Object::pixel_table_offset_ / TTT::Drawable_Object::pixel_per_meter_ + TTT::Drawable_Object::get_phys_table_size() * 0.5f};
-    // glm::vec2 pl2_pos{0.04, 0.5};
-
-    double player_speed = 0.009;
-        
 
     table_visualizer.Set_Token_Fill_Color(18000, sf::Color(255,0,0) );
     table_visualizer.Set_Token_Fill_Color(19000, sf::Color(255,255,0) );
 
     table_visualizer.Set_Token_Fill_Color(100000, sf::Color(255,0,255) );
     
+
+// game
+    std::string winner;
+    glm::vec2 max{TTT::Drawable_Object::physical_table_size_};
+    glm::vec2 min{0, 0};
+        
+    glm::vec2 pl1_pos{TTT::Drawable_Object::get_phys_table_size() * glm::vec2{0.5f, 0.6f}};
+    glm::vec2 pl2_pos{TTT::Drawable_Object::get_phys_table_size() * glm::vec2{0.5f, 0.3f}};
+    // glm::vec2 pl2_pos{0.04, 0.5};
+
+    double player_speed = 0.009;
+        
 
         while (window.isOpen()) {
             if(!table_visualizer.game_over().first){
