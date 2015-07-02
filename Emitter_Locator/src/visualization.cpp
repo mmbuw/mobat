@@ -58,7 +58,8 @@ int main(int argc, char** argv) {
     glm::vec2 min{0, 0};
         
     glm::vec2 pl1_pos{0.9, 0.5};
-    glm::vec2 pl2_pos{0.04, 0.5};
+    glm::vec2 pl2_pos{TTT::Drawable_Object::pixel_table_offset_ / TTT::Drawable_Object::pixel_per_meter_ + TTT::Drawable_Object::get_phys_table_size() * 0.5f};
+    // glm::vec2 pl2_pos{0.04, 0.5};
 
     double player_speed = 0.009;
         
