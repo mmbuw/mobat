@@ -310,10 +310,10 @@ std::pair<bool, std::string> Table_Visualizer::game_over(){
 		return {false, "Chuck Norris"};
 	}else{
 
-		if(tmp > 3){
-			return {true, "Blue"};
+		if(tmp >= 3){
+			return {true, "Red"};
 		}else{
-			return {true, "Red"};//"Right", "lower"
+			return {true, "Blue"};//"upper/higher"
 		}
 	}	
 	
