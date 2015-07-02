@@ -126,7 +126,7 @@ int main(int argc, char** argv) {
                 table_visualizer.Draw(window);
 
 
-                table_visualizer.Signal_Token(1000, sf::Vector2f(pl2_pos.x, pl2_pos.y));
+                table_visualizer.Signal_Token(1000, glm::vec2(pl2_pos.x, pl2_pos.y));
                 //table_visualizer.Signal_Token(2000, sf::Vector2f(pl1_pos.x, pl1_pos.y));
 
 
@@ -149,7 +149,7 @@ int main(int argc, char** argv) {
 
                             table_visualizer
                                 .Signal_Token(frequency_position_entry.first, 
-                                              sf::Vector2f(smartphonePosition.x, 
+                                              glm::vec2(smartphonePosition.x, 
                                                            smartphonePosition.y));
                         }
                     }

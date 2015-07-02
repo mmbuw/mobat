@@ -30,7 +30,19 @@ class Drawable_Object {
 
 			pixel_table_offset_ = glm::vec2{(resolution_.x - table_dims_in_px_.x)/2.0,
 									    (resolution_.y - table_dims_in_px_.y)/2.0};
+			right_ = glm::vec2{1.0f, 0.0f};
+			up_ = glm::vec2{0.0f, 1.0f};
+
+
 		}
+
+		static sf::Vector2f to_pixel_space(glm::vec2 const& pos, float radius) {
+			glm::vec2 pixel_pos{
+			 right_ * (pixel_table_offset_.x + pos.x * pixel_per_meter_  - radius)
+			 + up_ * (pixel_table_offset_.y + pos.y * pixel_per_meter_ - radius)};
+			return sf::Vector2f{pixel_pos.x, pixel_pos.y};
+		}
+
 	protected:
 
 		//scaling factor for the elements attributes
@@ -39,6 +51,8 @@ class Drawable_Object {
 		static glm::vec2 pixel_table_offset_;
 		static glm::vec2 table_dims_in_px_;
 		static glm::vec2 resolution_;
+		static glm::vec2 right_;
+		static glm::vec2 up_;
 
 };
 

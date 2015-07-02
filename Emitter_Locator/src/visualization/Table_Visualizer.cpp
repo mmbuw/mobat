@@ -205,7 +205,7 @@ Set_Token_Recognition_Timeout( unsigned in_timeout_in_ms ) {
 }
 
 void Table_Visualizer::
-Signal_Token(unsigned int in_id, sf::Vector2f const& in_position) {
+Signal_Token(unsigned int in_id, glm::vec2 const& in_position) {
 
     if( recognized_tokens_.end() != recognized_tokens_.find(in_id) ) {
         tokens_to_refresh_.insert(in_id);
