@@ -7,7 +7,7 @@ namespace TTT {
 Table_Visualizer::
 Table_Visualizer( glm::vec2 const& in_canvas_resolution,
                   glm::vec2 const& table_dims,
-                  std::vector<sf::Vector2f> const& microphone_positions,
+                  std::vector<glm::vec2> const& microphone_positions,
                   sf::Color const& in_table_fill_color,
                   sf::Color const& in_microphone_fill_color,
                   sf::Color const& in_token_fill_color,
@@ -22,11 +22,11 @@ Table_Visualizer( glm::vec2 const& in_canvas_resolution,
             microphones_.push_back(Microphone_Object(id_counter++, pos) );
         }
     } else {
-        std::vector<sf::Vector2f> default_microphone_positions_;
-            default_microphone_positions_.push_back(sf::Vector2f(0.0,0.0));
-            default_microphone_positions_.push_back(sf::Vector2f(0.0, table_dims.y));
-            default_microphone_positions_.push_back(sf::Vector2f(table_dims.x,0.0));
-            default_microphone_positions_.push_back(sf::Vector2f(table_dims.x, table_dims.y));
+        std::vector<glm::vec2> default_microphone_positions_;
+            default_microphone_positions_.push_back(glm::vec2{0.0,0.0});
+            default_microphone_positions_.push_back(glm::vec2{0.0, table_dims.y});
+            default_microphone_positions_.push_back(glm::vec2{table_dims.x,0.0});
+            default_microphone_positions_.push_back(glm::vec2{table_dims.x, table_dims.y});
 
         for(auto const& pos : default_microphone_positions_) {
             microphones_.push_back(Microphone_Object(id_counter++, pos) );

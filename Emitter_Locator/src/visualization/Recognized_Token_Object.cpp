@@ -26,12 +26,9 @@ Draw(sf::RenderWindow& canvas) const {
 
 void Recognized_Token_Object::
 Recalculate_Geometry() {
-	float token_radius 
-		= 2*(std::min(physical_table_size_.x, 
-				   physical_table_size_.y) / 50.0f) * pixel_per_meter_;  
-	token_circle_shape_.setPosition(to_pixel_space(physical_position_, token_radius));
-
-	token_circle_shape_.setRadius( token_radius );
+	float radius = 0.04f * pixel_per_meter_;
+	token_circle_shape_.setPosition(to_pixel_space(physical_position_, radius));
+	token_circle_shape_.setRadius(radius);
 }
 
 void Recognized_Token_Object::

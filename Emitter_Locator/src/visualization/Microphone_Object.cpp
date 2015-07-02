@@ -1,9 +1,10 @@
 #include "Microphone_Object.h"
+#include <iostream>
 
 namespace TTT {
 
 Microphone_Object::
-Microphone_Object(unsigned in_id, sf::Vector2f const& in_position ) {
+Microphone_Object(unsigned in_id, glm::vec2 const& in_position ) {
 	id_ = in_id;
 	physical_position_ = in_position;
 }
@@ -15,15 +16,9 @@ Draw(sf::RenderWindow& canvas) const {
 
 void Microphone_Object::
 Recalculate_Geometry() {
-
-	float microphone_radius 
-		= (std::min(physical_table_size_.x, 
-				    physical_table_size_.y) / 50.0f) * pixel_per_meter_;  
-	microphone_circle_shape_
-		.setPosition(pixel_table_offset_.x + physical_position_.x * pixel_per_meter_ - microphone_radius,
-					 pixel_table_offset_.y + physical_position_.y * pixel_per_meter_ + microphone_radius);
-
-	microphone_circle_shape_.setRadius(microphone_radius);
+	float radius = 0.02f * pixel_per_meter_;  
+	microphone_circle_shape_.setPosition(to_pixel_space(physical_position_, radius));
+	microphone_circle_shape_.setRadius(radius);
 }
 
 void Microphone_Object::

@@ -26,10 +26,10 @@ Draw(sf::RenderWindow& canvas, std::vector<Microphone_Object> const& microphones
 	//	std::cout << "=)\n";
 	}
 
-	error_vis_shader.setParameter("mic1_pos", microphones[0].physical_position_ );
-	error_vis_shader.setParameter("mic2_pos", microphones[1].physical_position_ );
-	error_vis_shader.setParameter("mic3_pos", microphones[2].physical_position_ );
-	error_vis_shader.setParameter("mic4_pos", microphones[3].physical_position_ );
+	// error_vis_shader.setParameter("mic1_pos", microphones[0].physical_position_ );
+	// error_vis_shader.setParameter("mic2_pos", microphones[1].physical_position_ );
+	// error_vis_shader.setParameter("mic3_pos", microphones[2].physical_position_ );
+	// error_vis_shader.setParameter("mic4_pos", microphones[3].physical_position_ );
 
 	//std::cout << "toas in draw call: " << toas[0] << ", " << toas[1] << ", " << toas[2] << ", " << toas[3] << "\n";
 
@@ -44,7 +44,7 @@ void Table_Object::
 Recalculate_Geometry() {
 
 	table_rectangle_shape_.setSize(sf::Vector2f{table_dims_in_px_.x, table_dims_in_px_.y});
-	table_rectangle_shape_.setPosition(sf::Vector2f(pixel_table_offset_.x, pixel_table_offset_.y));
+	table_rectangle_shape_.setPosition(pixel_table_offset_.x, pixel_table_offset_.y);
 
 }
 

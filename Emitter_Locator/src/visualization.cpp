@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
     unsigned latest_received_timestamp = 0;
 
 
-    std::vector<sf::Vector2f> default_microphone_positions_ = {{0.06, 0.075}, {0.945,  0.09}, {0.925,  1.915} , {0.06,  1.905}};
+    std::vector<glm::vec2> default_microphone_positions_ = {{0.06, 0.075}, {0.945,  0.09}, {0.925,  1.915} , {0.06,  1.905}};
 
 
 

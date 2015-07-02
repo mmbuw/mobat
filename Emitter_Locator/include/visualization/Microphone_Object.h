@@ -12,9 +12,9 @@ class Microphone_Object : Drawable_Object {
 		sf::CircleShape microphone_circle_shape_;
 
 	public:
-		sf::Vector2f physical_position_;
+		glm::vec2 physical_position_;
 		
-		Microphone_Object(unsigned in_id, sf::Vector2f const& in_position );
+		Microphone_Object(unsigned in_id, glm::vec2 const& in_position );
 		virtual void Draw(sf::RenderWindow& canvas) const;
 		virtual void Recalculate_Geometry();
 
