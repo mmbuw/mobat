@@ -5,6 +5,8 @@
 
 #include <SFML/Graphics.hpp>
 
+
+
 #include <iostream>
 #include <thread>
 #include <X11/Xlib.h>
@@ -15,17 +17,14 @@ sf::Vector2f smartphonePosition(1.0f,0.5f);
 glm::vec2 windowResolution(800, 800);
 
 int main(int argc, char** argv) {
+// calculation
+    Locator locator{4};
 
-    unsigned vis_frame_count = 0;
-    
-    std::string winner;
+    locator.set_frequencies_to_record({18000, 19000, 100000});
 
-    std::map<unsigned, std::array<std::pair<bool, glm::vec2>,10> > positions_to_average;
+    auto recording_thread = std::thread(&Locator::record_position, &locator);
 
-    
-
-
-
+// visualisation
     sf::RenderWindow signal_plot_window_(sf::VideoMode(280, 400)
                        , "Transformed_Frequencies");
 
@@ -37,39 +36,33 @@ int main(int argc, char** argv) {
     unsigned latest_received_timestamp = 0;
 
 
-    std::vector<sf::Vector2f> default_microphone_positions_ = {{0.06, 0.075}, {0.945,  0.09}, {0.925,  1.915} , {0.06,  1.905}};
+    std::vector<glm::vec2> default_microphone_positions_ = {{0.06, 0.075}, {0.945,  0.09}, {0.925,  1.915} , {0.06,  1.905}};
 
+    glm::vec2 table_dims{1.0, 2.0};
+    // initialize measures for drawing & simulation 
+    TTT::Drawable_Object::physical_table_size_ = table_dims;
+    TTT::Drawable_Object::set_resolution(windowResolution);
+    TTT::Drawable_Object::set_projection(glm::vec2{0.25, 0.5}, glm::vec2{0.5, 1.0});
 
-
-    TTT::Table_Visualizer table_visualizer(windowResolution, glm::vec2(1.0, 2.0), default_microphone_positions_);
+    TTT::Table_Visualizer table_visualizer(default_microphone_positions_);
     table_visualizer.Set_Token_Recognition_Timeout(5000000);
-
-
-    Locator locator{4};
-
-
-    locator.set_frequencies_to_record({18000, 19000, 100000});
-
-
-    auto recording_thread = std::thread(&Locator::record_position, &locator);
-
-
-
-    glm::vec2 max{TTT::Drawable_Object::get_phys_table_size().x, TTT::Drawable_Object::get_phys_table_size().y};
-    glm::vec2 min{0, 0};
-        
-    glm::vec2 pl1_pos{0.9, 0.5};
-    glm::vec2 pl2_pos{TTT::Drawable_Object::pixel_table_offset_ / TTT::Drawable_Object::pixel_per_meter_ + TTT::Drawable_Object::get_phys_table_size() * 0.5f};
-    // glm::vec2 pl2_pos{0.04, 0.5};
-
-    double player_speed = 0.009;
-        
 
     table_visualizer.Set_Token_Fill_Color(18000, sf::Color(255,0,0) );
     table_visualizer.Set_Token_Fill_Color(19000, sf::Color(255,255,0) );
 
     table_visualizer.Set_Token_Fill_Color(100000, sf::Color(255,0,255) );
     
+
+// game
+    std::string winner;
+    glm::vec2 field_max{TTT::Drawable_Object::physical_projection_offset_ + TTT::Drawable_Object::physical_projection_size_ + glm::vec2{-0.02f, 0.02f}};
+    glm::vec2 field_min{TTT::Drawable_Object::physical_projection_offset_ + glm::vec2{0.02f, 0.06f}};
+        
+    glm::vec2 pl1_pos{TTT::Drawable_Object::physical_projection_offset_ + TTT::Drawable_Object::physical_projection_size_ * glm::vec2{0.5f, 0.6f}};
+    glm::vec2 pl2_pos{TTT::Drawable_Object::physical_projection_offset_ + TTT::Drawable_Object::physical_projection_size_ * glm::vec2{0.5f, 0.3f}};
+
+    double player_speed = 0.009;
+        
 
         while (window.isOpen()) {
             if(!table_visualizer.game_over().first){
@@ -96,7 +89,7 @@ int main(int argc, char** argv) {
                 }
 
                 glm::vec2 pl1_new{pl1_pos + pl1_dir};
-                pl1_pos = glm::clamp(pl1_new, min, max);
+                pl1_pos = glm::clamp(pl1_new, field_min, field_max);
 
                  //left player
 
@@ -120,7 +113,7 @@ int main(int argc, char** argv) {
 
 
                 glm::vec2 pl2_new{pl2_pos + pl2_dir};
-                pl2_pos = glm::clamp(pl2_new, min, max);
+                pl2_pos = glm::clamp(pl2_new, field_min, field_max);
 
                 window.clear();
                 table_visualizer.Recalculate_Geometry();
@@ -128,8 +121,8 @@ int main(int argc, char** argv) {
                 table_visualizer.Draw(window);
 
 
-                table_visualizer.Signal_Token(1000, glm::vec2(pl2_pos.x, pl2_pos.y));
-                //table_visualizer.Signal_Token(2000, sf::Vector2f(pl1_pos.x, pl1_pos.y));
+                // table_visualizer.Signal_Token(2000, pl1_pos);
+                table_visualizer.Signal_Token(1000, pl2_pos);
 
 
                 std::map<unsigned, std::pair<unsigned, glm::vec2> > positions = locator.load_position();
@@ -208,28 +201,37 @@ int main(int argc, char** argv) {
 
             }else{
                 winner = table_visualizer.game_over().second;
-                std::cout<< "Winner is: " << winner <<"\n";
+                //std::cout<< "Winner is: " << winner <<"\n";
+                //std::cout<<max.x << "  "<< max.y <<"\n";
 
-
-                window.clear();
-                /* sf::Text text;
+                sf::Color color = sf::Color(255, 192, 203);
+                //window.clear();
+                sf::Text text;
+                sf::Text play_again;
                 sf::Font font;
-                font.loadFromFile("DejaVuSans.ttf");
+                font.loadFromFile("../fonds/OpenSans-Light.ttf");
                 text.setFont(font);
-                text.setString(winner + "wins!\n If you want to play again enter again. Otherwise enter something else!");
+                text.setString(winner + " wins!\n");
                 text.setCharacterSize(24);
-                text.setColor(sf::Color::Red);          
-                text.setStyle(sf::Text::Bold | sf::Text::Underlined);
+                text.setColor(color);          
+                
+                text.setPosition(windowResolution.x/2.5 , windowResolution.y/2.0 - 40);
 
+                play_again.setFont(font);
+                play_again.setString("If you want to play again press return!\n");
+                play_again.setCharacterSize(24);
+                play_again.setColor(color);          
+                
+                play_again.setPosition(windowResolution.x/5.0, windowResolution.y/2.0 + 20);
 
-                window.draw(text);*/
+                window.draw(text);
+                window.draw(play_again);
                 window.display();
 
                 if(sf::Keyboard::isKeyPressed(sf::Keyboard::Return)) {
                     table_visualizer.restart();
                 }
 
-                ++vis_frame_count;
             }
         }
 

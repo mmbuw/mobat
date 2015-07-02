@@ -19,19 +19,14 @@ Draw(sf::RenderWindow& canvas) const {
 	//std::cout << id_ << "Hz @ ";
 	//std::cout << token_circle_shape_.getPosition().x << " ";
 	//std::cout << token_circle_shape_.getPosition().y << "\n";
-
-
 	canvas.draw(token_circle_shape_);
 }
 
 void Recognized_Token_Object::
 Recalculate_Geometry() {
-	float token_radius 
-		= 5*(std::min(physical_table_size_.x, 
-				   physical_table_size_.y) / 50.0f) * pixel_per_meter_;  
-	token_circle_shape_.setPosition(to_pixel_space(physical_position_, token_radius));
-
-	token_circle_shape_.setRadius( token_radius );
+	float radius = 0.02f * pixel_per_projection_;
+	token_circle_shape_.setPosition(to_projection_space(physical_position_, radius));
+	token_circle_shape_.setRadius(radius);
 }
 
 void Recognized_Token_Object::

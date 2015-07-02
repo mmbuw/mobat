@@ -5,15 +5,11 @@
 namespace TTT {
 
 Table_Visualizer::
-Table_Visualizer( glm::vec2 const& in_canvas_resolution,
-                  glm::vec2 const& table_dims,
-                  std::vector<sf::Vector2f> const& microphone_positions,
+Table_Visualizer(std::vector<glm::vec2> const& microphone_positions,
                   sf::Color const& in_table_fill_color,
                   sf::Color const& in_microphone_fill_color,
                   sf::Color const& in_token_fill_color,
                   double ball_size) : elapsed_milliseconds_since_last_frame_(0) {
-
-    resolution_ = in_canvas_resolution;
 
     unsigned int id_counter = 0;
 
@@ -22,21 +18,23 @@ Table_Visualizer( glm::vec2 const& in_canvas_resolution,
             microphones_.push_back(Microphone_Object(id_counter++, pos) );
         }
     } else {
-        std::vector<sf::Vector2f> default_microphone_positions_;
-            default_microphone_positions_.push_back(sf::Vector2f(0.0,0.0));
-            default_microphone_positions_.push_back(sf::Vector2f(0.0, table_dims.y));
-            default_microphone_positions_.push_back(sf::Vector2f(table_dims.x,0.0));
-            default_microphone_positions_.push_back(sf::Vector2f(table_dims.x, table_dims.y));
+        std::vector<glm::vec2> default_microphone_positions_;
+            default_microphone_positions_.push_back(glm::vec2{0.0,0.0});
+            default_microphone_positions_.push_back(glm::vec2{0.0, physical_table_size_.y});
+            default_microphone_positions_.push_back(glm::vec2{physical_table_size_.x,0.0});
+            default_microphone_positions_.push_back(glm::vec2{physical_table_size_.x, physical_table_size_.y});
 
         for(auto const& pos : default_microphone_positions_) {
             microphones_.push_back(Microphone_Object(id_counter++, pos) );
         }
     }
     
-    set_phys_table_size(table_dims);
-    recalculate_measures();
     Set_Table_Fill_Color( in_table_fill_color );
     Set_Microphone_Fill_Color( in_microphone_fill_color );
+
+    projection_shape_.setPosition(to_projection_space(physical_projection_offset_));
+    projection_shape_.setSize(to_projection_size(physical_projection_size_));
+    projection_shape_.setFillColor(sf::Color::Yellow);
 
     table_.Recalculate_Geometry();
 
@@ -47,7 +45,8 @@ Table_Visualizer( glm::vec2 const& in_canvas_resolution,
     ball_ = Ball(sf::Vector2f(ball_pos_.x, ball_pos_.y), ball_size);
     ball_.Set_Fill_Color(sf::Color::Blue);
     // initialize variables 
-    points_ = Score{pixel_table_offset_.x + table_dims_in_px_.x / 7, resolution_.y};
+    points_ = Score{{pixel_projection_offset_.x + pixel_projection_size_.x / 7, pixel_projection_offset_.y + pixel_projection_size_ .y * 0.5 - 10},
+    				{pixel_projection_offset_.x + pixel_projection_size_.x * 6 / 7, pixel_projection_offset_.y + pixel_projection_size_.y * 0.5 + 10}};
     restart();
     
 }
@@ -60,6 +59,7 @@ Draw(sf::RenderWindow& canvas) const {
 
 	
 	table_.Draw(canvas);
+    canvas.draw(projection_shape_);
 	points_.Draw(canvas);
 
 
@@ -121,23 +121,23 @@ Recalculate_Geometry() {
 
     float b_rad = ball_.getRadius();
 
-    glm::vec2 table_min{pixel_table_offset_ + glm::vec2{b_rad}};
-    glm::vec2 table_max{pixel_table_offset_ + table_dims_in_px_ - glm::vec2{b_rad}};
+    glm::vec2 field_min{pixel_projection_offset_ + glm::vec2{b_rad}};
+    glm::vec2 field_max{pixel_projection_offset_ + pixel_projection_size_  - glm::vec2{b_rad}};
     // border reflection
-    if(ball_pos_.x <= table_min.x || ball_pos_.x >= table_max.x){
+    if(ball_pos_.x <= field_min.x || ball_pos_.x >= field_max.x){
 
-        if(ball_pos_.x <= table_min.x){
-            ball_pos_.x = table_min.x;  
+        if(ball_pos_.x <= field_min.x){
+            ball_pos_.x = field_min.x;  
             ball_dir_ = glm::reflect(ball_dir_, glm::vec2{1.0f ,0.0f});
         }
         else{
-            ball_pos_.x = table_max.x;
+            ball_pos_.x = field_max.x;
             ball_dir_ = glm::reflect(ball_dir_, glm::vec2{-1.0f ,0.0f});
         }
     }
     // goal detection
-    if(ball_pos_.y <= table_min.y - b_rad * 2.0f || ball_pos_.y >= table_max.y + b_rad * 2.0f){
-        if(ball_pos_.y <= table_min.y - b_rad * 2.0f){
+    if(ball_pos_.y <= field_min.y - b_rad * 2.0f || ball_pos_.y >= field_max.y + b_rad * 2.0f){
+        if(ball_pos_.y <= field_min.y - b_rad * 2.0f){
             ++left_goals_;
         }
         else{
@@ -147,7 +147,7 @@ Recalculate_Geometry() {
         std::cout<<"Left: "<<left_goals_<<"  Right:  "<<right_goals_<<"\n";
 
         ball_dir_ = glm::vec2{0};
-        ball_pos_ = pixel_table_offset_ + table_dims_in_px_* 0.5f;
+        ball_pos_ = pixel_projection_offset_ + pixel_projection_size_ * 0.5f;
         move_ball_ = false;
         ball_reset_ = true;
     }
@@ -310,10 +310,10 @@ std::pair<bool, std::string> Table_Visualizer::game_over(){
 		return {false, "Chuck Norris"};
 	}else{
 
-		if(tmp > 3){
-			return {true, "left"};
+		if(tmp >= 3){
+			return {true, "Red"};
 		}else{
-			return {true, "right"};
+			return {true, "Blue"};//"upper/higher"
 		}
 	}	
 	
@@ -324,7 +324,7 @@ std::pair<bool, std::string> Table_Visualizer::game_over(){
 void Table_Visualizer::restart(){
 
 
-	ball_pos_ = glm::vec2{pixel_table_offset_ + table_dims_in_px_ * 0.5f};
+	ball_pos_ = glm::vec2{pixel_projection_offset_ + pixel_projection_size_ * 0.5f};
     ball_dir_ = glm::vec2{0.0f, 1.0f};
     ball_speed_min_ = 2.0f;
     ball_speed_ = ball_speed_min_;
