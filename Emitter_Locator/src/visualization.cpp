@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
     
 
         while (window.isOpen()) {
-            if(!table_visualizer.game_over().first ){
+            if(!table_visualizer.game_over().first){
                 glm::vec2 pl1_dir{0, 0};
                 glm::vec2 pl2_dir{0, 0};
 
@@ -123,9 +123,6 @@ int main(int argc, char** argv) {
                 window.clear();
                 table_visualizer.Recalculate_Geometry();
 
-
-
-
                 table_visualizer.Draw(window);
 
 
@@ -169,24 +166,13 @@ int main(int argc, char** argv) {
                 window.display();   
 
 
-
-
-
-
-
-
                 glm::vec4 toas = locator.load_toas();
                  
-
-
                 std::array< std::vector<double>, 4> signal_vis_samples =  locator.load_signal_vis_samples();
-       
         
                 signal_plot_window_.clear(sf::Color(255, 255, 255));
 
-
                 std::array<unsigned, 4> recognized_vis_sample_pos = locator.load_recognized_vis_sample_positions();
-
 
                 sf::RectangleShape data_point;
                 for(unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
@@ -197,15 +183,8 @@ int main(int argc, char** argv) {
 
                         float width = 280.0f / signal_vis_samples[channel_iterator].size();
 
-
-
-
-
-
                         data_point.setSize(sf::Vector2f(1,sig) );
                         data_point.setPosition( sf::Vector2f( width * sample_idx, channel_iterator * 100.0 + (100.0-sig) ) );
-
-
 
                         if(sample_idx <  recognized_vis_sample_pos[channel_iterator] ) {
                             data_point.setFillColor(sf::Color(255, 0, 0) ) ;
@@ -213,18 +192,10 @@ int main(int argc, char** argv) {
                             data_point.setFillColor(sf::Color(0, 255, 0) ) ;          
                         }
             
-
                         signal_plot_window_.draw(data_point);
-
                     
                     }
                 }
-
-
-
-
-
-
 
                 signal_plot_window_.display();
 
@@ -247,37 +218,14 @@ int main(int argc, char** argv) {
                 window.draw(text);*/
                 window.display();
 
-
-                table_visualizer.restart();
-            
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Return)) {
+                    table_visualizer.restart();
+                }
             }
-
-        
-
-
-
-
-
-
-        }//end of second while --> end of game
-
-
-
-
+        }
 
         locator.shut_down();
         recording_thread.join();
  
-
-
-
-        
-
-
-
-
-
-
-    
     return 0;
 }
