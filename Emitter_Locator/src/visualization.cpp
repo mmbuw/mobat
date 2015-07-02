@@ -5,6 +5,8 @@
 
 #include <SFML/Graphics.hpp>
 
+
+
 #include <iostream>
 #include <thread>
 #include <X11/Xlib.h>
@@ -201,21 +203,31 @@ int main(int argc, char** argv) {
 
             }else{
                 winner = table_visualizer.game_over().second;
-                std::cout<< "Winner is: " << winner <<"\n";
+                //std::cout<< "Winner is: " << winner <<"\n";
+                //std::cout<<max.x << "  "<< max.y <<"\n";
 
-
-                window.clear();
-                /* sf::Text text;
+                sf::Color color = sf::Color(255, 192, 203);
+                //window.clear();
+                sf::Text text;
+                sf::Text play_again;
                 sf::Font font;
-                font.loadFromFile("DejaVuSans.ttf");
+                font.loadFromFile("../fonds/OpenSans-Light.ttf");
                 text.setFont(font);
-                text.setString(winner + "wins!\n If you want to play again enter again. Otherwise enter something else!");
+                text.setString(winner + " wins!\n");
                 text.setCharacterSize(24);
-                text.setColor(sf::Color::Red);          
-                text.setStyle(sf::Text::Bold | sf::Text::Underlined);
+                text.setColor(color);          
+                
+                text.setPosition(windowResolution.x/2.5 , windowResolution.y/2.0 - 40);
 
+                play_again.setFont(font);
+                play_again.setString("If you want to play again press return!\n");
+                play_again.setCharacterSize(24);
+                play_again.setColor(color);          
+                
+                play_again.setPosition(windowResolution.x/5.0, windowResolution.y/2.0 + 20);
 
-                window.draw(text);*/
+                window.draw(text);
+                window.draw(play_again);
                 window.display();
 
                 if(sf::Keyboard::isKeyPressed(sf::Keyboard::Return)) {

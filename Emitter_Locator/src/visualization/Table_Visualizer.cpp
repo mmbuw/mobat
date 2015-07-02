@@ -311,9 +311,9 @@ std::pair<bool, std::string> Table_Visualizer::game_over(){
 	}else{
 
 		if(tmp > 3){
-			return {true, "left"};
+			return {true, "Blue"};
 		}else{
-			return {true, "right"};
+			return {true, "Red"};//"Right", "lower"
 		}
 	}	
 	
