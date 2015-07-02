@@ -34,9 +34,8 @@ Draw(sf::RenderWindow& canvas, std::vector<Microphone_Object> const& microphones
 
 void Table_Object::
 Recalculate_Geometry() {
-
-	table_rectangle_shape_.setSize(sf::Vector2f{pixel_table_size_.x, pixel_table_size_.y});
-	table_rectangle_shape_.setPosition(pixel_table_offset_.x, pixel_table_offset_.y);
+	table_rectangle_shape_.setSize(to_projection_size(physical_table_size_));
+	table_rectangle_shape_.setPosition(to_projection_space(glm::vec2{0.0f}));
 
 }
 

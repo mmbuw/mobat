@@ -24,6 +24,7 @@ class Drawable_Object {
 
 		static sf::Vector2f to_pixel_space(glm::vec2 const& pos, float radius = 0.0f);
 		static sf::Vector2f to_projection_space(glm::vec2 pos);
+		static sf::Vector2f to_projection_size(glm::vec2 const& size);
 
 	// protected:
 

@@ -33,7 +33,7 @@ Table_Visualizer(std::vector<glm::vec2> const& microphone_positions,
     Set_Microphone_Fill_Color( in_microphone_fill_color );
 
     projection_shape_.setPosition(to_projection_space(physical_projection_offset_));
-    projection_shape_.setSize(sf::Vector2f{projection_size_.x * pixel_per_projection_, projection_size_.y * -pixel_per_projection_});
+    projection_shape_.setSize(to_projection_size(projection_size_));
     projection_shape_.setFillColor(sf::Color::Yellow);
 
     table_.Recalculate_Geometry();

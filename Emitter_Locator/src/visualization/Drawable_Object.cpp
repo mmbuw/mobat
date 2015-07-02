@@ -75,10 +75,13 @@ sf::Vector2f Drawable_Object::to_projection_space(glm::vec2 pos) {
     pos *= pixel_per_projection_;
     pos += pixel_projection_offset_;
     pos.y = resolution_.y - pos.y;
-    // pos.x = pixel_projection_offset_.x + pos.x * pixel_per_projection_;
-    // pos.y = resolution_.y - pixel_projection_offset_.y - pos.y * pixel_per_projection_;
     return to_sf(pos);
 } 
+
+sf::Vector2f Drawable_Object::to_projection_size(glm::vec2 const& size) {
+    return sf::Vector2f{size.x * pixel_per_projection_, size.y * -pixel_per_projection_};
+}
+
 
 sf::Vector2f to_sf(glm::vec2 const& vec) {
     return sf::Vector2f{vec.x, vec.y};
