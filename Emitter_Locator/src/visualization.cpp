@@ -204,7 +204,21 @@ int main(int argc, char** argv) {
                 //std::cout<< "Winner is: " << winner <<"\n";
                 //std::cout<<max.x << "  "<< max.y <<"\n";
 
-                sf::Color color = sf::Color(255, 192, 203);
+
+                sf::Texture texture;
+                if(winner == "red"){
+                    texture.loadFromFile("../pictures/red_wins.png"); 
+                }else{
+                    texture.loadFromFile("../pictures/blue_wins.png"); 
+                }
+                sf::Texture* texture2 = new sf::Texture(texture);//otherwise it gives a warning and therefore an error (could be uninitialized)
+
+                sf::RectangleShape rect;
+                rect.setSize(sf::Vector2f(600, 400));
+                rect.setPosition(sf::Vector2f(windowResolution.x/2 - 300, windowResolution.y/2 - 200));
+                rect.setTexture(texture2, false);
+
+                /*sf::Color color = sf::Color(255, 192, 203);
                 //window.clear();
                 sf::Text text;
                 sf::Text play_again;
@@ -223,9 +237,13 @@ int main(int argc, char** argv) {
                 play_again.setColor(color);          
                 
                 play_again.setPosition(windowResolution.x/5.0, windowResolution.y/2.0 + 20);
+                */
 
-                window.draw(text);
-                window.draw(play_again);
+
+
+                window.draw(rect);
+                /*window.draw(text);
+                window.draw(play_again);*/
                 window.display();
 
                 if(sf::Keyboard::isKeyPressed(sf::Keyboard::Return)) {
