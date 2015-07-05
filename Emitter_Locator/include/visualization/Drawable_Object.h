@@ -19,7 +19,9 @@ class Drawable_Object {
 		static void set_resolution(glm::vec2 const& res);
 
 		static sf::Vector2f to_projection_space(glm::vec2 pos, float radius = 0.0f);
-		static sf::Vector2f to_projection_size(glm::vec2 const& size);
+		static sf::Vector2f to_projection_size(glm::vec2 size);
+		static glm::vec2 pixel_projection_offset();
+		static glm::vec2 pixel_projection_size();
 
 	// protected:
 

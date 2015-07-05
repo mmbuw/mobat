@@ -1,5 +1,5 @@
 #include "Table_Visualizer.h"
-
+#include "glm/gtx/string_cast.hpp"
 #include <iostream>
 
 namespace TTT {
@@ -42,8 +42,9 @@ Table_Visualizer(std::vector<glm::vec2> const& microphone_positions,
         mic_obj.Recalculate_Geometry();
     }
 
-    ball_ = Ball(sf::Vector2f(ball_pos_.x, ball_pos_.y), ball_size);
-    ball_.Set_Fill_Color(sf::Color::Blue);
+    // ball_ = Ball(sf::Vector2f(ball_pos_.x, ball_pos_.y), ball_size);
+    ball_.setRadius(ball_size);
+    ball_.setFillColor(sf::Color::Blue);
     // initialize variables 
     points_ = Score{{pixel_projection_offset_.x + pixel_projection_size_.x / 7, pixel_projection_offset_.y + pixel_projection_size_ .y * 0.5 - 10},
     				{pixel_projection_offset_.x + pixel_projection_size_.x * 6 / 7, pixel_projection_offset_.y + pixel_projection_size_.y * 0.5 + 10}};
@@ -72,8 +73,8 @@ Draw(sf::RenderWindow& canvas) const {
     }
 
 
-    ball_.Draw(canvas);
-
+    // ball_.Draw(canvas);
+    canvas.draw(ball_);
 }
 
 
@@ -97,15 +98,14 @@ Recalculate_Geometry() {
 
     sf::CircleShape left  = recognized_tokens_[16000].get_Circle(); //NO HARDCODED FREQUENCIES!!!!!!!!!!!!
     sf::CircleShape right = recognized_tokens_[18000].get_Circle();
-    sf::CircleShape t_ball = ball_.get_Circle();
+    // sf::CircleShape t_ball = ball_.get_Circle();
 
     for(auto const& i : recognized_tokens_){
 
-        auto token = i.second.get_Circle();
-        auto intersection = circ_circ_intersect(t_ball, token);
+        auto intersection = ball_intersect(i.second);
         if(intersection.first){
             
-            move_ball_out_of_token(token);
+            move_ball_out_of_token(i.second);
             if(!move_ball_) {
                 move_ball_ = true;
                 ball_dir_ = intersection.second;
@@ -119,10 +119,11 @@ Recalculate_Geometry() {
     }
 
 
-    float b_rad = ball_.getRadius();
+    float b_rad = ball_.getRadius() / pixel_per_projection_;
 
-    glm::vec2 field_min{pixel_projection_offset_ + glm::vec2{b_rad}};
-    glm::vec2 field_max{pixel_projection_offset_ + pixel_projection_size_  - glm::vec2{b_rad}};
+    glm::vec2 field_min{physical_projection_offset_ + glm::vec2{b_rad}};
+    glm::vec2 field_max{physical_projection_offset_ + physical_projection_size_  - glm::vec2{b_rad}};
+    std::cout << to_string(field_min) << " and " << to_string(field_max) << " ball " << to_string(ball_pos_) << std::endl;
     // border reflection
     if(ball_pos_.x <= field_min.x || ball_pos_.x >= field_max.x){
 
@@ -147,7 +148,7 @@ Recalculate_Geometry() {
         std::cout<<"Left: "<<left_goals_<<"  Right:  "<<right_goals_<<"\n";
 
         ball_dir_ = glm::vec2{0};
-        ball_pos_ = pixel_projection_offset_ + pixel_projection_size_ * 0.5f;
+        ball_pos_ = physical_projection_offset_ + physical_projection_size_ * 0.5f;
         move_ball_ = false;
         ball_reset_ = true;
     }
@@ -162,7 +163,7 @@ Recalculate_Geometry() {
             ball_pos_ += ball_dir_ * float(elapsed_milliseconds_since_last_frame_ / 16.0f) * ball_speed_;
         }
 
-        ball_.setPosition(ball_pos_.x, ball_pos_.y);
+        ball_.setPosition(to_projection_space(ball_pos_, ball_.getRadius()));
     } 
 
 // }
@@ -275,30 +276,28 @@ Get_Elapsed_Milliseconds(){
     return elapsed_milliseconds_since_last_frame_;//.asMilliseconds();
 }
 
-std::pair<bool, glm::vec2> Table_Visualizer::circ_circ_intersect(sf::CircleShape const& ball, sf::CircleShape const& paddle) const{
-    glm::vec2 mid_ball{ball.getPosition().x + ball.getRadius(), ball.getPosition().y + ball.getRadius()};
-    glm::vec2 mid_paddle{paddle.getPosition().x + paddle.getRadius(), paddle.getPosition().y + paddle.getRadius()};
+std::pair<bool, glm::vec2> Table_Visualizer::ball_intersect(Recognized_Token_Object const& paddle) const{
+    glm::vec2 mid_paddle{paddle.get_physical_position()};
 
-    float dist = glm::length(mid_ball - mid_paddle);
+    float dist = glm::length(ball_pos_ - mid_paddle);
 
-    bool intersects = dist < ball.getRadius() + paddle.getRadius();
+    bool intersects = dist < (ball_.getRadius() + paddle.get_Circle().getRadius()) / pixel_per_projection_;
 
     glm::vec2 normal{-1.0f, 0.0f};
     if(intersects) {    
-        normal = glm::normalize(mid_ball - mid_paddle);
+        normal = glm::normalize(ball_pos_ - mid_paddle);
     }
 
     return std::pair<bool, glm::vec2>{intersects, normal}; 
 }
 
-void Table_Visualizer::move_ball_out_of_token(sf::CircleShape const& paddle){
+void Table_Visualizer::move_ball_out_of_token(Recognized_Token_Object const& paddle){
       
-    glm::vec2 mid_ball{ball_.getPosition().x + ball_.getRadius(), ball_.getPosition().y + ball_.getRadius()};
-    glm::vec2 mid_paddle{paddle.getPosition().x + paddle.getRadius(), paddle.getPosition().y + paddle.getRadius()};
+    glm::vec2 mid_paddle{paddle.get_physical_position()};
     
-    glm::vec2 norm = circ_circ_intersect(ball_.get_Circle(), paddle).second;
+    glm::vec2 norm = ball_intersect(paddle).second;
 
-    glm::vec2 new_ball_pos{mid_paddle + norm * float(ball_.getRadius() + paddle.getRadius())};
+    glm::vec2 new_ball_pos{mid_paddle + norm * float(ball_.getRadius() + paddle.get_Circle().getRadius()) / pixel_per_projection_};
 
     ball_pos_ = new_ball_pos;
 }
@@ -324,11 +323,11 @@ std::pair<bool, std::string> Table_Visualizer::game_over(){
 void Table_Visualizer::restart(){
 
 
-	ball_pos_ = glm::vec2{pixel_projection_offset_ + pixel_projection_size_ * 0.5f};
+	ball_pos_ = glm::vec2{physical_projection_offset_ + physical_projection_size_ * 0.5f};
     ball_dir_ = glm::vec2{0.0f, 1.0f};
-    ball_speed_min_ = 2.0f;
+    ball_speed_min_ = 0.001f;
     ball_speed_ = ball_speed_min_;
-    ball_speed_max_ = 5.0f;
+    ball_speed_max_ = 0.002f;
     ball_acceleration_ = 1.2f;
     move_ball_ = false;
     ball_reset_ = true;

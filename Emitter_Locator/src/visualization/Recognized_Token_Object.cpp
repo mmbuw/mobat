@@ -85,5 +85,10 @@ sf::CircleShape Recognized_Token_Object::get_Circle() const{
 	return token_circle_shape_;
 }
 
+glm::vec2 const& Recognized_Token_Object::get_physical_position() const {
+	return physical_position_;
+}
+
+
 
 }; //namespace TTT
