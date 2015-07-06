@@ -52,14 +52,14 @@ glm::vec2 TDOAtor::
 locate() const {
 
 
-    double min_x = min_.x;
-    double min_y = min_.y;
-  //  double min_dif = 10000000;
+    double located_x = min_.x;
+    double located_y = min_.y;
+    double min_dif = std::numeric_limits<double>::max();
 
     glm::vec2 test;
 
-    double x_step_length = (max_.x - min_.x) / 200.0;
-    double y_step_length = (max_.y - min_.y) / 400.0;
+    double x_step_length = (max_.x - min_.x) / 100.0;
+    double y_step_length = (max_.y - min_.y) / 200.0;
 
     std::map<unsigned, std::map<unsigned, double> > xy_counter_to_error_mapping;
     unsigned x_counter = 0;
@@ -84,17 +84,17 @@ locate() const {
             }
             
             xy_counter_to_error_mapping[x_counter][y_counter] = temp_dif;
-            /*
+            
               if(temp_dif < min_dif) {
                   min_dif = temp_dif;
-                  min_x = x;
-                  min_y = y;
+                  located_x = x;
+                  located_y = y;
               }
-            */
-            temp_dif = 0;
+            
         }
     }
 
+/*
     unsigned largest_x = x_counter - 1;
     unsigned largest_y = y_counter - 1;
 
@@ -103,7 +103,7 @@ locate() const {
     unsigned least_error_y_count = 0;
     x_counter = 0;
     y_counter = 0;
-
+*/
 
     /*
          +  : sample points
@@ -122,7 +122,7 @@ locate() const {
         compute the error between 4 corners in order to determine a 
         point in-between in order to avoid jumping within the cell
     */
-
+/*
     for(unsigned x_it = 0; x_it < largest_x; ++x_it) {
 
         for(unsigned y_it = 0; y_it < largest_y; ++y_it) {
@@ -130,7 +130,7 @@ locate() const {
             double tile_error =  xy_counter_to_error_mapping[x_it][y_it] 
                                + xy_counter_to_error_mapping[x_it][y_it+1]
                                + xy_counter_to_error_mapping[x_it+1][y_it]
-                               + xy_counter_to_error_mapping[x_it+1][y_it+1];//*(y_iterator+1) + ( (*(xy_iterator+1)) )
+                               + xy_counter_to_error_mapping[x_it+1][y_it+1];
 
             if (tile_error < least_error) {
                 least_error = tile_error;
@@ -147,7 +147,9 @@ locate() const {
     //std::cout << "Returning: "  << min_x + least_error_x_count * x_step_length << ", " << min_y + least_error_y_count * y_step_length << "\n";
     return {min_x + least_error_x_count * x_step_length, 
             min_y + least_error_y_count * y_step_length}; 
+*/
 
-    //return {min_x, min_y};
+    std::cout << "Located position: " << located_x << ",  " << located_y << "\n";
+    return {located_x, located_y};
 };
 
