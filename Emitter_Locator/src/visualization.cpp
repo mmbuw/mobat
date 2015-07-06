@@ -206,7 +206,7 @@ int main(int argc, char** argv) {
 
 
                 sf::Texture texture;
-                if(winner == "red"){
+                if(winner == "Red"){
                     texture.loadFromFile("../pictures/red_wins.png"); 
                 }else{
                     texture.loadFromFile("../pictures/blue_wins.png"); 
