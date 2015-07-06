@@ -149,7 +149,6 @@ locate() const {
             min_y + least_error_y_count * y_step_length}; 
 */
 
-    std::cout << "Located position: " << located_x << ",  " << located_y << "\n";
     return {located_x, located_y};
 };
 
