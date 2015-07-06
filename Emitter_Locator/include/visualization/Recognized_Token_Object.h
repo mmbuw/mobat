@@ -47,6 +47,7 @@ class Recognized_Token_Object : Drawable_Object {
 		unsigned Get_Id() const;
 
 		sf::CircleShape get_Circle() const;
+		glm::vec2 const& get_physical_position() const;
 
 }; //end class Recognized_Token_Object
 

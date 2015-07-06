@@ -36,7 +36,8 @@ class Table_Visualizer : Drawable_Object {
 
 		//needed for pesudopong
 		glm::vec2 ball_pos_;
-		Ball ball_;	
+		// Ball ball_;	
+		sf::CircleShape ball_;
 		glm::vec2 ball_dir_;
 
 		float ball_speed_min_;
@@ -91,9 +92,9 @@ class Table_Visualizer : Drawable_Object {
 
 		unsigned Get_Elapsed_Milliseconds();
 
-		std::pair<bool, glm::vec2> circ_circ_intersect(sf::CircleShape const& ball, sf::CircleShape const& paddle) const;
+		std::pair<bool, glm::vec2> ball_intersect(Recognized_Token_Object const& paddle) const;
 
-		void move_ball_out_of_token(sf::CircleShape const& t);
+		void move_ball_out_of_token(Recognized_Token_Object const& paddle);
 
 		std::pair<bool, std::string> game_over();
 
