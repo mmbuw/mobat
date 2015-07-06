@@ -6,18 +6,32 @@
 namespace TTT {
 
 Score::Score(glm::vec2 const& min, glm::vec2 const& max){
-	sf::Vector2f size{max.y - min.y, max.y - min.y};
-	float x_size = (max.x - min.x) / ( 2 * points_.size() - 1); 
-	for(unsigned i = 0; i < points_.size(); ++i){
-		if(i < 3){
-			points_[i].setFillColor(sf::Color::Blue);
-		}else{
-			points_[i].setFillColor(sf::Color::Red);
-		}
 
-		// points_[i].setPosition(x_max /2, (i)*90);  // if table is horizontal
-		points_[i].setPosition(min.x + x_size * i * 2, min.y);	//if table is vertical
-		points_[i].setSize(size);
+	sf::Vector2f size{max.y - min.y, max.y - min.y};
+	float distance = (max.x - min.x) / ( 2 * points_.size() - 1); 
+	if(up_.x == 0){//spiefeld vertikal
+		for(unsigned i = 0; i < points_.size(); ++i){
+			if(i < 3){
+				points_[i].setFillColor(sf::Color::Blue);
+			}else{
+				points_[i].setFillColor(sf::Color::Red);
+			}
+
+			
+			points_[i].setPosition(min.x + distance * i * 2, min.y - size.x/2);	//if table is vertical
+			points_[i].setSize(size);
+		}
+	}else{	//spielfeld horizontal
+		for(unsigned i = 0; i < points_.size(); ++i){
+			if(i < 3){
+				points_[i].setFillColor(sf::Color::Blue);
+			}else{
+				points_[i].setFillColor(sf::Color::Red);
+			}
+
+			points_[i].setPosition((max.y + min.y) /2 - size.x/2, min.x + i*distance * 2);  // if table is horizontal
+			points_[i].setSize(size);
+		}
 	}
 }
 
