@@ -153,13 +153,16 @@ analyze(buffer_collection const& collector){
                 bool found_low_value = false;
 
 
-                bool sum_increasing = false;
+                //bool sum_increasing = false;
 
                 double current_peak_to_push = 0.0;
                 unsigned current_sample_to_push = 0;
+
+               	peak_samples[channel_iterator].clear();
+
                 for(auto const& sig : fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator]) {
 
-                	peak_samples[channel_iterator].clear();
+
 
                 		//std::cout << "signal: "<< sig << "   peak: " << peak << "\n";
 
@@ -182,17 +185,16 @@ analyze(buffer_collection const& collector){
 
 
 
-                      if(sig > 0.99 * normalized_peak ) {
+                      if(sig > 0.90 * normalized_peak ) {
                       	//std::cout << "Touching sample with amplitude: " << sig << "\n";
-                      	if(false == sum_increasing)
-                      		sum_increasing = true;
+
                       		if(current_peak_to_push < sig ) {
                       			current_peak_to_push = sig;
                       			current_sample_to_push = sample_num;
                       		} else {
 	                      		//sum_increasing = false;
 	                      	}
-
+	                    
          
 
                       } else if(sig < 0.8 * normalized_peak) {
@@ -203,12 +205,15 @@ analyze(buffer_collection const& collector){
 
 	                      		current_peak_to_push = 0.0;
 	                      		current_sample_to_push = 0;
-	                      		sum_increasing = false;
+	              //        		sum_increasing = false;
 
                       }
 
 
                     if ( true == found_low_value ) {
+
+
+
 /*
                    		 unsigned num_signal_samples = 0;
 
@@ -310,6 +315,9 @@ analyze(buffer_collection const& collector){
 
             }
 
+
+
+/*
                 unsigned sample_pos_array[4];
 
                	unsigned averaged_sample_pos = 0;
@@ -345,6 +353,18 @@ analyze(buffer_collection const& collector){
                         signal_detected_at_sample_per_frequency[frequency_entry.first][channel_it] = apex_finder;
                         vis_sample_pos_mapping[frequency_entry.first][channel_it] = apex_finder;		
             	}
+
+*/
+        //use peaks for calculation
+        {
+        	for(int i = 0; i < 4; ++i) {
+	        	if( peak_samples[i].size() > 0 ) {
+	        		std::cout << peak_samples[i].size() << "\n";
+                    signal_detected_at_sample_per_frequency[frequency_entry.first][i] =  peak_samples[i][0];
+	        		vis_sample_pos_mapping[frequency_entry.first][i] = peak_samples[i][0];		
+	        	}
+        	}
+        }
 
         }
 
