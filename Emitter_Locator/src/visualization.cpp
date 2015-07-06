@@ -14,7 +14,7 @@
 #define NUM_RECORDED_CHANNELS 4
 
 sf::Vector2f smartphonePosition(1.0f,0.5f);
-glm::vec2 windowResolution(800, 800);
+glm::vec2 windowResolution(800, 900);
 
 int main(int argc, char** argv) {
 // calculation
@@ -40,7 +40,8 @@ int main(int argc, char** argv) {
 
     glm::vec2 table_dims{1.0, 2.0};
     // initialize measures for drawing & simulation 
-    TTT::Drawable_Object::physical_table_size_ = table_dims;
+    TTT::Drawable_Object::up_ = glm::vec2(0,1);
+    TTT::Drawable_Object::right_ = glm::vec2(1,0);
     TTT::Drawable_Object::set_resolution(windowResolution);
     TTT::Drawable_Object::set_projection(glm::vec2{0.25, 0.5}, glm::vec2{0.5, 1.0});
 

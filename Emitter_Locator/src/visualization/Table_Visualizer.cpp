@@ -32,7 +32,7 @@ Table_Visualizer(std::vector<glm::vec2> const& microphone_positions,
     Set_Table_Fill_Color( in_table_fill_color );
     Set_Microphone_Fill_Color( in_microphone_fill_color );
 
-    projection_shape_.setPosition(to_projection_space(physical_projection_offset_));
+    projection_shape_.setPosition(to_sf(pixel_projection_offset()));
     projection_shape_.setSize(to_projection_size(physical_projection_size_));
     projection_shape_.setFillColor(sf::Color::Yellow);
 
@@ -59,8 +59,8 @@ void Table_Visualizer::
 Draw(sf::RenderWindow& canvas) const {
 
 	
-	table_.Draw(canvas);
     canvas.draw(projection_shape_);
+	table_.Draw(canvas);
 	points_.Draw(canvas);
 
 
@@ -123,7 +123,7 @@ Recalculate_Geometry() {
 
     glm::vec2 field_min{physical_projection_offset_ + glm::vec2{b_rad}};
     glm::vec2 field_max{physical_projection_offset_ + physical_projection_size_  - glm::vec2{b_rad}};
-    std::cout << to_string(field_min) << " and " << to_string(field_max) << " ball " << to_string(ball_pos_) << std::endl;
+
     // border reflection
     if(ball_pos_.x <= field_min.x || ball_pos_.x >= field_max.x){
 

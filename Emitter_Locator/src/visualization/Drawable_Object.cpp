@@ -4,8 +4,8 @@ namespace TTT {
 
 glm::vec2 Drawable_Object::physical_table_size_ = glm::vec2(0.0f, 0.0f);
 glm::vec2 Drawable_Object::resolution_ = glm::vec2(0,0);
-glm::vec2 Drawable_Object::up_ = glm::vec2(0,1);
-glm::vec2 Drawable_Object::right_ = glm::vec2(1,0);
+glm::vec2 Drawable_Object::up_ = glm::vec2(0,0);
+glm::vec2 Drawable_Object::right_ = glm::vec2(0,0);
 glm::vec2 Drawable_Object::pixel_projection_offset_ = glm::vec2(0,0);
 glm::vec2 Drawable_Object::physical_projection_offset_ = glm::vec2(0,0);
 glm::vec2 Drawable_Object::physical_projection_size_ = glm::vec2(0,0);
@@ -51,7 +51,7 @@ sf::Vector2f Drawable_Object::to_projection_space(glm::vec2 pos, float radius) {
 
 sf::Vector2f Drawable_Object::to_projection_size(glm::vec2 size) {
     size = right_ * size.x + up_ * size.y;
-    return sf::Vector2f{size.x * pixel_per_projection_, size.y * -pixel_per_projection_};
+    return sf::Vector2f{size.x * pixel_per_projection_, size.y * pixel_per_projection_};
 }
 
 glm::vec2 Drawable_Object::pixel_projection_offset() {
