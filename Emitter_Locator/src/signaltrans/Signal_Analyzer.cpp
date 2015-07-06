@@ -194,13 +194,6 @@ analyze(buffer_collection const& collector){
 
         //use peaks for calculation
         {
-        	for(int i = 0; i < 4; ++i) {
-	        	if( peak_samples[i].size() > 0 ) {
-	        		//std::cout << peak_samples[i].size() << "\n";
-                    signal_detected_at_sample_per_frequency[frequency_entry.first][i] =  peak_samples[i][0];
-	        		vis_sample_pos_mapping[frequency_entry.first][i] = peak_samples[i][0];		
-	        	}
-        	}
 
         	if(    peak_samples[0].size() > 0 
         		&& peak_samples[1].size() > 0
@@ -210,12 +203,16 @@ analyze(buffer_collection const& collector){
 
         		//iterate samples of first signal 
 
-			    unsigned int const & (*min) (unsigned int const &, unsigned int const &) = std::min<unsigned>;
-			    unsigned int const & (*max) (unsigned int const &, unsigned int const &) = std::max<unsigned>;
+
+    			unsigned int const & (*min) (unsigned int const &, unsigned int const &) = std::min<unsigned>;
+    			unsigned int const & (*max) (unsigned int const &, unsigned int const &) = std::max<unsigned>;
+
+
+    			bool break_all_loops = false;
 
         		std::array<unsigned, 4> signal_one_to_four_pos;
         	  	for( unsigned channel_one_iterator = 0; channel_one_iterator < peak_samples[0].size(); ++channel_one_iterator) {
-        			signal_one_to_four_pos[0] /*= signal_detected_at_sample_per_frequency[frequency_entry.first][i] */= peak_samples[0][channel_one_iterator];
+        			signal_one_to_four_pos[0] = peak_samples[0][channel_one_iterator];
 
         			for(unsigned channel_two_iterator = 0; channel_two_iterator < peak_samples[1].size(); ++channel_two_iterator) {
         				signal_one_to_four_pos[1]  = peak_samples[1][channel_two_iterator];
@@ -233,12 +230,42 @@ analyze(buffer_collection const& collector){
         															  signal_one_to_four_pos.end(),
         															  0,
         															  max);
-		        				
-		        			}       		       				
-	        			}       				
-        			}
 
+
+         						if(max_sample - min_sample < 500) {
+						        	for(int i = 0; i < 4; ++i) {
+							        	if( peak_samples[i].size() > 0 ) {
+							        		//std::cout << peak_samples[i].size() << "\n";
+						                    signal_detected_at_sample_per_frequency[frequency_entry.first][i] = signal_one_to_four_pos[i];
+							        		vis_sample_pos_mapping[frequency_entry.first][i] =  signal_one_to_four_pos[i];
+
+							        		break_all_loops = true;
+
+			
+							        	}
+						        	}
+         						}
+
+			        			if(break_all_loops) {
+			        				break;
+			        			}       	
+		        				
+		        			}
+
+		        			if(break_all_loops) {
+		        				break;
+		        			}       		       				
+	        			}       	
+	        					if(break_all_loops) {
+		        					break;
+		        				}     	
+        			}
+	        						if(break_all_loops) {
+		        						break;
+		        					}     	
         	  	}
+
+        	  	
         	}
         }
 
@@ -246,10 +273,11 @@ analyze(buffer_collection const& collector){
 
     }
 
+
+
     unsigned int const & (*min) (unsigned int const &, unsigned int const &) = std::min<unsigned>;
     unsigned int const & (*max) (unsigned int const &, unsigned int const &) = std::max<unsigned>;
-
-
+    
     for(auto const& frequency_entry : frequency_toas_mapping) {
 
         unsigned sample_min = std::accumulate(signal_detected_at_sample_per_frequency[frequency_entry.first].begin(),
@@ -265,7 +293,7 @@ analyze(buffer_collection const& collector){
         //     std::cout << "Doing something\n";
         //     std::cout << "sample min: " << sample_min << "  sample_max: " << sample_max << "\n";  
         // }
-
+    
         if(sample_max-sample_min > 0 && sample_max - sample_min < 500 && sample_max < 999999) {
 
             for(unsigned int signal_idx = 0; signal_idx < 4; ++signal_idx) {
@@ -282,6 +310,8 @@ analyze(buffer_collection const& collector){
             is_frequency_toa_mapping_valid[frequency_entry.first] = false;
         }
     }
+
+
 }
 
 //frequencies we deregister are not taken into account in the analyzation step anymore
