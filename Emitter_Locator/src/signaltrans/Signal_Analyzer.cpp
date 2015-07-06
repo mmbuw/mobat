@@ -46,6 +46,8 @@ analyze(buffer_collection const& collector){
 
     double signal_average[4];
 
+    std::array<std::vector<unsigned> ,4> peak_samples;
+
     for(auto const& frequency_entry : frequency_toas_mapping) {
 
         if(frequency_entry.first >= 50000) {
@@ -130,12 +132,12 @@ analyze(buffer_collection const& collector){
                 	} else {
 
 
-                		double power = 20;
+                		double power = 10;
                 		if(peak-min > 5.0) {
                 			sig =  100.0 * (pow(sig,power) - pow(min,power)) / (pow(peak,power) - pow(min,power));
 
-                			if( sig < 5.0)
-                				sig = 0; 
+                			//if( sig < 5.0)
+                			//	sig = 0; 
                 		}
                 		else {
                 			sig = 0.0;
@@ -150,7 +152,14 @@ analyze(buffer_collection const& collector){
 
                 bool found_low_value = false;
 
+
+                bool sum_increasing = false;
+
+                double current_peak_to_push = 0.0;
+                unsigned current_sample_to_push = 0;
                 for(auto const& sig : fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator]) {
+
+                	peak_samples[channel_iterator].clear();
 
                 		//std::cout << "signal: "<< sig << "   peak: " << peak << "\n";
 
@@ -164,12 +173,43 @@ analyze(buffer_collection const& collector){
 
 
                     //unsigned num_signal_samples = 0;
-                    if( sample_num > 300 && sig > 0 &&  sig <= 0.99*normalized_peak ) {
-                    	found_low_value = true;
-                    }
+
+
+/*                    if( sample_num > 300 && sig > 0 &&  sig <= 0.99*normalized_peak ) {
+                       	found_low_value = true;
+                      }
+*/
+
+
+
+                      if(sig > 0.99 * normalized_peak ) {
+                      	//std::cout << "Touching sample with amplitude: " << sig << "\n";
+                      	if(false == sum_increasing)
+                      		sum_increasing = true;
+                      		if(current_peak_to_push < sig ) {
+                      			current_peak_to_push = sig;
+                      			current_sample_to_push = sample_num;
+                      		} else {
+	                      		//sum_increasing = false;
+	                      	}
+
+         
+
+                      } else if(sig < 0.8 * normalized_peak) {
+                      		if(current_sample_to_push != 0) {
+ 	                      		peak_samples[channel_iterator].push_back(current_sample_to_push);
+	                      		std::cout << "Channel " << channel_iterator << " pushed peak at position: " << current_sample_to_push << " with value " << current_peak_to_push << "\n";
+	                      	}
+
+	                      		current_peak_to_push = 0.0;
+	                      		current_sample_to_push = 0;
+	                      		sum_increasing = false;
+
+                      }
+
 
                     if ( true == found_low_value ) {
-
+/*
                    		 unsigned num_signal_samples = 0;
 
                    		 if(sig >= 0.99*normalized_peak) {
@@ -178,15 +218,7 @@ analyze(buffer_collection const& collector){
   		                 		 
 
 	                    	unsigned int apex_finder = sample_num;// + 200 ;
-	                    	/*
-	                    	for(apex_finder = sample_num ; apex_finder > 0; --apex_finder ) {
-	                    		if( fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator][apex_finder] < 0.2*normalized_peak )
-	                    			break;
-	                    	}
-							*/
-	                    	//apex_finder = sample_num;
 
-	                    	//if(apex_finder > 700) {
 	                        	signal_detected_at_sample_per_frequency[frequency_entry.first][channel_iterator] = apex_finder; //+ 1000;
 	                        	vis_sample_pos_mapping[frequency_entry.first][channel_iterator] = apex_finder;// + 1000;
 	          	
@@ -196,7 +228,7 @@ analyze(buffer_collection const& collector){
                        
                    		 	++num_signal_samples;
                    		 }
-
+*/
                         /*
                         if(num_pause_samples > starting_sample_threshold) {
                             allow_signal_detection = true;
@@ -306,7 +338,7 @@ analyze(buffer_collection const& collector){
                 for(unsigned channel_it = 0; channel_it < 4; ++channel_it) {
                    	unsigned apex_finder = closest_sample_pos;
                     for(apex_finder = closest_sample_pos; apex_finder > 0; --apex_finder ) {
-                    	if( fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_it][apex_finder] < 10.0 )
+                    	if( fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_it][apex_finder] < 5.0 )
                     		break;
                     	}
 						
