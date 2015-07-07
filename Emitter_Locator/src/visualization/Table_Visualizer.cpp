@@ -32,7 +32,7 @@ Table_Visualizer(std::vector<glm::vec2> const& microphone_positions,
     Set_Table_Fill_Color( in_table_fill_color );
     Set_Microphone_Fill_Color( in_microphone_fill_color );
 
-    projection_shape_.setPosition(to_sf(pixel_projection_offset()));
+    projection_shape_.setPosition(to_projection_space(physical_projection_offset_));
     projection_shape_.setSize(to_projection_size(physical_projection_size_));
     projection_shape_.setFillColor(sf::Color::Yellow);
 
@@ -58,9 +58,8 @@ Table_Visualizer::
 void Table_Visualizer::
 Draw(sf::RenderWindow& canvas) const {
 
-	
-    canvas.draw(projection_shape_);
 	table_.Draw(canvas);
+    canvas.draw(projection_shape_);
 	points_.Draw(canvas);
 
 

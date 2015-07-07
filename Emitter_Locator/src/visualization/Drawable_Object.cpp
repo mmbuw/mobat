@@ -44,13 +44,20 @@ sf::Vector2f Drawable_Object::to_projection_space(glm::vec2 pos, float radius) {
     pos -= glm::vec2{radius, radius};
     // add margin
     pos += pixel_projection_offset_;
-    pos.y = resolution_.y - pos.y;
+    if((up_ + right_).y > 0) {
+        pos.y = resolution_.y - pos.y;
+    }
     pos = right_ * pos.x + up_ * pos.y;
     return to_sf(pos);
 } 
 
 sf::Vector2f Drawable_Object::to_projection_size(glm::vec2 size) {
-    size = right_ * size.x + up_ * size.y;
+    if((up_ + right_).y < 0) {
+        size = right_ * size.x + up_ * size.y;
+    }
+    else {
+        size = right_ * size.x + up_ * -size.y;
+    }
     return sf::Vector2f{size.x * pixel_per_projection_, size.y * pixel_per_projection_};
 }
 
@@ -59,6 +66,10 @@ glm::vec2 Drawable_Object::pixel_projection_offset() {
 }
 glm::vec2 Drawable_Object::pixel_projection_size() {
     return right_ * pixel_projection_size_.x + up_ * pixel_projection_size_.y;
+}
+
+void Drawable_Object::set_phys_table_size(glm::vec2 const& size) {
+    physical_table_size_ = size;
 }
 
 sf::Vector2f to_sf(glm::vec2 const& vec) {
