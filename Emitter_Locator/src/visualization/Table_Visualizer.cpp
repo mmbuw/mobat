@@ -43,6 +43,7 @@ Table_Visualizer(std::vector<glm::vec2> const& microphone_positions,
     }
 
     // ball_ = Ball(sf::Vector2f(ball_pos_.x, ball_pos_.y), ball_size);
+    gamemode_ = true;
     ball_.setRadius(ball_size);
     ball_.setFillColor(sf::Color::Blue);
     // initialize variables 
@@ -60,7 +61,10 @@ Draw(sf::RenderWindow& canvas) const {
 
 	table_.Draw(canvas);
     canvas.draw(projection_shape_);
-	points_.Draw(canvas);
+    
+    if(gamemode_ == true){
+		points_.Draw(canvas);
+    }
 
 
     for(auto const& mic_obj : microphones_) {
@@ -73,7 +77,9 @@ Draw(sf::RenderWindow& canvas) const {
 
 
     // ball_.Draw(canvas);
-    canvas.draw(ball_);
+    if(gamemode_ == true){
+   		canvas.draw(ball_);
+   	}
 }
 
 
@@ -95,76 +101,77 @@ Recalculate_Geometry() {
 
     // if(recognized_tokens_.size() >= 2){
 
-    sf::CircleShape left  = recognized_tokens_[16000].get_Circle(); //NO HARDCODED FREQUENCIES!!!!!!!!!!!!
-    sf::CircleShape right = recognized_tokens_[18000].get_Circle();
+    //sf::CircleShape left  = recognized_tokens_[16000].get_Circle(); //NO HARDCODED FREQUENCIES!!!!!!!!!!!!
+    //sf::CircleShape right = recognized_tokens_[18000].get_Circle();
     // sf::CircleShape t_ball = ball_.get_Circle();
 
-    for(auto const& i : recognized_tokens_){
+	if(gamemode_ == true){
+	    for(auto const& i : recognized_tokens_){
 
-        auto intersection = ball_intersect(i.second);
-        if(intersection.first){
-            
-            move_ball_out_of_token(i.second);
-            if(!move_ball_) {
-                move_ball_ = true;
-                ball_dir_ = intersection.second;
-            }
-            else {
-                ball_dir_ = glm::reflect(ball_dir_, intersection.second);
-                ball_speed_ *= ball_acceleration_;
+	        auto intersection = ball_intersect(i.second);
+	        if(intersection.first){
+	            
+	            move_ball_out_of_token(i.second);
+	            if(!move_ball_) {
+	                move_ball_ = true;
+	                ball_dir_ = intersection.second;
+	            }
+	            else {
+	                ball_dir_ = glm::reflect(ball_dir_, intersection.second);
+	                ball_speed_ *= ball_acceleration_;
 
-            }                       
-        }   
-    }
+	            }                       
+	        }   
+	    }
 
 
-    float b_rad = ball_.getRadius() / pixel_per_projection_;
+	    float b_rad = ball_.getRadius() / pixel_per_projection_;
 
-    glm::vec2 field_min{physical_projection_offset_ + glm::vec2{b_rad}};
-    glm::vec2 field_max{physical_projection_offset_ + physical_projection_size_  - glm::vec2{b_rad}};
+	    glm::vec2 field_min{physical_projection_offset_ + glm::vec2{b_rad}};
+	    glm::vec2 field_max{physical_projection_offset_ + physical_projection_size_  - glm::vec2{b_rad}};
 
-    // border reflection
-    if(ball_pos_.x <= field_min.x || ball_pos_.x >= field_max.x){
+	    // border reflection
+	    if(ball_pos_.x <= field_min.x || ball_pos_.x >= field_max.x){
 
-        if(ball_pos_.x <= field_min.x){
-            ball_pos_.x = field_min.x;  
-            ball_dir_ = glm::reflect(ball_dir_, glm::vec2{1.0f ,0.0f});
-        }
-        else{
-            ball_pos_.x = field_max.x;
-            ball_dir_ = glm::reflect(ball_dir_, glm::vec2{-1.0f ,0.0f});
-        }
-    }
-    // goal detection
-    if(ball_pos_.y <= field_min.y - b_rad * 2.0f || ball_pos_.y >= field_max.y + b_rad * 2.0f){
-        if(ball_pos_.y <= field_min.y - b_rad * 2.0f){
-            ++left_goals_;
-        }
-        else{
-            ++right_goals_;
-        }
-        points_.update(right_goals_, left_goals_);
-        std::cout<<"Left: "<<left_goals_<<"  Right:  "<<right_goals_<<"\n";
+	        if(ball_pos_.x <= field_min.x){
+	            ball_pos_.x = field_min.x;  
+	            ball_dir_ = glm::reflect(ball_dir_, glm::vec2{1.0f ,0.0f});
+	        }
+	        else{
+	            ball_pos_.x = field_max.x;
+	            ball_dir_ = glm::reflect(ball_dir_, glm::vec2{-1.0f ,0.0f});
+	        }
+	    }
+	    // goal detection
+	    if(ball_pos_.y <= field_min.y - b_rad * 2.0f || ball_pos_.y >= field_max.y + b_rad * 2.0f){
+	        if(ball_pos_.y <= field_min.y - b_rad * 2.0f){
+	            ++left_goals_;
+	        }
+	        else{
+	            ++right_goals_;
+	        }
+	        points_.update(right_goals_, left_goals_);
+	        std::cout<<"Left: "<<left_goals_<<"  Right:  "<<right_goals_<<"\n";
 
-        ball_dir_ = glm::vec2{0};
-        ball_pos_ = physical_projection_offset_ + physical_projection_size_ * 0.5f;
-        move_ball_ = false;
-        ball_reset_ = true;
-    }
+	        ball_dir_ = glm::vec2{0};
+	        ball_pos_ = physical_projection_offset_ + physical_projection_size_ * 0.5f;
+	        move_ball_ = false;
+	        ball_reset_ = true;
+	    }
 
-    if(move_ball_ || ball_reset_) {
-        if(ball_reset_) {
-            ball_reset_ = false;
-            ball_speed_ = ball_speed_min_;
-        }
-        else {
-            ball_speed_ = glm::clamp(ball_speed_, ball_speed_min_, ball_speed_max_);
-            ball_pos_ += ball_dir_ * float(elapsed_milliseconds_since_last_frame_ / 16.0f) * ball_speed_;
-        }
+	    if(move_ball_ || ball_reset_) {
+	        if(ball_reset_) {
+	            ball_reset_ = false;
+	            ball_speed_ = ball_speed_min_;
+	        }
+	        else {
+	            ball_speed_ = glm::clamp(ball_speed_, ball_speed_min_, ball_speed_max_);
+	            ball_pos_ += ball_dir_ * float(elapsed_milliseconds_since_last_frame_ / 16.0f) * ball_speed_;
+	        }
 
-        ball_.setPosition(to_projection_space(ball_pos_, ball_.getRadius()));
-    } 
-
+	        ball_.setPosition(to_projection_space(ball_pos_, ball_.getRadius()));
+	    } 
+	}
 // }
 }
 
@@ -337,6 +344,19 @@ void Table_Visualizer::restart(){
     //get initial timestamp
     last_time_stamp_ = std::chrono::high_resolution_clock::now();
 
+}
+
+void Table_Visualizer::change_gm(){
+	if(gamemode_ == true){
+		gamemode_ = false;
+	}else{
+		gamemode_ = true;
+	}
+}
+
+
+bool Table_Visualizer::wanna_play(){
+	return gamemode_;
 }
 
 }; //namespace TTT

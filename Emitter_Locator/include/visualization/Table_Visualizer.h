@@ -35,6 +35,8 @@ class Table_Visualizer : Drawable_Object {
 		std::chrono::high_resolution_clock::time_point last_time_stamp_;
 
 		//needed for pesudopong
+		bool gamemode_;
+
 		glm::vec2 ball_pos_;
 		// Ball ball_;	
 		sf::CircleShape ball_;
@@ -99,6 +101,10 @@ class Table_Visualizer : Drawable_Object {
 		std::pair<bool, std::string> game_over();
 
 		void restart();
+
+		void change_gm();
+
+		bool wanna_play();
 };
 
 }; //end TTT

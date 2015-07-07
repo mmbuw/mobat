@@ -16,6 +16,8 @@
 sf::Vector2f smartphonePosition(1.0f,0.5f);
 glm::vec2 windowResolution(1280, 800);
 
+
+
 int main(int argc, char** argv) {
 // calculation
     Locator locator{4};
@@ -30,6 +32,9 @@ int main(int argc, char** argv) {
 
     sf::RenderWindow window(sf::VideoMode(unsigned(windowResolution.x), unsigned(windowResolution.y))
                            , "Table_Vis", sf::Style::Fullscreen);
+
+    //sf::RenderWindow window(sf::VideoMode(unsigned(windowResolution.x), unsigned(windowResolution.y))
+    //                       , "Table_Vis");
 
     // Limit the framerate to 60 frames per second (this step is optional)
     window.setFramerateLimit(60);
@@ -70,9 +75,20 @@ int main(int argc, char** argv) {
     glm::vec2 pl2_pos{TTT::Drawable_Object::physical_projection_offset_ + TTT::Drawable_Object::physical_projection_size_ * glm::vec2{0.5f, 0.3f}};
 
     double player_speed = 0.009;
+
+    sf::Event event;
         
 
         while (window.isOpen()) {
+            if(window.pollEvent(event)) {
+                if(event.type == sf::Event::KeyPressed){
+                   if(event.key.code == sf::Keyboard::Space){
+                        table_visualizer.change_gm();
+                    }
+                }
+            }
+
+
             if(!table_visualizer.game_over().first){
                 glm::vec2 pl1_dir{0, 0};
                 glm::vec2 pl2_dir{0, 0};
@@ -118,6 +134,8 @@ int main(int argc, char** argv) {
                 if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
                     pl2_dir.x -= player_speed;
                 }
+
+                
 
 
                 glm::vec2 pl2_new{pl2_pos + pl2_dir};
@@ -253,7 +271,9 @@ int main(int argc, char** argv) {
                 window.draw(play_again);*/
                 window.display();
 
-                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Return)) {
+
+
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Return) || !table_visualizer.wanna_play()) {
                     table_visualizer.restart();
                 }
 
