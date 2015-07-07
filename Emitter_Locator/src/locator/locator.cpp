@@ -11,7 +11,8 @@ Locator::Locator(unsigned int num_mics):
  shutdown{false},
  recorder{num_mics, 44100, 130000},
  collector{recorder.buffer_bytes() / num_mics, num_mics},
- locator{330, {0.06, 0.075}, {0.945,  0.09}, {0.925,  1.915} , {0.06,  1.905}},
+ //locator{330, {0.06, 0.075}, {0.945,  0.09}, {0.925,  1.915} , {0.06,  1.905}},
+ locator{330, {0.057, 0.125}, {0.54,  0.12}, {0.52,  1.08} , {0.065,  1.075}},
  locator_frame_counter_(1)
  {}
 

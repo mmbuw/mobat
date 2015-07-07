@@ -29,29 +29,34 @@ int main(int argc, char** argv) {
                        , "Transformed_Frequencies");
 
     sf::RenderWindow window(sf::VideoMode(unsigned(windowResolution.x), unsigned(windowResolution.y))
-                           , "Table_Vis");
+                           , "Table_Vis", sf::Style::Fullscreen);
 
     // Limit the framerate to 60 frames per second (this step is optional)
     window.setFramerateLimit(60);
     unsigned latest_received_timestamp = 0;
 
 
-    std::vector<glm::vec2> default_microphone_positions_ = {{0.06, 0.075}, {0.945,  0.09}, {0.925,  1.915} , {0.06,  1.905}};
+    //std::vector<glm::vec2> default_microphone_positions_ = {{0.06, 0.075}, {0.945,  0.09}, {0.925,  1.915} , {0.06,  1.905}};
+    std::vector<glm::vec2> default_microphone_positions_ = {{0.057, 0.125}, {0.54,  0.12}, {0.52,  1.08} , {0.065,  1.075}};
 
-    glm::vec2 table_dims{1.0, 2.0};
+    glm::vec2 table_dims{0.60, 1.20};
     // initialize measures for drawing & simulation 
     TTT::Drawable_Object::set_basis(glm::vec2(0,1), glm::vec2(1,0));
     // TTT::Drawable_Object::set_basis(glm::vec2(1,0), glm::vec2(0,1));
     TTT::Drawable_Object::set_resolution(windowResolution);
     TTT::Drawable_Object::set_phys_table_size(table_dims);
     TTT::Drawable_Object::set_projection(glm::vec2{0.25, 0.5}, glm::vec2{0.5, 1.0});
+    TTT::Drawable_Object::set_projection(glm::vec2{0.0, 0.0}, glm::vec2{1.0, 2.0});
+    TTT::Drawable_Object::set_projection(glm::vec2{0.0, 0.0}, glm::vec2{0.60, 1.20});
+    TTT::Drawable_Object::set_projection(glm::vec2{0.07, 0.17}, glm::vec2{0.445, 0.885});
+    //TTT::Drawable_Object::set_projection(glm::vec2{0.11, 0.36}, glm::vec2{0.8, 1.28});
     // TTT::Drawable_Object::set_projection(glm::vec2{0.25, 0.5}, glm::vec2{0.5, 1.0});
 
     TTT::Table_Visualizer table_visualizer(default_microphone_positions_);
     table_visualizer.Set_Token_Recognition_Timeout(5000000);
 
     table_visualizer.Set_Token_Fill_Color(18000, sf::Color(255,0,0) );
-    table_visualizer.Set_Token_Fill_Color(19000, sf::Color(255,255,0) );
+    table_visualizer.Set_Token_Fill_Color(19000, sf::Color(0, 0,255) );
 
     table_visualizer.Set_Token_Fill_Color(100000, sf::Color(255,0,255) );
     
