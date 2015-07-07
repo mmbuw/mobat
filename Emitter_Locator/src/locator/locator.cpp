@@ -141,7 +141,7 @@ load_recognized_vis_sample_positions() const {
             }
         }
 
-        cached_signal_vis_samples = signal_analyzer.get_signal_samples_for(18000);
+        cached_signal_vis_samples = signal_analyzer.get_signal_samples_for(17000);
 
         if(found_positions) {
             ++locator_frame_counter_;
@@ -162,7 +162,7 @@ load_recognized_vis_sample_positions() const {
         signal_vis_samples_mutex.unlock();
 
 
-        cached_recognized_vis_sample_pos = signal_analyzer.get_vis_sample_pos_for(18000);
+        cached_recognized_vis_sample_pos = signal_analyzer.get_vis_sample_pos_for(17000);
         recognized_vis_sample_pos_mutex.lock();
         recognized_vis_sample_pos = cached_recognized_vis_sample_pos;
         recognized_vis_sample_pos_mutex.unlock();
