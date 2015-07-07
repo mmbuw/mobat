@@ -30,11 +30,15 @@ int main(int argc, char** argv) {
     sf::RenderWindow signal_plot_window_(sf::VideoMode(280, 400)
                        , "Transformed_Frequencies");
 
+#if 1
     sf::RenderWindow window(sf::VideoMode(unsigned(windowResolution.x), unsigned(windowResolution.y))
                            , "Table_Vis", sf::Style::Fullscreen);
 
-    //sf::RenderWindow window(sf::VideoMode(unsigned(windowResolution.x), unsigned(windowResolution.y))
-    //                       , "Table_Vis");
+#else
+    sf::RenderWindow window(sf::VideoMode(unsigned(windowResolution.x), unsigned(windowResolution.y))
+                           , "Table_Vis");
+#endif
+
 
     // Limit the framerate to 60 frames per second (this step is optional)
     window.setFramerateLimit(60);
@@ -146,7 +150,7 @@ int main(int argc, char** argv) {
                 table_visualizer.Draw(window);
 
 
-                // table_visualizer.Signal_Token(2000, pl1_pos);
+                //table_visualizer.Signal_Token(2000, pl1_pos);
                 //table_visualizer.Signal_Token(1000, pl2_pos);
 
 
