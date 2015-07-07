@@ -58,7 +58,6 @@ Table_Visualizer::
 void Table_Visualizer::
 Draw(sf::RenderWindow& canvas) const {
 
-	
 	table_.Draw(canvas);
     canvas.draw(projection_shape_);
 	points_.Draw(canvas);
@@ -123,7 +122,7 @@ Recalculate_Geometry() {
 
     glm::vec2 field_min{physical_projection_offset_ + glm::vec2{b_rad}};
     glm::vec2 field_max{physical_projection_offset_ + physical_projection_size_  - glm::vec2{b_rad}};
-    std::cout << to_string(field_min) << " and " << to_string(field_max) << " ball " << to_string(ball_pos_) << std::endl;
+
     // border reflection
     if(ball_pos_.x <= field_min.x || ball_pos_.x >= field_max.x){
 
@@ -308,7 +307,6 @@ std::pair<bool, std::string> Table_Visualizer::game_over(){
 	if(abs(tmp) < 3){
 		return {false, "Chuck Norris"};
 	}else{
-		std::cout<<tmp<<"\n";
 		if(tmp > 0){  //>= 3
 			return {true, "Red"};
 		}else{

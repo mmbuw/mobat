@@ -1,4 +1,5 @@
 #include "Table_Object.h"
+#include <iostream>
 
 namespace TTT {
 
@@ -36,7 +37,6 @@ void Table_Object::
 Recalculate_Geometry() {
 	table_rectangle_shape_.setSize(to_projection_size(physical_table_size_));
 	table_rectangle_shape_.setPosition(to_projection_space(glm::vec2{0.0f}));
-
 }
 
 void Table_Object::

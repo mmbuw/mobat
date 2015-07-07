@@ -3,10 +3,13 @@
 
 #include <glm/vec2.hpp>
 #include <SFML/Graphics.hpp>
+#include "Drawable_Object.h"
+
+
 
 namespace TTT {
 
-class Score{
+class Score : Drawable_Object{
   private:
 
     std::array<sf::RectangleShape, 6> points_;
