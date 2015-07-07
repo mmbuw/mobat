@@ -14,7 +14,7 @@
 #define NUM_RECORDED_CHANNELS 4
 
 sf::Vector2f smartphonePosition(1.0f,0.5f);
-glm::vec2 windowResolution(800, 900);
+glm::vec2 windowResolution(1280, 800);
 
 int main(int argc, char** argv) {
 // calculation
@@ -117,7 +117,6 @@ int main(int argc, char** argv) {
 
                 glm::vec2 pl2_new{pl2_pos + pl2_dir};
                 pl2_pos = glm::clamp(pl2_new, field_min, field_max);
-                std::cout << pl2_pos.x << ", " << pl2_pos.y << std::endl;
                 window.clear();
                 table_visualizer.Recalculate_Geometry();
 
