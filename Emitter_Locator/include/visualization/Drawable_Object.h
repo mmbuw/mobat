@@ -17,6 +17,7 @@ class Drawable_Object {
 		static void set_phys_table_size(glm::vec2 const& size);
 		static void set_projection(glm::vec2 const& origin, glm::vec2 const& size);
 		static void set_resolution(glm::vec2 const& res);
+		static void set_basis(glm::vec2 const& right, glm::vec2 const& up);
 
 		static sf::Vector2f to_projection_space(glm::vec2 pos, float radius = 0.0f);
 		static sf::Vector2f to_projection_size(glm::vec2 size);

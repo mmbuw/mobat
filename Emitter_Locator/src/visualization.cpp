@@ -40,10 +40,12 @@ int main(int argc, char** argv) {
 
     glm::vec2 table_dims{1.0, 2.0};
     // initialize measures for drawing & simulation 
-    TTT::Drawable_Object::up_ = glm::vec2(0,1);
-    TTT::Drawable_Object::right_ = glm::vec2(1,0);
+    TTT::Drawable_Object::set_basis(glm::vec2(0,1), glm::vec2(1,0));
+    // TTT::Drawable_Object::set_basis(glm::vec2(1,0), glm::vec2(0,1));
     TTT::Drawable_Object::set_resolution(windowResolution);
+    TTT::Drawable_Object::set_phys_table_size(table_dims);
     TTT::Drawable_Object::set_projection(glm::vec2{0.25, 0.5}, glm::vec2{0.5, 1.0});
+    // TTT::Drawable_Object::set_projection(glm::vec2{0.25, 0.5}, glm::vec2{0.5, 1.0});
 
     TTT::Table_Visualizer table_visualizer(default_microphone_positions_);
     table_visualizer.Set_Token_Recognition_Timeout(5000000);
@@ -56,8 +58,8 @@ int main(int argc, char** argv) {
 
 // game
     std::string winner;
-    glm::vec2 field_max{TTT::Drawable_Object::physical_projection_offset_ + TTT::Drawable_Object::physical_projection_size_ + glm::vec2{-0.02f, 0.02f}};
-    glm::vec2 field_min{TTT::Drawable_Object::physical_projection_offset_ + glm::vec2{0.02f, 0.06f}};
+    glm::vec2 field_max{TTT::Drawable_Object::physical_projection_offset_ + TTT::Drawable_Object::physical_projection_size_ - glm::vec2{0.02f, 0.02f}};
+    glm::vec2 field_min{TTT::Drawable_Object::physical_projection_offset_ + glm::vec2{0.02f, 0.02f}};
         
     glm::vec2 pl1_pos{TTT::Drawable_Object::physical_projection_offset_ + TTT::Drawable_Object::physical_projection_size_ * glm::vec2{0.5f, 0.6f}};
     glm::vec2 pl2_pos{TTT::Drawable_Object::physical_projection_offset_ + TTT::Drawable_Object::physical_projection_size_ * glm::vec2{0.5f, 0.3f}};
@@ -115,7 +117,7 @@ int main(int argc, char** argv) {
 
                 glm::vec2 pl2_new{pl2_pos + pl2_dir};
                 pl2_pos = glm::clamp(pl2_new, field_min, field_max);
-
+                std::cout << pl2_pos.x << ", " << pl2_pos.y << std::endl;
                 window.clear();
                 table_visualizer.Recalculate_Geometry();
 
