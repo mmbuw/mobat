@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
 // calculation
     Locator locator{4};
 
-    locator.set_frequencies_to_record({18000, 19000, 100000});
+    locator.set_frequencies_to_record({19000, 17000, 100000});
 
     auto recording_thread = std::thread(&Locator::record_position, &locator);
 
@@ -60,8 +60,8 @@ int main(int argc, char** argv) {
     TTT::Table_Visualizer table_visualizer(default_microphone_positions_);
     table_visualizer.Set_Token_Recognition_Timeout(5000000);
 
-    table_visualizer.Set_Token_Fill_Color(18000, sf::Color(255,0,0) );
-    table_visualizer.Set_Token_Fill_Color(19000, sf::Color(0, 0,255) );
+    table_visualizer.Set_Token_Fill_Color(19000, sf::Color(255,0,0) );
+    table_visualizer.Set_Token_Fill_Color(17000, sf::Color(0, 0,255) );
 
     table_visualizer.Set_Token_Fill_Color(100000, sf::Color(255,0,255) );
     
@@ -147,7 +147,7 @@ int main(int argc, char** argv) {
 
 
                 // table_visualizer.Signal_Token(2000, pl1_pos);
-                table_visualizer.Signal_Token(1000, pl2_pos);
+                //table_visualizer.Signal_Token(1000, pl2_pos);
 
 
                 std::map<unsigned, std::pair<unsigned, glm::vec2> > positions = locator.load_position();

@@ -232,7 +232,7 @@ analyze(buffer_collection const& collector){
         															  max);
 
 
-         						if(max_sample - min_sample < 500) {
+         						if(max_sample - min_sample < 300) {
 						        	for(int i = 0; i < 4; ++i) {
 							        	if( peak_samples[i].size() > 0 ) {
 							        		//std::cout << peak_samples[i].size() << "\n";
