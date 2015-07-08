@@ -11,6 +11,13 @@ class Table_Object : Drawable_Object {
 
 	private:
 		sf::RectangleShape table_rectangle_shape_;
+		sf::RectangleShape middle_line1_;
+		sf::RectangleShape middle_line2_;
+		sf::RectangleShape left_line_;
+		sf::RectangleShape right_line_;
+		sf::CircleShape middle_;
+		sf::CircleShape left_goal_;
+		sf::CircleShape right_goal_;
 
 	public:
 		virtual void Draw(sf::RenderWindow& canvas) const;

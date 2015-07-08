@@ -36,6 +36,7 @@ class Drawable_Object {
 		static glm::vec2 physical_projection_size_;
 		static glm::vec2 pixel_projection_size_;
 		static float pixel_per_projection_;
+		static float line_thickness_;
 };
 
 sf::Vector2f to_sf(glm::vec2 const& vec);

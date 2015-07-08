@@ -12,6 +12,7 @@ glm::vec2 Drawable_Object::physical_projection_offset_ = glm::vec2(0,0);
 glm::vec2 Drawable_Object::physical_projection_size_ = glm::vec2(0,0);
 glm::vec2 Drawable_Object::pixel_projection_size_ = glm::vec2(0,0);
 float Drawable_Object::pixel_per_projection_ = 0.0f;
+float Drawable_Object::line_thickness_ = 0.0f;
 
 Drawable_Object::Drawable_Object()
 {};
@@ -43,6 +44,7 @@ void Drawable_Object::set_projection(glm::vec2 const& origin, glm::vec2 const& s
 
 void Drawable_Object::set_resolution(glm::vec2 const& res) {
     resolution_ = res;   
+    line_thickness_ = std::min(resolution_.x, resolution_.y) * 0.007;
 }
 
 sf::Vector2f Drawable_Object::to_projection_space(glm::vec2 pos, float radius) {
