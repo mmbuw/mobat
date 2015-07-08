@@ -48,23 +48,35 @@ void Drawable_Object::set_resolution(glm::vec2 const& res) {
 sf::Vector2f Drawable_Object::to_projection_space(glm::vec2 pos, float radius) {
     pos -= physical_projection_offset_;
     pos *= pixel_per_projection_;
-    pos -= glm::vec2{radius, radius};
     // add margin
     pos = right_ * pos.x + up_ * pos.y;
-    if((up_ + right_).y > 0) {
-        // pos.y = resolution_.y - pos.y;
-    }
     pos += pixel_projection_offset_;
-    // std::cout << pixel_projection_offset_.x << ", " << pixel_projection_offset_.y << std::endl;
+    if((up_ + right_).y > 0) {
+        pos.y = resolution_.y - pos.y;
+    }
+    if((up_ + right_).x > 0) {
+        pos.x = resolution_.x - pos.x;
+    }
+    pos -= glm::vec2{radius, radius};
     return to_sf(pos);
 } 
 
 sf::Vector2f Drawable_Object::to_projection_size(glm::vec2 size) {
     if((up_ + right_).y < 0) {
-        size = right_ * size.x + up_ * size.y;
+        if((up_ + right_).x < 0) {
+            size = right_ * size.x + up_ * size.y;
+        }
+        else {
+            size = right_ * -size.x + up_ * size.y;
+        }
     }
     else {
-        size = right_ * size.x + up_ * size.y;
+        if((up_ + right_).x < 0) {
+            size = right_ * size.x + up_ * -size.y;
+        }
+        else {
+            size = right_ * -size.x + up_ * -size.y;
+        }
     }
     return sf::Vector2f{size.x * pixel_per_projection_, size.y * pixel_per_projection_};
 }
