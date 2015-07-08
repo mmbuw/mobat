@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
     sf::ContextSettings settings;
     settings.antialiasingLevel = 8;
     sf::RenderWindow window(sf::VideoMode(unsigned(windowResolution.x), unsigned(windowResolution.y))
-                           , "Table_Vis", sf::Style::Default, settings);
+                           , "Table_Vis", sf::Style::Fullscreen, settings);
 
 #else
     sf::RenderWindow window(sf::VideoMode(unsigned(windowResolution.x), unsigned(windowResolution.y))
@@ -64,8 +64,8 @@ int main(int argc, char** argv) {
     TTT::Table_Visualizer table_visualizer(default_microphone_positions_);
     table_visualizer.Set_Token_Recognition_Timeout(5000000);
 
-    table_visualizer.Set_Token_Fill_Color(19000, sf::Color(255,0,0) );
-    table_visualizer.Set_Token_Fill_Color(17000, sf::Color(0, 0,255) );
+    table_visualizer.Set_Token_Fill_Color(19000, sf::Color(0,0,255) );
+    table_visualizer.Set_Token_Fill_Color(17000, sf::Color(255, 0, 0) );
 
     //table_visualizer.Set_Token_Fill_Color(100000, sf::Color(255,0,255) );
     
@@ -87,7 +87,6 @@ int main(int argc, char** argv) {
     sf::Texture texture_blue;
     texture_blue.loadFromFile("../pictures/blue_wins.png"); 
 
-    bool not_finished = true;
     sf::RectangleShape rect_red;
     rect_red.setSize(sf::Vector2f(600, 400));
     rect_red.setPosition(sf::Vector2f(windowResolution.x/2 - 300, windowResolution.y/2 - 200));
@@ -243,7 +242,6 @@ int main(int argc, char** argv) {
                 signal_plot_window_.display();
             */
             }else{
-                if(not_finished) {
                     winner = table_visualizer.game_over().second;
                     //std::cout<< "Winner is: " << winner <<"\n";
                     //std::cout<<max.x << "  "<< max.y <<"\n";
@@ -254,8 +252,7 @@ int main(int argc, char** argv) {
                     else{
                         window.draw(rect_blue);
                     }
-                    not_finished = false;
-                }
+            
 
 
                 /*sf::Color color = sf::Color(255, 192, 203);
@@ -286,7 +283,7 @@ int main(int argc, char** argv) {
                 if(sf::Keyboard::isKeyPressed(sf::Keyboard::Return) || !table_visualizer.wanna_play()) {
                     table_visualizer.restart();
 
-                    not_finished = true;
+        
                 }
 
             }
