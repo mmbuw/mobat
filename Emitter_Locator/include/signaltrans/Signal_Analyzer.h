@@ -26,7 +26,7 @@ class Signal_Analyzer {
     	  these toas are stored and can be retrieved by 
     	  "get_toas_for(unsigned const frequency)"
         */
-    	void analyze(buffer_collection const&);
+    	void analyze(buffer_collection const& collector, unsigned signal_chunk);
 
     	/*
           unregisters a frequency in order to not analyze it anymore

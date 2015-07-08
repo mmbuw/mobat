@@ -13,7 +13,8 @@ Locator::Locator(unsigned int num_mics):
  collector{recorder.buffer_bytes() / num_mics, num_mics},
  //locator{330, {0.06, 0.075}, {0.945,  0.09}, {0.925,  1.915} , {0.06,  1.905}},
  locator{330, {0.057, 0.125}, {0.54,  0.12}, {0.52,  1.08} , {0.065,  1.075}},
- locator_frame_counter_(cached_positions[0].size())
+ locator_frame_counter_(cached_positions[0].size()),
+ current_signal_chunk_(0)
  {}
 
 
@@ -94,21 +95,36 @@ load_recognized_vis_sample_positions() const {
     // start recording loop
     auto recording_thread = std::thread{&Recorder::recording_loop, &recorder};
 
+    bool first_signal_available = false;
     while (!shutdown)
     {
-        if(!recorder.new_recording()) {
-            continue;
-        }
-
-        collector.from_interleaved(recorder.buffer());
-
-        recorder.request_recording();
 
         for (unsigned frequency_to_analyze : frequencies_to_locate) {
             signal_analyzer.start_listening_to(frequency_to_analyze);
         }
 
-        signal_analyzer.analyze(collector); 
+        bool work_on_old_signal = false; 
+        if(!recorder.new_recording()) {
+            work_on_old_signal = true;
+        } else {
+            first_signal_available = true;
+        }
+
+        if(false == work_on_old_signal) {
+            current_signal_chunk_ = 0;
+            collector.from_interleaved(recorder.buffer());
+
+            recorder.request_recording();
+
+        } else {
+            if( first_signal_available == false || ++current_signal_chunk_ > 8)
+                continue;
+        }
+
+        //std::cout << "Doing something\n";
+
+        std::cout << "Calling with chunk:  " << current_signal_chunk_ << "\n";
+        signal_analyzer.analyze(collector, current_signal_chunk_); 
         
         bool found_positions = false;
 

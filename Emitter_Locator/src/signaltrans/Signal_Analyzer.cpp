@@ -18,7 +18,7 @@ Signal_Analyzer::
 }
 
 void Signal_Analyzer::
-analyze(buffer_collection const& collector){
+analyze(buffer_collection const& collector, unsigned signal_chunk){
 
 	std::vector<unsigned> fft_result_frequencies;
 	for(auto const& frequency_to_transform_entry : frequency_toas_mapping) {
@@ -38,7 +38,7 @@ analyze(buffer_collection const& collector){
     
     signal_detected_at_sample_per_frequency.clear();
 
-    fft_transformer.perform_FFT_on_channels((int**)&collector[0], collector.length, fft_window_size);
+    fft_transformer.perform_FFT_on_channels((int**)&collector[0], collector.length, fft_window_size, signal_chunk);
 
     double updated_times[4];
 
@@ -51,12 +51,12 @@ analyze(buffer_collection const& collector){
     for(auto const& frequency_entry : frequency_toas_mapping) {
 
         if(frequency_entry.first >= 50000) {
-
+/*
             signal_detected_at_sample_per_frequency[frequency_entry.first] = {100000, 100000, 100000, 100000};
             
             for(unsigned int channel_it = 0; channel_it < collector.count; ++channel_it) {
                 for(unsigned int i = 0; i < collector.length; ++i ) {
-                    if(collector[channel_it][i] > std::numeric_limits<int>::max()-1000 /* 2147000000*/) {
+                    if(collector[channel_it][i] > std::numeric_limits<int>::max()-1000) {
                         
                         // std::cout << "Channel " << channel_it << " detected at: " << i << "\n";
                         signal_detected_at_sample_per_frequency[frequency_entry.first][channel_it] = i;
@@ -67,7 +67,7 @@ analyze(buffer_collection const& collector){
                 }
             }
             // std::cout << "\n";
-
+*/
         } else {
 
 

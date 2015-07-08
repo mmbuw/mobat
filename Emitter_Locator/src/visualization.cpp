@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
     sf::ContextSettings settings;
     settings.antialiasingLevel = 8;
     sf::RenderWindow window(sf::VideoMode(unsigned(windowResolution.x), unsigned(windowResolution.y))
-                           , "Table_Vis", sf::Style::Fullscreen, settings);
+                           , "Table_Vis", sf::Style::Default, settings);
 
 #else
     sf::RenderWindow window(sf::VideoMode(unsigned(windowResolution.x), unsigned(windowResolution.y))

@@ -61,6 +61,8 @@ private:
     Signal_Analyzer signal_analyzer;
 
     unsigned locator_frame_counter_;
+
+    unsigned current_signal_chunk_;
  };
 
  #endif //LOCATOR_HPP
