@@ -54,6 +54,9 @@ class Table_Visualizer : Drawable_Object {
 		Score points_;
 
 		unsigned elapsed_milliseconds_since_last_frame_;
+		// keep track of contact times for ball deceleration
+		std::chrono::high_resolution_clock::time_point  current_time_;
+		std::chrono::high_resolution_clock::time_point  contact_time_;
 
 		void Calculate_Elapsed_Milliseconds();
 
