@@ -13,7 +13,7 @@ Locator::Locator(unsigned int num_mics):
  collector{recorder.buffer_bytes() / num_mics, num_mics},
  //locator{330, {0.06, 0.075}, {0.945,  0.09}, {0.925,  1.915} , {0.06,  1.905}},
  locator{330, {0.057, 0.125}, {0.54,  0.12}, {0.52,  1.08} , {0.065,  1.075}},
- locator_frame_counter_(1)
+ locator_frame_counter_(cached_positions[0].size())
  {}
 
 
@@ -141,22 +141,63 @@ load_recognized_vis_sample_positions() const {
             }
         }
 
-        cached_signal_vis_samples = signal_analyzer.get_signal_samples_for(17000);
+        //cached_signal_vis_samples = signal_analyzer.get_signal_samples_for(17000);
 
         if(found_positions) {
             ++locator_frame_counter_;
             cached_located_positions.clear();
+
+
             for(auto const& currently_located_position_entry :  currently_located_positions) {
+            glm::vec2 accumulated_position = glm::vec2(0.0, 0.0);
+            //glm::temp_pos = glm::vec2(0.0, 0.0);
                 cached_located_positions[currently_located_position_entry.first] = std::make_pair(  locator_frame_counter_ , currently_located_position_entry.second);
+                cached_positions[currently_located_position_entry.first][locator_frame_counter_ % cached_positions[currently_located_position_entry.first].size()] = std::make_pair(locator_frame_counter_,currently_located_position_entry.second);
+
+                unsigned normalization_counter = 0;
+                std::vector< float > valid_x_pos;
+                std::vector< float > valid_y_pos;
+
+                for ( auto const& glm_vec : cached_positions[currently_located_position_entry.first]) {
+
+                    if(locator_frame_counter_ - glm_vec.first < cached_positions[currently_located_position_entry.first].size()) {
+                       valid_x_pos.push_back(glm_vec.second.x);
+                       valid_y_pos.push_back(glm_vec.second.y);
+                       
+                       std::sort(valid_x_pos.begin(), valid_x_pos.end());
+                       std::sort(valid_y_pos.begin(), valid_y_pos.end());
+
+                       accumulated_position += glm_vec.second ;    
+                       ++normalization_counter;                 
+                    }
+
+                    //temp_pos = glm_vec * 2.0f;
+                    //accumulated_position += temp_pos;
+                }
+
+                float median_x = valid_x_pos[valid_x_pos.size()/2.0];
+                float median_y = valid_y_pos[valid_y_pos.size()/2.0];                
+
+                accumulated_position /= normalization_counter;
+
+                accumulated_position.x = median_x;
+                accumulated_position.y = median_y;
+
+                cached_located_positions[currently_located_position_entry.first] = std::make_pair(  locator_frame_counter_ , accumulated_position);
             }
+
+
+
+
 
             position_mutex.lock();
             located_positions = cached_located_positions;
+
             position_mutex.unlock();
 
         }
 
-
+/*
         signal_vis_samples_mutex.lock();
         signal_vis_samples = cached_signal_vis_samples;
         signal_vis_samples_mutex.unlock();
@@ -166,7 +207,7 @@ load_recognized_vis_sample_positions() const {
         recognized_vis_sample_pos_mutex.lock();
         recognized_vis_sample_pos = cached_recognized_vis_sample_pos;
         recognized_vis_sample_pos_mutex.unlock();
-
+*/
     }
     // stop recording loop
     recorder.shutdown();

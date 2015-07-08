@@ -45,7 +45,7 @@ Table_Visualizer(std::vector<glm::vec2> const& microphone_positions,
     // ball_ = Ball(sf::Vector2f(ball_pos_.x, ball_pos_.y), ball_size);
     gamemode_ = true;
     ball_.setRadius(ball_size);
-    ball_.setFillColor(sf::Color::Blue);
+    ball_.setFillColor(sf::Color::Black);
     // initialize variables 
     // points_ = Score{{pixel_projection_offset_.x + pixel_projection_size_.x / 7, pixel_projection_offset_.y + pixel_projection_size_ .y * 0.5 - 10},
     // 				{pixel_projection_offset_.x + pixel_projection_size_.x * 6 / 7, pixel_projection_offset_.y + pixel_projection_size_.y * 0.5 + 10}};

@@ -51,6 +51,9 @@ private:
     
     std::vector<unsigned> frequencies_to_locate;
 
+    std::map<unsigned, std::array<std::pair<unsigned, glm::vec2>, 7> > cached_positions;
+
+
     Recorder recorder;
     buffer_collection collector;
 

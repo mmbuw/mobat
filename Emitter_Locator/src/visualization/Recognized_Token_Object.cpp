@@ -40,6 +40,9 @@ Update_Alpha_Value(float in_alpha) {
 	new_color.a = sf::Uint8(255.0 * in_alpha);
 
 	token_circle_shape_.setFillColor(new_color);
+
+	token_circle_shape_.setOutlineThickness(10);
+	token_circle_shape_.setOutlineColor(sf::Color(0, 0, 0, 255.0*in_alpha));
 }
 
 

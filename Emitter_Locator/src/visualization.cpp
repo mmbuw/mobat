@@ -22,17 +22,22 @@ int main(int argc, char** argv) {
 // calculation
     Locator locator{4};
 
-    locator.set_frequencies_to_record({19000, 17000, 100000});
+    locator.set_frequencies_to_record({19000, 17000 /*, 100000*/});
 
     auto recording_thread = std::thread(&Locator::record_position, &locator);
 
 // visualisation
-    sf::RenderWindow signal_plot_window_(sf::VideoMode(280, 400)
-                       , "Transformed_Frequencies");
+    //sf::RenderWindow signal_plot_window_(sf::VideoMode(280, 400)
+    //                   , "Transformed_Frequencies");
 
 #if 1
+
+
+
+    sf::ContextSettings settings;
+    settings.antialiasingLevel = 8;
     sf::RenderWindow window(sf::VideoMode(unsigned(windowResolution.x), unsigned(windowResolution.y))
-                           , "Table_Vis", sf::Style::Fullscreen);
+                           , "Table_Vis", sf::Style::Fullscreen, settings);
 
 #else
     sf::RenderWindow window(sf::VideoMode(unsigned(windowResolution.x), unsigned(windowResolution.y))
@@ -51,15 +56,9 @@ int main(int argc, char** argv) {
     glm::vec2 table_dims{0.60, 1.20};
     // initialize measures for drawing & simulation 
     TTT::Drawable_Object::set_basis(glm::vec2(0,1), glm::vec2(1,0));
-    // TTT::Drawable_Object::set_basis(glm::vec2(1,0), glm::vec2(0,1));
     TTT::Drawable_Object::set_resolution(windowResolution);
     TTT::Drawable_Object::set_phys_table_size(table_dims);
-    TTT::Drawable_Object::set_projection(glm::vec2{0.25, 0.5}, glm::vec2{0.5, 1.0});
-    TTT::Drawable_Object::set_projection(glm::vec2{0.0, 0.0}, glm::vec2{1.0, 2.0});
-    TTT::Drawable_Object::set_projection(glm::vec2{0.0, 0.0}, glm::vec2{0.60, 1.20});
-    TTT::Drawable_Object::set_projection(glm::vec2{0.07, 0.17}, glm::vec2{0.445, 0.885});
-    //TTT::Drawable_Object::set_projection(glm::vec2{0.11, 0.36}, glm::vec2{0.8, 1.28});
-    // TTT::Drawable_Object::set_projection(glm::vec2{0.25, 0.5}, glm::vec2{0.5, 1.0});
+    TTT::Drawable_Object::set_projection(glm::vec2{0.02, 0.165}, glm::vec2{0.555, 0.885});
 
     TTT::Table_Visualizer table_visualizer(default_microphone_positions_);
     table_visualizer.Set_Token_Recognition_Timeout(5000000);
@@ -67,7 +66,7 @@ int main(int argc, char** argv) {
     table_visualizer.Set_Token_Fill_Color(19000, sf::Color(255,0,0) );
     table_visualizer.Set_Token_Fill_Color(17000, sf::Color(0, 0,255) );
 
-    table_visualizer.Set_Token_Fill_Color(100000, sf::Color(255,0,255) );
+    //table_visualizer.Set_Token_Fill_Color(100000, sf::Color(255,0,255) );
     
 
 // game
@@ -197,6 +196,7 @@ int main(int argc, char** argv) {
 
                 glm::vec4 toas = locator.load_toas();
                  
+                 /*
                 std::array< std::vector<double>, 4> signal_vis_samples =  locator.load_signal_vis_samples();
         
                 signal_plot_window_.clear(sf::Color(255, 255, 255));
@@ -227,7 +227,7 @@ int main(int argc, char** argv) {
                 }
 
                 signal_plot_window_.display();
-
+            */
             }else{
                 winner = table_visualizer.game_over().second;
                 //std::cout<< "Winner is: " << winner <<"\n";
