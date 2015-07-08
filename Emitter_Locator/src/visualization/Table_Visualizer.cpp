@@ -35,8 +35,8 @@ Table_Visualizer(std::vector<glm::vec2> const& microphone_positions,
     projection_shape_.setFillColor(sf::Color::Transparent);
     projection_shape_.setOutlineColor(sf::Color::Yellow);
     projection_shape_.setOutlineThickness(line_thickness_);
-    projection_shape_.setPosition(to_projection_space(physical_projection_offset_ + glm::vec2{0.0f, line_thickness_ / pixel_per_projection_}));
-    projection_shape_.setSize(to_projection_size(physical_projection_size_ - glm::vec2{0.0f, 2.0f * line_thickness_ / pixel_per_projection_}));
+    projection_shape_.setPosition(to_projection_space(physical_projection_offset_ + glm::vec2{line_thickness_ / pixel_per_projection_}));
+    projection_shape_.setSize(to_projection_size(physical_projection_size_ - glm::vec2{2.0f * line_thickness_ / pixel_per_projection_}));
 
     table_.Recalculate_Geometry();
 

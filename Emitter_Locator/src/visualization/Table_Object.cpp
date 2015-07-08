@@ -56,18 +56,18 @@ Recalculate_Geometry() {
 	
 	middle_line1_.setFillColor(sf::Color::Yellow);
 	middle_line1_.setSize(to_projection_size(glm::vec2{physical_projection_size_.x * 0.5f - middle_.getRadius() / pixel_per_projection_, line_thickness_ / pixel_per_projection_}));
-	middle_line1_.setPosition(to_projection_space(physical_projection_offset_ + glm::vec2{0.0f, physical_projection_size_.y * 0.5f}));
+	middle_line1_.setPosition(to_projection_space(physical_projection_offset_ + glm::vec2{0.0f, (physical_projection_size_.y - line_thickness_ / pixel_per_projection_) * 0.5f}));
 
 	middle_line2_.setFillColor(sf::Color::Yellow);
 	middle_line2_.setSize(to_projection_size(glm::vec2{physical_projection_size_.x * 0.5f - middle_.getRadius() / pixel_per_projection_, line_thickness_ / pixel_per_projection_}));
-	middle_line2_.setPosition(to_projection_space(physical_projection_offset_ + glm::vec2{physical_table_size_.x * 0.5f + middle_.getRadius() / pixel_per_projection_, physical_projection_size_.y * 0.5f}));
+	middle_line2_.setPosition(to_projection_space(physical_projection_offset_ + glm::vec2{physical_projection_size_.x * 0.5f + middle_.getRadius() / pixel_per_projection_, (physical_projection_size_.y - line_thickness_ / pixel_per_projection_) * 0.5f}));
 
 	left_line_.setFillColor(sf::Color::Yellow);
 	left_line_.setSize(to_projection_size(glm::vec2{physical_projection_size_.x, line_thickness_ / pixel_per_projection_}));
-	left_line_.setPosition(to_projection_space(physical_projection_offset_ + glm::vec2{0.0f, physical_projection_size_.y * 0.35f}));
+	left_line_.setPosition(to_projection_space(physical_projection_offset_ + glm::vec2{0.0f, physical_projection_size_.y * 0.35f - line_thickness_ / pixel_per_projection_ * 0.5f}));
 
 	right_line_.setFillColor(sf::Color::Yellow);
-	right_line_.setPosition(to_projection_space(physical_projection_offset_ + glm::vec2{0.0f, physical_projection_size_.y * 0.65f}));
+	right_line_.setPosition(to_projection_space(physical_projection_offset_ + glm::vec2{0.0f, physical_projection_size_.y * 0.65f - line_thickness_ / pixel_per_projection_ * 0.5f}));
 	right_line_.setSize(to_projection_size(glm::vec2{physical_projection_size_.x, line_thickness_ / pixel_per_projection_}));
 
 	left_goal_.setRadius(pixel_per_projection_ * 0.25f);

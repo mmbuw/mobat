@@ -13,7 +13,8 @@ class Score : Drawable_Object{
   private:
 
     std::array<sf::RectangleShape, 6> points_;
-  	
+    sf::Color color_red_;
+  	sf::Color color_blue_;
   //virtual void Recalculate_Geometry(sf::Vector2f const& resolution) = 0;
 
   public:
