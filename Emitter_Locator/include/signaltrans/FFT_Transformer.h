@@ -29,7 +29,7 @@ class FFT_Transformer {
 		int** audio_buffers_;
 
 		unsigned short fft_frame_size_;
-		fftw_complex* fft_in_;
+		double* fft_in_;
 		fftw_complex* fft_result_;
 		double* accumulated_result_;
 

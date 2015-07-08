@@ -183,7 +183,7 @@ Recalculate_Geometry() {
 		            ball_speed_ = glm::clamp(ball_speed_, ball_speed_min_, ball_speed_max_);
 	            }
 
-	            std::cout << ball_speed_ << std::endl;
+	            //std::cout << ball_speed_ << std::endl;
 	            ball_pos_ += ball_dir_ * float(elapsed_milliseconds_since_last_frame_ / 16.0f) * ball_speed_;
 	        }
 

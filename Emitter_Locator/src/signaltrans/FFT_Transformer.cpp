@@ -60,7 +60,7 @@ FFT_Transformer::FFT_Transformer(unsigned short fft_window_size) : start_sample_
 
 
 	found_freq_ = false;
-	fft_in_ = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * fft_window_size_);
+	fft_in_ = (double*) fftw_malloc(sizeof(double) * fft_window_size_);
 	fft_result_ = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * fft_window_size_);
 	window_ = (double*) malloc(sizeof(double) * fft_window_size_);
 
@@ -116,7 +116,7 @@ void FFT_Transformer::clear_cached_fft_results(unsigned channel_num) {
 void FFT_Transformer::initialize_execution_plan() {
 
 	//fftw_plan_with_nthreads(1);
-	fftw_execution_plan_ = fftw_plan_dft_1d(fft_window_size_, fft_in_, fft_result_,  FFTW_FORWARD, FFTW_EXHAUSTIVE);
+	fftw_execution_plan_ = fftw_plan_dft_r2c_1d(fft_window_size_, fft_in_, fft_result_, FFTW_EXHAUSTIVE);
 }
 
 void FFT_Transformer::set_analyzation_range(unsigned int start_sample, unsigned int end_sample) {
@@ -166,8 +166,7 @@ void FFT_Transformer::set_FFT_input( unsigned int offset ) {
 				++frame_idx) {
 
 				//std::cout << "buffer content: " << audio_buffers_[0][(offset) + frame_idx] << "\n";
-				fft_in_[frame_idx][0] = window_[frame_idx] * (audio_buffers_[0][    (offset) + frame_idx]) / 2147483647.0;
-				fft_in_[frame_idx][1] = 0.0;
+				fft_in_[frame_idx] = window_[frame_idx] * (audio_buffers_[0][    (offset) + frame_idx]) / 2147483647.0;
 			}
 		}
 	} else {
@@ -228,20 +227,24 @@ unsigned int FFT_Transformer::perform_FFT(unsigned channel_num) {
 
 
 							if(current_frequency > 13000.0 && current_frequency < 20002.0 ) {
-								normalization_range_value +=  std::sqrt(fft_result_[signal_it][0]*fft_result_[signal_it][0]) + 
+
+								double tmp_normalization_value = std::sqrt(fft_result_[signal_it][0]*fft_result_[signal_it][0]) + 
 									  	(fft_result_[signal_it][1]*fft_result_[signal_it][1]) ;
+								normalization_range_value +=  tmp_normalization_value;
 
-									  	//++taken_normalization_samples;
-							}
 
-							for(unsigned iterated_frequency : listening_to_those_frequencies) {
-								if(current_frequency > ((double)iterated_frequency-100.0) && current_frequency < ((double)iterated_frequency+100.0 ) ) {
+								for(unsigned iterated_frequency : listening_to_those_frequencies) {
+									if(current_frequency > ((double)iterated_frequency-100.0) && current_frequency < ((double)iterated_frequency+100.0 ) ) {
 
-									temp_accum_results[iterated_frequency] += std::sqrt(fft_result_[signal_it][0]*fft_result_[signal_it][0]) + 
-																		  	(fft_result_[signal_it][1]*fft_result_[signal_it][1]) ;
+										temp_accum_results[iterated_frequency] += tmp_normalization_value;
 
+									}
 								}
+
+
 							}
+
+
 
 
 

@@ -108,18 +108,6 @@ analyze(buffer_collection const& collector, unsigned signal_chunk){
                                                fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].end(), std::numeric_limits<double>::max(), d_min);
 
 				
-				//mins[channel_iterator] = min;
-               	//double range = peak - min;
-
-               //	ranges[channel_iterator] = range;
-                
-                /*
-                double avg = std::accumulate(fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].begin(), 
-                                               fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].end(), 0) 
-                                                /  fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].size();
-
-                bool allow_signal_detection = false;
-*/
 
                 sample_vector_size = fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].size();
               	
@@ -136,8 +124,7 @@ analyze(buffer_collection const& collector, unsigned signal_chunk){
                 		if(peak-min > 5.0) {
                 			sig =  100.0 * (pow(sig,power) - pow(min,power)) / (pow(peak,power) - pow(min,power));
 
-                			//if( sig < 5.0)
-                			//	sig = 0; 
+             
                 		}
                 		else {
                 			sig = 0.0;
