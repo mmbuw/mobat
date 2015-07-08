@@ -62,12 +62,12 @@ class Table_Visualizer : Drawable_Object {
 		Table_Visualizer(std::vector<glm::vec2> const& microphone_positions
 						 	= std::vector<glm::vec2>(),
 						 sf::Color const& in_table_fill_color 
-						 	= sf::Color(82,159,153),
+						 	= sf::Color::White,
 						 sf::Color const& in_microphone_fill_color 
 						 	= sf::Color(0,255,0, 125),
 						 sf::Color const& in_token_fill_color 
 						 	= sf::Color(255,0,0),
-						 double ball_size = 15
+						 double ball_size = 25
 						);
 		~Table_Visualizer();
 

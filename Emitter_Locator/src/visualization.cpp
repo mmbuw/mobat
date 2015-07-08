@@ -56,6 +56,7 @@ int main(int argc, char** argv) {
     glm::vec2 table_dims{0.60, 1.20};
     // initialize measures for drawing & simulation 
     TTT::Drawable_Object::set_basis(glm::vec2(0,1), glm::vec2(1,0));
+    // TTT::Drawable_Object::set_basis(glm::vec2(1,0), glm::vec2(0,1));
     TTT::Drawable_Object::set_resolution(windowResolution);
     TTT::Drawable_Object::set_phys_table_size(table_dims);
     TTT::Drawable_Object::set_projection(glm::vec2{0.02, 0.165}, glm::vec2{0.555, 0.885});
@@ -81,6 +82,19 @@ int main(int argc, char** argv) {
 
     sf::Event event;
         
+    sf::Texture texture_red;
+    texture_red.loadFromFile("../pictures/red_wins.png"); 
+    sf::Texture texture_blue;
+    texture_blue.loadFromFile("../pictures/blue_wins.png"); 
+
+    bool not_finished = true;
+    sf::RectangleShape rect_red;
+    rect_red.setSize(sf::Vector2f(600, 400));
+    rect_red.setPosition(sf::Vector2f(windowResolution.x/2 - 300, windowResolution.y/2 - 200));
+    rect_red.setTexture(&texture_red, false);
+    sf::RectangleShape rect_blue{rect_red};
+    rect_blue.setTexture(&texture_blue, false);
+
 
         while (window.isOpen()) {
             if(window.pollEvent(event)) {
@@ -150,7 +164,7 @@ int main(int argc, char** argv) {
 
 
                 //table_visualizer.Signal_Token(2000, pl1_pos);
-                //table_visualizer.Signal_Token(1000, pl2_pos);
+                // table_visualizer.Signal_Token(1000, pl2_pos);
 
 
                 std::map<unsigned, std::pair<unsigned, glm::vec2> > positions = locator.load_position();
@@ -229,23 +243,20 @@ int main(int argc, char** argv) {
                 signal_plot_window_.display();
             */
             }else{
-                winner = table_visualizer.game_over().second;
-                //std::cout<< "Winner is: " << winner <<"\n";
-                //std::cout<<max.x << "  "<< max.y <<"\n";
+                if(not_finished) {
+                    winner = table_visualizer.game_over().second;
+                    //std::cout<< "Winner is: " << winner <<"\n";
+                    //std::cout<<max.x << "  "<< max.y <<"\n";
 
-
-                sf::Texture texture;
-                if(winner == "Red"){
-                    texture.loadFromFile("../pictures/red_wins.png"); 
-                }else{
-                    texture.loadFromFile("../pictures/blue_wins.png"); 
+                   if(winner == "Red"){
+                        window.draw(rect_red);
+                    }
+                    else{
+                        window.draw(rect_blue);
+                    }
+                    not_finished = false;
                 }
-                sf::Texture* texture2 = new sf::Texture(texture);//otherwise it gives a warning and therefore an error (could be uninitialized)
 
-                sf::RectangleShape rect;
-                rect.setSize(sf::Vector2f(600, 400));
-                rect.setPosition(sf::Vector2f(windowResolution.x/2 - 300, windowResolution.y/2 - 200));
-                rect.setTexture(texture2, false);
 
                 /*sf::Color color = sf::Color(255, 192, 203);
                 //window.clear();
@@ -268,17 +279,14 @@ int main(int argc, char** argv) {
                 play_again.setPosition(windowResolution.x/5.0, windowResolution.y/2.0 + 20);
                 */
 
-
-
-                window.draw(rect);
                 /*window.draw(text);
                 window.draw(play_again);*/
                 window.display();
 
-
-
                 if(sf::Keyboard::isKeyPressed(sf::Keyboard::Return) || !table_visualizer.wanna_play()) {
                     table_visualizer.restart();
+
+                    not_finished = true;
                 }
 
             }
