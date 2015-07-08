@@ -123,9 +123,12 @@ Recalculate_Geometry() {
 	            }
 	            else {
 	                ball_dir_ = glm::reflect(ball_dir_, intersection.second);
-	                ball_speed_ *= ball_acceleration_;
+	                ball_speed_max_ *= ball_acceleration_;
+	                ball_speed_min_ *= ball_acceleration_;
 
 	            }                       
+                contact_time_ = current_time_;
+                ball_speed_ = ball_speed_max_;
 	        }   
 	    }
 
@@ -170,7 +173,17 @@ Recalculate_Geometry() {
 	            ball_speed_ = ball_speed_min_;
 	        }
 	        else {
-	            ball_speed_ = glm::clamp(ball_speed_, ball_speed_min_, ball_speed_max_);
+	        	static double slowing_time = 2000;
+
+	            // only recalculate ball speed while ball is slowing
+	            if(ball_speed_ > ball_speed_min_) {
+			        unsigned time_since_contact = std::chrono::duration_cast<std::chrono::milliseconds>
+			        (current_time_ - contact_time_).count(); 
+		        	ball_speed_ = ball_speed_min_ + (ball_speed_max_ - ball_speed_min_) * (1 - double(time_since_contact) / slowing_time);
+		            ball_speed_ = glm::clamp(ball_speed_, ball_speed_min_, ball_speed_max_);
+	            }
+
+	            std::cout << ball_speed_ << std::endl;
 	            ball_pos_ += ball_dir_ * float(elapsed_milliseconds_since_last_frame_ / 16.0f) * ball_speed_;
 	        }
 
@@ -270,14 +283,13 @@ update_tokens() {
 
 void Table_Visualizer::
 Calculate_Elapsed_Milliseconds() {
-    std::chrono::high_resolution_clock::time_point 
-    current_time_stamp = std::chrono::high_resolution_clock::now();
+    current_time_ = std::chrono::high_resolution_clock::now();
 
     std::chrono::milliseconds elapsed_milliseconds
         = std::chrono::duration_cast<std::chrono::milliseconds>
-        (current_time_stamp - last_time_stamp_); 
+        (current_time_ - last_time_stamp_); 
 
-    last_time_stamp_ = current_time_stamp;
+    last_time_stamp_ = current_time_;
 
     elapsed_milliseconds_since_last_frame_ = elapsed_milliseconds.count();
 }
@@ -337,8 +349,8 @@ void Table_Visualizer::restart(){
     ball_dir_ = glm::vec2{0.0f, 1.0f};
     ball_speed_min_ = 0.001f;
     ball_speed_ = ball_speed_min_;
-    ball_speed_max_ = 0.003f;
-    ball_acceleration_ = 1.3f;
+    ball_speed_max_ = 0.005f;
+    ball_acceleration_ = 1.2f;
     move_ball_ = false;
     ball_reset_ = true;
     right_goals_ = 0;
