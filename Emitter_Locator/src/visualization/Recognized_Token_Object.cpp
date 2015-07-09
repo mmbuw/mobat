@@ -11,6 +11,8 @@ Recognized_Token_Object(unsigned in_id,
 						  life_time_in_ms_(in_life_time_in_ms),
 						  remaining_life_time_in_ms_(in_life_time_in_ms),
 						  physical_position_(in_position) {
+	token_circle_shape_.setOutlineThickness(10);
+	token_circle_shape_.setOutlineColor(sf::Color(0, 0, 0, 255.0));
 }
 
 void Recognized_Token_Object::
@@ -41,7 +43,6 @@ Update_Alpha_Value(float in_alpha) {
 
 	token_circle_shape_.setFillColor(new_color);
 
-	token_circle_shape_.setOutlineThickness(10);
 	token_circle_shape_.setOutlineColor(sf::Color(0, 0, 0, 255.0*in_alpha));
 }
 

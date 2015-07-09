@@ -312,7 +312,7 @@ std::pair<bool, glm::vec2> Table_Visualizer::ball_intersect(Recognized_Token_Obj
 
     float dist = glm::length(ball_pos_ - mid_paddle);
 
-    bool intersects = dist < (ball_.getRadius() + paddle.get_Circle().getRadius()) / pixel_per_projection_;
+    bool intersects = dist < (ball_.getRadius() + paddle.get_Circle().getRadius() + paddle.get_Circle().getOutlineThickness()) / pixel_per_projection_;
 
     glm::vec2 normal{-1.0f, 0.0f};
     if(intersects) {    
@@ -328,7 +328,7 @@ void Table_Visualizer::move_ball_out_of_token(Recognized_Token_Object const& pad
     
     glm::vec2 norm = ball_intersect(paddle).second;
 
-    glm::vec2 new_ball_pos{mid_paddle + norm * float(ball_.getRadius() + paddle.get_Circle().getRadius()) / pixel_per_projection_};
+    glm::vec2 new_ball_pos{mid_paddle + norm * float(ball_.getRadius() + paddle.get_Circle().getRadius() + paddle.get_Circle().getOutlineThickness()) / pixel_per_projection_};
 
     ball_pos_ = new_ball_pos;
 }
