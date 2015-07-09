@@ -165,8 +165,8 @@ int main(int argc, char** argv) {
                 table_visualizer.Draw(window);
 
 
-                table_visualizer.Signal_Token(2000, pl1_pos);
-                // table_visualizer.Signal_Token(1000, pl2_pos);
+                //table_visualizer.Signal_Token(2000, pl1_pos);
+                //table_visualizer.Signal_Token(1000, pl2_pos);
 
 
                 std::map<unsigned, std::pair<unsigned, glm::vec2> > positions = locator.load_position();

@@ -52,8 +52,7 @@ Table_Visualizer(std::vector<glm::vec2> const& microphone_positions,
     // points_ = Score{{pixel_projection_offset_.x + pixel_projection_size_.x / 7, pixel_projection_offset_.y + pixel_projection_size_ .y * 0.5 - 10},
     // 				{pixel_projection_offset_.x + pixel_projection_size_.x * 6 / 7, pixel_projection_offset_.y + pixel_projection_size_.y * 0.5 + 10}};
 
- points_ = Score{{pixel_projection_offset_.x , pixel_projection_offset_.y },
-    				{pixel_projection_offset_.x + pixel_projection_size_.x , pixel_projection_offset_.y + pixel_projection_size_.y }};
+ points_ = Score(6);
     restart();
     
 }
@@ -328,7 +327,7 @@ void Table_Visualizer::move_ball_out_of_token(Recognized_Token_Object const& pad
 
 std::pair<bool, std::string> Table_Visualizer::game_over(){
 	int tmp = left_goals_ - right_goals_;
-	if(abs(tmp) < 3){
+	if(abs(tmp) < points_.get_maxpoints() / 2){
 		return {false, "Chuck Norris"};
 	}else{
 		if(tmp > 0){  //>= 3

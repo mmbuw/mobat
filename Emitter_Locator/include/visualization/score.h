@@ -12,18 +12,20 @@ namespace TTT {
 class Score : Drawable_Object{
   private:
 
-    std::array<sf::RectangleShape, 6> points_;
+    std::vector<sf::RectangleShape> points_;
     sf::Color color_red_;
   	sf::Color color_blue_;
+    int maxpoints_;
   //virtual void Recalculate_Geometry(sf::Vector2f const& resolution) = 0;
 
   public:
     Score(){};
     ~Score(){};
-    Score(glm::vec2 const& min, glm::vec2 const& max);
+    Score(int maxpoints);
     void Draw(sf::RenderWindow& canvas) const;
     void update(int r_goals, int l_goals); //changes colors according to given scores
     void reset();
+    int get_maxpoints();
 };
 
 };//Namespace TTT

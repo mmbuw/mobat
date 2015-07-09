@@ -5,19 +5,24 @@
 
 namespace TTT {
 
-Score::Score(glm::vec2 const& min, glm::vec2 const& max){
-	std::cout<<"min:  "<<min.x<<"  "<<min.y<<"\n";
-	std::cout<<"max:  "<<max.x<<"  "<<max.y<<"\n";
-
+Score::Score(int maxpoints){
+	glm::vec2  min{pixel_projection_offset_.x , pixel_projection_offset_.y };
+	glm::vec2  max = min  + glm::vec2{ pixel_projection_size_.x, pixel_projection_size_.y } ;
 	color_red_ = sf::Color(255, 0, 0, 128);
 	color_blue_ = sf::Color(0, 0, 255, 128);
+	maxpoints_ = maxpoints; 
 
-	sf::Vector2f size{pixel_projection_size_.y / 12 , pixel_projection_size_.y / 12};
+	for(int i = 0; i < maxpoints_; ++i){
+		points_.push_back(sf::RectangleShape());
+	}
+
+	sf::Vector2f size{pixel_projection_size_.y / (maxpoints*2) , pixel_projection_size_.y / (maxpoints*2)};
 	// sf::Vector2f size{max.y - min.y , max.y - min.y};
 	if(up_.x == 0){//spiefeld vertikal
-	float distance = (max.x - min.x) / ( 2 * points_.size() - 1); 
-		for(unsigned i = 0; i < points_.size(); ++i){
-			if(i < 3){
+		for(int i = 0; i < maxpoints; ++i){
+		float distance = (max.x - min.x) / ( 2 * maxpoints_ - 1); 
+			// points_.push_back(sf::RectangleShape());
+			if(i < maxpoints / 2){
 				points_[i].setFillColor(color_blue_);
 			}else{
 				points_[i].setFillColor(color_red_);
@@ -28,9 +33,11 @@ Score::Score(glm::vec2 const& min, glm::vec2 const& max){
 			points_[i].setSize(size);
 		}
 	}else{	//spielfeld horizontal
-	 float distance = (max.y - min.y) / (points_.size()) - size.x; 
-		for(unsigned i = 0; i < points_.size(); ++i){
-			if(i < 3){
+		float distance = (max.y - min.y) / (points_.size()) - size.x; 
+	// std::cout<<"HHHHHHHAAAAAAAAAAAAAAAAAAALLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLOOOOOOOOOOOOOOOOOOOOOOOOOOOOO!\n";
+		for(int i = 0; i < maxpoints_; ++i){
+		// points_.push_back(sf::RectangleShape());
+			if(i < maxpoints / 2){
 				points_[i].setFillColor(color_blue_);
 			}else{
 				points_[i].setFillColor(color_red_);
@@ -53,25 +60,26 @@ Draw(sf::RenderWindow& canvas) const {
 
 void Score::
 update(int r_goals, int l_goals) {
+	int half = maxpoints_ / 2;
 	if(r_goals == l_goals)
 	{
-		points_[2].setFillColor(color_blue_);
-		points_[3].setFillColor(color_red_);
+		points_[half - 1].setFillColor(color_blue_);
+		points_[half - 0].setFillColor(color_red_);
 	}else{
 		int tmp = (r_goals - l_goals);
 
-		if(tmp == -3){
+		if(tmp == - half){
 			points_[0].setFillColor(color_red_);
-		}else if(tmp == 3){
-			points_[5].setFillColor(color_blue_);
+		}else if(tmp == half){
+			points_[maxpoints_ - 1].setFillColor(color_blue_);
 		}else{
 			if(tmp < 0){
-				tmp += 3;
+				tmp += half;
 				points_[tmp-1].setFillColor(color_blue_);
 				points_[tmp].setFillColor(color_red_);
 			}else{
 
-				tmp += 2;
+				tmp += half - 1;
 				points_[tmp].setFillColor(color_blue_);
 				points_[tmp+1].setFillColor(color_red_);
 			}
@@ -85,14 +93,19 @@ update(int r_goals, int l_goals) {
 
 void Score::
 reset(){
-	for(unsigned i = 0; i < points_.size(); ++i){
-		if(i < 3){
+	for(int i = 0; i < maxpoints_; ++i){
+		if(i < maxpoints_ / 2){
 
 			points_[i].setFillColor(color_blue_);
 		}else{
 			points_[i].setFillColor(color_red_);
 		}
 	}
+}
+
+int Score::
+get_maxpoints(){
+	return maxpoints_;
 }
 
 
