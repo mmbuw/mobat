@@ -33,8 +33,8 @@ int main(int argc, char** argv) {
     auto recording_thread = std::thread(&Locator::record_position, &locator);
 
 // visualisation
-    //sf::RenderWindow signal_plot_window_(sf::VideoMode(280, 400)
-    //                   , "Transformed_Frequencies");
+    sf::RenderWindow signal_plot_window_(sf::VideoMode(280, 400)
+                       , "Transformed_Frequencies");
 
     sf::ContextSettings settings;
     settings.antialiasingLevel = 8;
@@ -103,6 +103,7 @@ int main(int argc, char** argv) {
             if(event.type == sf::Event::KeyPressed){
                if(event.key.code == sf::Keyboard::Space){
                     table_visualizer.change_gm();
+
                 }
             }
         }
@@ -209,11 +210,12 @@ int main(int argc, char** argv) {
 
 
             glm::vec4 toas = locator.load_toas();
-             
-             /*
+            
+            
             std::array< std::vector<double>, 4> signal_vis_samples =  locator.load_signal_vis_samples();
     
             signal_plot_window_.clear(sf::Color(255, 255, 255));
+
 
             std::array<unsigned, 4> recognized_vis_sample_pos = locator.load_recognized_vis_sample_positions();
 
@@ -240,10 +242,12 @@ int main(int argc, char** argv) {
                 }
             }
 
+        
             signal_plot_window_.display();
-        */
-        }else{
-            if(draw_endscreen_){
+            
+            }else{
+                if(draw_endscreen_){
+
 
                 winner = table_visualizer.game_over().second;
                 //std::cout<< "Winner is: " << winner <<"\n";
