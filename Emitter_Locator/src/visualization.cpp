@@ -95,6 +95,9 @@ int main(int argc, char** argv) {
     rect_blue.setTexture(&texture_blue, false);
 
 
+    bool draw_endscreen_ = true;
+
+
         while (window.isOpen()) {
             if(window.pollEvent(event)) {
                 if(event.type == sf::Event::KeyPressed){
@@ -162,7 +165,7 @@ int main(int argc, char** argv) {
                 table_visualizer.Draw(window);
 
 
-                //table_visualizer.Signal_Token(2000, pl1_pos);
+                table_visualizer.Signal_Token(2000, pl1_pos);
                 // table_visualizer.Signal_Token(1000, pl2_pos);
 
 
@@ -242,6 +245,8 @@ int main(int argc, char** argv) {
                 signal_plot_window_.display();
             */
             }else{
+                if(draw_endscreen_){
+
                     winner = table_visualizer.game_over().second;
                     //std::cout<< "Winner is: " << winner <<"\n";
                     //std::cout<<max.x << "  "<< max.y <<"\n";
@@ -252,6 +257,9 @@ int main(int argc, char** argv) {
                     else{
                         window.draw(rect_blue);
                     }
+
+                    draw_endscreen_ = false;
+                }
             
 
 
@@ -281,6 +289,7 @@ int main(int argc, char** argv) {
                 window.display();
 
                 if(sf::Keyboard::isKeyPressed(sf::Keyboard::Return) || !table_visualizer.wanna_play()) {
+                    draw_endscreen_ = true;
                     table_visualizer.restart();
 
         
