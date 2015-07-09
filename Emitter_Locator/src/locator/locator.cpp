@@ -116,14 +116,14 @@ load_recognized_vis_sample_positions() const {
 
             recorder.request_recording();
 
+
         } else {
-            if( first_signal_available == false || ++current_signal_chunk_ > 8)
+            if( first_signal_available == false || ++current_signal_chunk_ >= 3)
                 continue;
         }
 
         //std::cout << "Doing something\n";
 
-        std::cout << "Calling with chunk:  " << current_signal_chunk_ << "\n";
         signal_analyzer.analyze(collector, current_signal_chunk_); 
         
         bool found_positions = false;
@@ -191,13 +191,13 @@ load_recognized_vis_sample_positions() const {
                     //accumulated_position += temp_pos;
                 }
 
-                float median_x = valid_x_pos[valid_x_pos.size()/2.0];
-                float median_y = valid_y_pos[valid_y_pos.size()/2.0];                
+                //float median_x = valid_x_pos[valid_x_pos.size()/2.0];
+                //float median_y = valid_y_pos[valid_y_pos.size()/2.0];                
 
                 accumulated_position /= normalization_counter;
 
-                accumulated_position.x = median_x;
-                accumulated_position.y = median_y;
+                //accumulated_position.x = median_x;
+                //accumulated_position.y = median_y;
 
                 cached_located_positions[currently_located_position_entry.first] = std::make_pair(  locator_frame_counter_ , accumulated_position);
             }

@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
 // calculation
     Locator locator{4};
 
-    locator.set_frequencies_to_record({19000, 17000 /*, 100000*/});
+    locator.set_frequencies_to_record({19000, 16000 /*, 100000*/});
 
     auto recording_thread = std::thread(&Locator::record_position, &locator);
 
@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
     table_visualizer.Set_Token_Recognition_Timeout(5000000);
 
     table_visualizer.Set_Token_Fill_Color(19000, sf::Color(0,0,255) );
-    table_visualizer.Set_Token_Fill_Color(17000, sf::Color(255, 0, 0) );
+    table_visualizer.Set_Token_Fill_Color(16000, sf::Color(255, 0, 0) );
 
     //table_visualizer.Set_Token_Fill_Color(100000, sf::Color(255,0,255) );
     

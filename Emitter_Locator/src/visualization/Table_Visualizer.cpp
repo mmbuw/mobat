@@ -194,6 +194,7 @@ Recalculate_Geometry() {
 
     	        ball_.setPosition(to_projection_space(ball_pos_, ball_.getRadius())); 
             }
+
 	    } 
 	}
 // }
@@ -355,7 +356,7 @@ void Table_Visualizer::restart(){
     ball_dir_ = glm::vec2{0.0f, 1.0f};
     ball_speed_min_ = 0.001f;
     ball_speed_ = ball_speed_min_;
-    ball_speed_max_ = 0.005f;
+    ball_speed_max_ = 0.0025f;
     ball_acceleration_ = 1.2f;
     move_ball_ = false;
     ball_reset_ = true;
