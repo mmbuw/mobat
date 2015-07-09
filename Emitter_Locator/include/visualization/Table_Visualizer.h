@@ -51,6 +51,9 @@ class Table_Visualizer : Drawable_Object {
 		int right_goals_;
 		int left_goals_;
 
+		std::chrono::high_resolution_clock::time_point time_of_last_goal_;
+		unsigned ball_respawn_delay_;
+
 		Score points_;
 
 		unsigned elapsed_milliseconds_since_last_frame_;

@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
     //sf::RenderWindow signal_plot_window_(sf::VideoMode(280, 400)
     //                   , "Transformed_Frequencies");
 
-#if 1
+#if 0
 
 
 
@@ -165,7 +165,7 @@ int main(int argc, char** argv) {
                 table_visualizer.Draw(window);
 
 
-                //table_visualizer.Signal_Token(2000, pl1_pos);
+                table_visualizer.Signal_Token(2000, pl1_pos);
                 //table_visualizer.Signal_Token(1000, pl2_pos);
 
 
