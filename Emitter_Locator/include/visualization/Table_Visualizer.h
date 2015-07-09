@@ -43,6 +43,7 @@ class Table_Visualizer : Drawable_Object {
 		glm::vec2 ball_dir_;
 
 		float ball_speed_min_;
+		float ball_speed_limit_;
 		float ball_speed_max_;
 		float ball_speed_;
 		float ball_acceleration_;
@@ -57,6 +58,7 @@ class Table_Visualizer : Drawable_Object {
 		Score points_;
 
 		unsigned elapsed_milliseconds_since_last_frame_;
+		unsigned ball_slowing_time_;
 		// keep track of contact times for ball deceleration
 		std::chrono::high_resolution_clock::time_point  current_time_;
 		std::chrono::high_resolution_clock::time_point  contact_time_;
