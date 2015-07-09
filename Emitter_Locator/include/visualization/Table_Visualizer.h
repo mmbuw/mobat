@@ -52,6 +52,9 @@ class Table_Visualizer : Drawable_Object {
 		int right_goals_;
 		int left_goals_;
 
+		bool moved_out_;
+		glm::vec2 last_moved_dir_;
+
 		std::chrono::high_resolution_clock::time_point time_of_last_goal_;
 		unsigned ball_respawn_delay_;
 
@@ -104,7 +107,7 @@ class Table_Visualizer : Drawable_Object {
 
 		std::pair<bool, glm::vec2> ball_intersect(Recognized_Token_Object const& paddle) const;
 
-		void move_ball_out_of_token(Recognized_Token_Object const& paddle);
+		void move_ball_out_of_token(Recognized_Token_Object const& paddle, glm::vec2 const& dir = glm::vec2{0.0f});
 
 		std::pair<bool, std::string> game_over();
 

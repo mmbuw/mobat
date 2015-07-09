@@ -66,11 +66,11 @@ Table_Visualizer::
 void Table_Visualizer::
 Draw(sf::RenderWindow& canvas) const {
 
-	table_.Draw(canvas);
+    table_.Draw(canvas);
     canvas.draw(projection_shape_);
     
     if(gamemode_ == true){
-		points_.Draw(canvas);
+        points_.Draw(canvas);
     }
 
 
@@ -85,9 +85,9 @@ Draw(sf::RenderWindow& canvas) const {
 
     // ball_.Draw(canvas);
     if(gamemode_ == true && (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - time_of_last_goal_).count() > ball_respawn_delay_)){
-   		canvas.draw(ball_);
+        canvas.draw(ball_);
 
-   	}
+    }
 }
 
 
@@ -103,40 +103,43 @@ Recalculate_Geometry() {
         id_token_pair.second.Recalculate_Geometry();
     }
 
-// pseudopong zeug
-
-
-
-    // if(recognized_tokens_.size() >= 2){
-
-    //sf::CircleShape left  = recognized_tokens_[16000].get_Circle(); //NO HARDCODED FREQUENCIES!!!!!!!!!!!!
-    //sf::CircleShape right = recognized_tokens_[18000].get_Circle();
-    // sf::CircleShape t_ball = ball_.get_Circle();
-
     if(gamemode_ == true){
         if(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - time_of_last_goal_).count() > ball_respawn_delay_){
+
+            bool already_moved_out = false;
+            Recognized_Token_Object last_token;
             for(auto const& i : recognized_tokens_){
 
                 auto intersection = ball_intersect(i.second);
                 if(intersection.first){
-                    
-                    move_ball_out_of_token(i.second);
+                    last_token = i.second;
+                    // dont use new move direction when still on paddle
+                    if(moved_out_) {
+                        move_ball_out_of_token(i.second, last_moved_dir_);
+                    }
+                    else {
+                        last_moved_dir_ = intersection.second;
+                        move_ball_out_of_token(i.second);
+                    }
+
                     if(!move_ball_) {
                         move_ball_ = true;
                         ball_dir_ = intersection.second;
                     }
                     else {
                         ball_dir_ = glm::reflect(ball_dir_, intersection.second);
-                        if(ball_speed_max_ <= ball_speed_limit_) {
-                            ball_speed_max_ *= ball_acceleration_;
-                            ball_speed_min_ *= ball_acceleration_;
-                        }
                     }                       
                     contact_time_ = current_time_;
                     ball_speed_ = ball_speed_max_;
+
+                    already_moved_out = true;
                 }   
             }
-
+            // increase speed when leaving paddle
+            if(moved_out_ && !already_moved_out && ball_speed_max_ <= ball_speed_limit_) {
+                ball_speed_max_ *= ball_acceleration_;
+                ball_speed_min_ *= ball_acceleration_;
+            }
 
             float b_rad = ball_.getRadius() / pixel_per_projection_;
 
@@ -154,6 +157,12 @@ Recalculate_Geometry() {
                     ball_pos_.x = field_max.x;
                     ball_dir_ = glm::reflect(ball_dir_, glm::vec2{-1.0f ,0.0f});
                 }
+                // orevent ball getting stuck between wall & paddle
+                if(already_moved_out) {
+                    ball_dir_ = glm::normalize(ball_pos_ - last_token.get_physical_position());
+                    already_moved_out = false;
+                }
+                
             }
             // goal detection
             if(ball_pos_.y <= field_min.y - b_rad * 2.0f || ball_pos_.y >= field_max.y + b_rad * 2.0f){
@@ -164,7 +173,6 @@ Recalculate_Geometry() {
                     ++right_goals_;
                 }
                 points_.update(right_goals_, left_goals_);
-                std::cout<<"Left: "<<left_goals_<<"  Right:  "<<right_goals_<<"\n";
 
                 ball_dir_ = glm::vec2{0};
                 ball_pos_ = physical_projection_offset_ + physical_projection_size_ * 0.5f;
@@ -181,23 +189,27 @@ Recalculate_Geometry() {
                     ball_speed_ = ball_speed_min_;
                 }
                 else {
-                    // only recalculate ball speed while ball is slowing
-                    if(ball_speed_ > ball_speed_min_) {
-                        unsigned time_since_contact = std::chrono::duration_cast<std::chrono::milliseconds>
-                        (current_time_ - contact_time_).count(); 
-                        ball_speed_ = ball_speed_min_ + (ball_speed_max_ - ball_speed_min_) * (1 - double(time_since_contact) / ball_slowing_time_);
-                        ball_speed_ = glm::clamp(ball_speed_, ball_speed_min_, ball_speed_max_);
-                    }
+                    // only decellerate when not at paddle
+                    if(!already_moved_out) {
+                        // only recalculate ball speed while ball is slowing
+                        if(ball_speed_ > ball_speed_min_) {
+                            unsigned time_since_contact = std::chrono::duration_cast<std::chrono::milliseconds>
+                            (current_time_ - contact_time_).count(); 
+                            ball_speed_ = ball_speed_min_ + (ball_speed_max_ - ball_speed_min_) * (1 - double(time_since_contact) / ball_slowing_time_);
+                            ball_speed_ = glm::clamp(ball_speed_, ball_speed_min_, ball_speed_max_);
+                        }
 
-                    //std::cout << ball_speed_ << std::endl;
-                    ball_pos_ += ball_dir_ * float(elapsed_milliseconds_since_last_frame_ / 16.0f) * ball_speed_;
+                        ball_pos_ += ball_dir_ * float(elapsed_milliseconds_since_last_frame_ / 16.0f) * ball_speed_;
+                    }
                 }
 
-    	        ball_.setPosition(to_projection_space(ball_pos_, ball_.getRadius())); 
+                ball_.setPosition(to_projection_space(ball_pos_, ball_.getRadius())); 
             }
 
-	    } 
-	}
+            if(!moved_out_ && already_moved_out) moved_out_ = true;
+            else moved_out_ = false;
+        } 
+    }
 // }
 }
 
@@ -322,30 +334,33 @@ std::pair<bool, glm::vec2> Table_Visualizer::ball_intersect(Recognized_Token_Obj
     return std::pair<bool, glm::vec2>{intersects, normal}; 
 }
 
-void Table_Visualizer::move_ball_out_of_token(Recognized_Token_Object const& paddle){
+void Table_Visualizer::move_ball_out_of_token(Recognized_Token_Object const& paddle, glm::vec2 const& dir){
       
     glm::vec2 mid_paddle{paddle.get_physical_position()};
     
-    glm::vec2 norm = ball_intersect(paddle).second;
+    glm::vec2 normal = dir;
+    if(dir == glm::vec2{0.0f}) {
+       normal = ball_intersect(paddle).second;
+    }    
 
-    glm::vec2 new_ball_pos{mid_paddle + norm * float(ball_.getRadius() + paddle.get_Circle().getRadius() + paddle.get_Circle().getOutlineThickness()) / pixel_per_projection_};
+    glm::vec2 new_ball_pos{mid_paddle + normal * float(ball_.getRadius() + paddle.get_Circle().getRadius() + paddle.get_Circle().getOutlineThickness()) * 1.01f / pixel_per_projection_};
 
     ball_pos_ = new_ball_pos;
 }
 
 
 std::pair<bool, std::string> Table_Visualizer::game_over(){
-	int tmp = left_goals_ - right_goals_;
-	if(abs(tmp) < points_.get_maxpoints() / 2){
-		return {false, "Chuck Norris"};
-	}else{
-		if(tmp > 0){  //>= 3
-			return {true, "Red"};
-		}else{
-			return {true, "Blue"};//"upper/higher"
-		}
-	}	
-	
+    int tmp = left_goals_ - right_goals_;
+    if(abs(tmp) < points_.get_maxpoints() / 2){
+        return {false, "Chuck Norris"};
+    }else{
+        if(tmp > 0){  //>= 3
+            return {true, "Red"};
+        }else{
+            return {true, "Blue"};//"upper/higher"
+        }
+    }   
+    
 }
 
 
@@ -353,7 +368,7 @@ std::pair<bool, std::string> Table_Visualizer::game_over(){
 void Table_Visualizer::restart(){
 
 
-	ball_pos_ = glm::vec2{physical_projection_offset_ + physical_projection_size_ * 0.5f};
+    ball_pos_ = glm::vec2{physical_projection_offset_ + physical_projection_size_ * 0.5f};
     ball_dir_ = glm::vec2{0.0f, 1.0f};
     ball_speed_min_ = configurator().getFloat("ball_speed_min");
     ball_speed_ = ball_speed_min_;
@@ -363,7 +378,7 @@ void Table_Visualizer::restart(){
     right_goals_ = 0;
     left_goals_ = 0;
 
-	points_.reset();
+    points_.reset();
     
     //get initial timestamp
     last_time_stamp_ = std::chrono::high_resolution_clock::now();
@@ -371,16 +386,16 @@ void Table_Visualizer::restart(){
 }
 
 void Table_Visualizer::change_gm(){
-	if(gamemode_ == true){
-		gamemode_ = false;
-	}else{
-		gamemode_ = true;
-	}
+    if(gamemode_ == true){
+        gamemode_ = false;
+    }else{
+        gamemode_ = true;
+    }
 }
 
 
 bool Table_Visualizer::wanna_play(){
-	return gamemode_;
+    return gamemode_;
 }
 
 }; //namespace TTT

@@ -33,6 +33,9 @@ int main(int argc, char** argv) {
     auto recording_thread = std::thread(&Locator::record_position, &locator);
 
 // visualisation
+
+    bool show_signalvis = configurator().getUint("show_signalvis") > 0;
+
     sf::RenderWindow signal_plot_window_(sf::VideoMode(280, 400)
                        , "Transformed_Frequencies");
 
@@ -167,7 +170,6 @@ int main(int argc, char** argv) {
 
             //table_visualizer.Signal_Token(1000, pl2_pos);
 
-
             std::map<unsigned, std::pair<unsigned, glm::vec2> > positions = locator.load_position();
             
             if(positions.size() != 0) {
@@ -211,39 +213,39 @@ int main(int argc, char** argv) {
 
             glm::vec4 toas = locator.load_toas();
             
+            if(show_signalvis) {
+
+                std::array< std::vector<double>, 4> signal_vis_samples =  locator.load_signal_vis_samples();
+        
+                signal_plot_window_.clear(sf::Color(255, 255, 255));
+
+
+                std::array<unsigned, 4> recognized_vis_sample_pos = locator.load_recognized_vis_sample_positions();
+
+                sf::RectangleShape data_point;
+                for(unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
+
+                    for(unsigned int sample_idx = 0; sample_idx < signal_vis_samples[channel_iterator].size(); sample_idx+=1) {
+                        unsigned int sig = signal_vis_samples[channel_iterator][sample_idx];
+
+
+                        float width = 280.0f / signal_vis_samples[channel_iterator].size();
+
+                        data_point.setSize(sf::Vector2f(1,sig) );
+                        data_point.setPosition( sf::Vector2f( width * sample_idx, channel_iterator * 100.0 + (100.0-sig) ) );
+
+                        if(sample_idx <  recognized_vis_sample_pos[channel_iterator] ) {
+                            data_point.setFillColor(sf::Color(255, 0, 0) ) ;
+                        } else {
+                            data_point.setFillColor(sf::Color(0, 255, 0) ) ;          
+                        }
             
-            std::array< std::vector<double>, 4> signal_vis_samples =  locator.load_signal_vis_samples();
-    
-            signal_plot_window_.clear(sf::Color(255, 255, 255));
-
-
-            std::array<unsigned, 4> recognized_vis_sample_pos = locator.load_recognized_vis_sample_positions();
-
-            sf::RectangleShape data_point;
-            for(unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
-
-                for(unsigned int sample_idx = 0; sample_idx < signal_vis_samples[channel_iterator].size(); sample_idx+=1) {
-                    unsigned int sig = signal_vis_samples[channel_iterator][sample_idx];
-
-
-                    float width = 280.0f / signal_vis_samples[channel_iterator].size();
-
-                    data_point.setSize(sf::Vector2f(1,sig) );
-                    data_point.setPosition( sf::Vector2f( width * sample_idx, channel_iterator * 100.0 + (100.0-sig) ) );
-
-                    if(sample_idx <  recognized_vis_sample_pos[channel_iterator] ) {
-                        data_point.setFillColor(sf::Color(255, 0, 0) ) ;
-                    } else {
-                        data_point.setFillColor(sf::Color(0, 255, 0) ) ;          
+                        signal_plot_window_.draw(data_point);
                     }
-        
-                    signal_plot_window_.draw(data_point);
-                
                 }
+            
+                signal_plot_window_.display();
             }
-
-        
-            signal_plot_window_.display();
             
             }else{
                 if(draw_endscreen_){
