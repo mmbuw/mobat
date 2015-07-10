@@ -14,6 +14,8 @@
 
 sf::Vector2f smartphonePosition(1.0f,0.5f);
 
+void draw_signal_plot(sf::RenderWindow& window, Locator const& locator);
+
 int main(int argc, char** argv) {
 
     std::string file_name{"default.conf"};
@@ -100,7 +102,6 @@ int main(int argc, char** argv) {
     bool player1_keyboard = configurator().getUint("keyboard1") > 0;
     bool player2_keyboard = configurator().getUint("keyboard2") > 0;
 
-
     while (window.isOpen()) {
         if(window.pollEvent(event)) {
             if(event.type == sf::Event::KeyPressed){
@@ -112,6 +113,7 @@ int main(int argc, char** argv) {
         }
 
         if(!table_visualizer.game_over().first){
+            window.clear();
 
             if(player1_keyboard) {
                 glm::vec2 pl1_dir{0, 0};
@@ -162,13 +164,9 @@ int main(int argc, char** argv) {
                 table_visualizer.Signal_Token(configurator().getUint("player2"), pl2_pos);
             }
 
-            window.clear();
             table_visualizer.Recalculate_Geometry();
 
             table_visualizer.Draw(window);
-
-
-            //table_visualizer.Signal_Token(1000, pl2_pos);
 
             std::map<unsigned, std::pair<unsigned, glm::vec2> > positions = locator.load_position();
             
@@ -205,55 +203,18 @@ int main(int argc, char** argv) {
                 //}
             }
 
-
             table_visualizer.update_tokens();
-
-            window.display();   
-
-
-            glm::vec4 toas = locator.load_toas();
             
             if(show_signalvis) {
-
-                std::array< std::vector<double>, 4> signal_vis_samples =  locator.load_signal_vis_samples();
-        
-                signal_plot_window_.clear(sf::Color(255, 255, 255));
-
-
-                std::array<unsigned, 4> recognized_vis_sample_pos = locator.load_recognized_vis_sample_positions();
-
-                sf::RectangleShape data_point;
-                for(unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
-
-                    for(unsigned int sample_idx = 0; sample_idx < signal_vis_samples[channel_iterator].size(); sample_idx+=1) {
-                        unsigned int sig = signal_vis_samples[channel_iterator][sample_idx];
-
-
-                        float width = 280.0f / signal_vis_samples[channel_iterator].size();
-
-                        data_point.setSize(sf::Vector2f(1,sig) );
-                        data_point.setPosition( sf::Vector2f( width * sample_idx, channel_iterator * 100.0 + (100.0-sig) ) );
-
-                        if(sample_idx <  recognized_vis_sample_pos[channel_iterator] ) {
-                            data_point.setFillColor(sf::Color(255, 0, 0) ) ;
-                        } else {
-                            data_point.setFillColor(sf::Color(0, 255, 0) ) ;          
-                        }
-            
-                        signal_plot_window_.draw(data_point);
-                    }
-                }
-            
-                signal_plot_window_.display();
+                draw_signal_plot(signal_plot_window_, locator);
             }
             
-            }else{
-                if(draw_endscreen_){
+        }
+        else {
 
+            if(draw_endscreen_){
 
                 winner = table_visualizer.game_over().second;
-                //std::cout<< "Winner is: " << winner <<"\n";
-                //std::cout<<max.x << "  "<< max.y <<"\n";
 
                if(winner == "Red"){
                     window.draw(rect_red);
@@ -266,42 +227,53 @@ int main(int argc, char** argv) {
             }
         
 
-
-            /*sf::Color color = sf::Color(255, 192, 203);
-            //window.clear();
-            sf::Text text;
-            sf::Text play_again;
-            sf::Font font;
-            font.loadFromFile("../fonds/OpenSans-Light.ttf");
-            text.setFont(font);
-            text.setString(winner + " wins!\n");
-            text.setCharacterSize(24);
-            text.setColor(color);          
-            
-            text.setPosition(windowResolution.x/2.5 , windowResolution.y/2.0 - 40);
-
-            play_again.setFont(font);
-            play_again.setString("If you want to play again press return!\n");
-            play_again.setCharacterSize(24);
-            play_again.setColor(color);          
-            
-            play_again.setPosition(windowResolution.x/5.0, windowResolution.y/2.0 + 20);
-            */
-
-            /*window.draw(text);
-            window.draw(play_again);*/
-            window.display();
-
             if(sf::Keyboard::isKeyPressed(sf::Keyboard::Return) || !table_visualizer.wanna_play()) {
                 draw_endscreen_ = true;
                 table_visualizer.restart();
             }
-
         }
+        
+        window.display();  
     }
 
     locator.shut_down();
     recording_thread.join();
 
     return 0;
+}
+
+
+
+
+void draw_signal_plot(sf::RenderWindow& window, Locator const& locator) {
+    std::array< std::vector<double>, 4> signal_vis_samples =  locator.load_signal_vis_samples();
+        
+    window.clear(sf::Color(255, 255, 255));
+
+
+    std::array<unsigned, 4> recognized_vis_sample_pos = locator.load_recognized_vis_sample_positions();
+
+    sf::RectangleShape data_point;
+    for(unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
+
+        for(unsigned int sample_idx = 0; sample_idx < signal_vis_samples[channel_iterator].size(); sample_idx+=1) {
+            unsigned int sig = signal_vis_samples[channel_iterator][sample_idx];
+
+
+            float width = 280.0f / signal_vis_samples[channel_iterator].size();
+
+            data_point.setSize(sf::Vector2f(1,sig) );
+            data_point.setPosition( sf::Vector2f( width * sample_idx, channel_iterator * 100.0 + (100.0-sig) ) );
+
+            if(sample_idx <  recognized_vis_sample_pos[channel_iterator] ) {
+                data_point.setFillColor(sf::Color(255, 0, 0) ) ;
+            } else {
+                data_point.setFillColor(sf::Color(0, 255, 0) ) ;          
+            }
+
+            window.draw(data_point);
+        }
+    }
+
+    window.display();
 }
