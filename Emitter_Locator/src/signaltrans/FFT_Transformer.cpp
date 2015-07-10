@@ -1,5 +1,7 @@
 #include "FFT_Transformer.h"
 
+#include "configurator.hpp"
+
 #include <limits>
 #include <iostream>
 
@@ -131,6 +133,8 @@ void FFT_Transformer::set_listened_frequencies(std::vector<unsigned> const& list
 }
 
 void FFT_Transformer::perform_FFT_on_channels(int** signal_buffers, unsigned ints_per_channel, unsigned window_size, unsigned signal_half_chunk) {
+        float num_chunks = configurator().getFloat("num_splitted_fourier_chunks");
+
         for (unsigned int channel_iterator = 0; channel_iterator < 4	; ++channel_iterator) {
             set_FFT_buffers(4, 
                     ints_per_channel,
@@ -139,9 +143,9 @@ void FFT_Transformer::perform_FFT_on_channels(int** signal_buffers, unsigned int
             unsigned signal_chunk = 2.0 * signal_half_chunk;
             reset_sample_counters(channel_iterator);
             clear_cached_fft_results(channel_iterator);
-            for(unsigned int i = signal_chunk * (ints_per_channel/6.0) ; i < (signal_chunk+1)*(ints_per_channel/6.0) - 50; ++i) {
+            for(unsigned int i = signal_chunk * (ints_per_channel/num_chunks) ; i < (signal_chunk+1)*(ints_per_channel/num_chunks) - 50; ++i) {
                 unsigned offset = 1 * i;
-                if(offset > (signal_chunk+1)*(ints_per_channel/6.0) - 50 )
+                if(offset > (signal_chunk+1)*(ints_per_channel/num_chunks) - 50 )
                     break;
 					
 				set_analyzation_range(0+offset, window_size+50 + offset);

@@ -17,7 +17,7 @@ file(GLOB SIGNALTRANS_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/signaltra
 add_library(signaltrans STATIC ${SIGNALTRANS_SOURCES})
 target_include_directories(signaltrans PUBLIC include/signaltrans include/locator)
 # requires fftw3-dev and libsndfile1-dev
-target_link_libraries(signaltrans -lfftw3_threads -lfftw3 -lm -lsndfile)
+target_link_libraries(signaltrans -lfftw3_threads -lfftw3 -lm -lsndfile visualization)
 
 # locator
 file(GLOB LOCATOR_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/locator/*.cpp)

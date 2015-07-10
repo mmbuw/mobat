@@ -1,4 +1,5 @@
 #include "locator.hpp"
+#include "configurator.hpp"
 
 #include <limits>
 #include <iostream>
@@ -118,7 +119,8 @@ load_recognized_vis_sample_positions() const {
 
 
         } else {
-            if( first_signal_available == false || ++current_signal_chunk_ >= 3)
+            if( first_signal_available == false || ++current_signal_chunk_ >= 
+                configurator().getUint("num_analyzed_fourier_chunks") )
                 continue;
         }
 

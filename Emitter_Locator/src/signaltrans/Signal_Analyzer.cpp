@@ -1,5 +1,6 @@
 #include "Signal_Analyzer.h"
 
+#include "configurator.hpp"
 
 #include <algorithm>
 #include <functional>
@@ -120,8 +121,9 @@ analyze(buffer_collection const& collector, unsigned signal_chunk){
                 	} else {
 
 
-                		double power = 10;
-                		if(peak-min > 5.0) {
+                		double power = configurator().getFloat("peak_power");
+                        double frequency_sum_detection_threshold = configurator().getFloat("frequency_sum_detection_threshold");
+                		if(peak-min > frequency_sum_detection_threshold) {
                 			sig =  100.0 * (pow(sig,power) - pow(min,power)) / (pow(peak,power) - pow(min,power));
 
              
