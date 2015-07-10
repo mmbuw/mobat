@@ -55,6 +55,14 @@ Table_Visualizer(std::vector<glm::vec2> const& microphone_positions,
     ball_speed_limit_ = configurator().getFloat("ball_speed_limit");
     ball_acceleration_ = configurator().getFloat("ball_acceleration");
     ball_slowing_time_ = configurator().getUint("ball_slowing_time");
+    // parameters for keybaord controlled game
+    player1_keyboard_ = configurator().getUint("keyboard1") > 0;
+    player2_keyboard_ = configurator().getUint("keyboard2") > 0;
+
+    player_speed_ = configurator().getFloat("player_speed");
+
+    player1_pos_ = glm::vec2{TTT::Drawable_Object::physical_projection_offset_ + TTT::Drawable_Object::physical_projection_size_ * glm::vec2{0.5f, 0.3f}};
+    player2_pos_ = glm::vec2{TTT::Drawable_Object::physical_projection_offset_ + TTT::Drawable_Object::physical_projection_size_ * glm::vec2{0.5f, 0.6f}};
 
     restart();
     
@@ -397,6 +405,57 @@ void Table_Visualizer::change_gm(){
 
 bool Table_Visualizer::wanna_play(){
     return gamemode_;
+}
+
+
+void Table_Visualizer::handle_keyboard_input() {
+    glm::vec2 field_max{TTT::Drawable_Object::physical_projection_offset_ + TTT::Drawable_Object::physical_projection_size_ - glm::vec2{0.02f, 0.02f}};
+    glm::vec2 field_min{TTT::Drawable_Object::physical_projection_offset_ + glm::vec2{0.02f, 0.02f}};
+        
+    if(player1_keyboard_) {
+        glm::vec2 pl1_dir{0, 0};
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+            pl1_dir.y += player_speed_;
+        }
+
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+            pl1_dir.y -= player_speed_;
+        }
+
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+            pl1_dir.x += player_speed_;
+        }
+
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+            pl1_dir.x -= player_speed_;
+        }
+
+        player1_pos_ = glm::clamp(player1_pos_ + pl1_dir, field_min, field_max);
+        Signal_Token(configurator().getUint("player1"), player1_pos_);
+    }
+     //left player
+    if(player2_keyboard_) {
+        glm::vec2 pl2_dir{0, 0};
+
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+            pl2_dir.y += player_speed_;
+        }
+
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+            pl2_dir.y -= player_speed_;
+        }
+
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+            pl2_dir.x += player_speed_;
+        }
+
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+            pl2_dir.x -= player_speed_;
+        }
+
+        player2_pos_ = glm::clamp(player2_pos_ + pl2_dir, field_min, field_max);
+        Signal_Token(configurator().getUint("player2"), player2_pos_);
+    }
 }
 
 }; //namespace TTT

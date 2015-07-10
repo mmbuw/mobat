@@ -10,10 +10,6 @@
 #include <thread>
 #include <X11/Xlib.h>
 
-#define NUM_RECORDED_CHANNELS 4
-
-sf::Vector2f smartphonePosition(1.0f,0.5f);
-
 void draw_signal_plot(sf::RenderWindow& window, Locator const& locator);
 
 int main(int argc, char** argv) {
@@ -75,13 +71,6 @@ int main(int argc, char** argv) {
     
 // game
     std::string winner;
-    glm::vec2 field_max{TTT::Drawable_Object::physical_projection_offset_ + TTT::Drawable_Object::physical_projection_size_ - glm::vec2{0.02f, 0.02f}};
-    glm::vec2 field_min{TTT::Drawable_Object::physical_projection_offset_ + glm::vec2{0.02f, 0.02f}};
-        
-    glm::vec2 pl1_pos{TTT::Drawable_Object::physical_projection_offset_ + TTT::Drawable_Object::physical_projection_size_ * glm::vec2{0.5f, 0.3f}};
-    glm::vec2 pl2_pos{TTT::Drawable_Object::physical_projection_offset_ + TTT::Drawable_Object::physical_projection_size_ * glm::vec2{0.5f, 0.6f}};
-
-    float player_speed = configurator().getFloat("player_speed");
 
     sf::Event event;
         
@@ -99,9 +88,6 @@ int main(int argc, char** argv) {
 
     bool draw_endscreen_ = true;
 
-    bool player1_keyboard = configurator().getUint("keyboard1") > 0;
-    bool player2_keyboard = configurator().getUint("keyboard2") > 0;
-
     while (window.isOpen()) {
         if(window.pollEvent(event)) {
             if(event.type == sf::Event::KeyPressed){
@@ -115,54 +101,7 @@ int main(int argc, char** argv) {
         if(!table_visualizer.game_over().first){
             window.clear();
 
-            if(player1_keyboard) {
-                glm::vec2 pl1_dir{0, 0};
-                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-                    pl1_dir.y += player_speed;
-                }
-
-                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-                    pl1_dir.y -= player_speed;
-                }
-
-
-                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-                    pl1_dir.x += player_speed;
-                }
-
-
-                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-                    pl1_dir.x -= player_speed;
-                }
-
-                pl1_pos = glm::clamp(pl1_pos + pl1_dir, field_min, field_max);
-                table_visualizer.Signal_Token(configurator().getUint("player1"), pl1_pos);
-            }
-             //left player
-            if(player2_keyboard) {
-                glm::vec2 pl2_dir{0, 0};
-
-                if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-                    pl2_dir.y += player_speed;
-                }
-
-
-                if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-                    pl2_dir.y -= player_speed;
-                }
-
-                if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
-                    pl2_dir.x += player_speed;
-                }
-
-
-                if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
-                    pl2_dir.x -= player_speed;
-                }
-
-                pl2_pos = glm::clamp(pl2_pos + pl2_dir, field_min, field_max);
-                table_visualizer.Signal_Token(configurator().getUint("player2"), pl2_pos);
-            }
+            table_visualizer.handle_keyboard_input();
 
             table_visualizer.Recalculate_Geometry();
 
@@ -171,24 +110,17 @@ int main(int argc, char** argv) {
             std::map<unsigned, std::pair<unsigned, glm::vec2> > positions = locator.load_position();
             
             if(positions.size() != 0) {
-                //std::cout << "Started getting posses: \n";
 
                 unsigned current_iteration_timestamp_peak = 0;
                 for(auto const& frequency_position_entry : positions ) {     
 
-
                     if(latest_received_timestamp < positions[frequency_position_entry.first].first) {
                         current_iteration_timestamp_peak = positions[frequency_position_entry.first].first;
 
-                        glm::vec2 current_frequency_position = positions[frequency_position_entry.first].second;
-
-                        smartphonePosition.x = current_frequency_position.x;
-                        smartphonePosition.y = 1.0 - current_frequency_position.y;
-
                         table_visualizer
                             .Signal_Token(frequency_position_entry.first, 
-                                          glm::vec2(smartphonePosition.x, 
-                                                       smartphonePosition.y));
+                                          glm::vec2(positions[frequency_position_entry.first].second.x,
+                                           1.0 - positions[frequency_position_entry.first].second.y));
                     }
                 }
 
@@ -225,7 +157,6 @@ int main(int argc, char** argv) {
 
                 draw_endscreen_ = false;
             }
-        
 
             if(sf::Keyboard::isKeyPressed(sf::Keyboard::Return) || !table_visualizer.wanna_play()) {
                 draw_endscreen_ = true;
