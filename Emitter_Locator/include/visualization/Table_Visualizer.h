@@ -52,6 +52,12 @@ class Table_Visualizer : Drawable_Object {
 		int right_goals_;
 		int left_goals_;
 
+		float player_speed_;
+		bool player1_keyboard_;
+		bool player2_keyboard_;
+		glm::vec2 player1_pos_;
+		glm::vec2 player2_pos_;
+
 		bool moved_out_;
 		glm::vec2 last_moved_dir_;
 
@@ -116,6 +122,9 @@ class Table_Visualizer : Drawable_Object {
 		void change_gm();
 
 		bool wanna_play();
+
+		void handle_keyboard_input();
+
 };
 
 }; //end TTT
