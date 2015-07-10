@@ -127,7 +127,8 @@ Recalculate_Geometry() {
                         ball_dir_ = intersection.second;
                     }
                     else {
-                        ball_dir_ = glm::reflect(ball_dir_, intersection.second);
+                        //ball_dir_ = glm::reflect(ball_dir_, intersection.second);
+                        ball_dir_ = intersection.second;
                     }                       
                     contact_time_ = current_time_;
                     ball_speed_ = ball_speed_max_;
