@@ -12,6 +12,10 @@ struct Microphone
 	 position{0, 0}
 	{}
 
+	Microphone (glm::vec2 xy) : 
+		position{xy.x, xy.y} 
+	{}
+
 	Microphone(double x, double y) :
 		position{x, y}
 	{}

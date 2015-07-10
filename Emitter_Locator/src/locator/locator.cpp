@@ -1,6 +1,8 @@
 #include "locator.hpp"
 #include "configurator.hpp"
 
+#include "microphone.hpp"
+
 #include <limits>
 #include <iostream>
 
@@ -13,10 +15,16 @@ Locator::Locator(unsigned int num_mics):
  recorder{num_mics, 44100, 130000},
  collector{recorder.buffer_bytes() / num_mics, num_mics},
  //locator{330, {0.06, 0.075}, {0.945,  0.09}, {0.925,  1.915} , {0.06,  1.905}},
- locator{330, {0.057, 0.125}, {0.54,  0.12}, {0.52,  1.08} , {0.065,  1.075}},
+ locator{330, {0.00, 0.0}, {0.0,  0.0}, {0.0,  0.0} , {0.0,  0.0}},
  locator_frame_counter_(cached_positions[0].size()),
  current_signal_chunk_(0)
- {}
+ {
+    locator = TDOAtor(330.0, Microphone( configurator().getVec("microphone1_pos") ),
+                            Microphone( configurator().getVec("microphone2_pos") ),
+                           Microphone( configurator().getVec("microphone3_pos") ),
+                          Microphone(  configurator().getVec("microphone4_pos") ) );
+
+ }
 
 
 std::map<unsigned, std::pair<unsigned, glm::vec2> > Locator::
