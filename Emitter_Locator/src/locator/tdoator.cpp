@@ -5,52 +5,50 @@
 
  TDOAtor::
  TDOAtor(double c,
-   Microphone const& m1, Microphone const& m2,
-   Microphone const& m3, Microphone const& m4):
-    c_{c},
-    mics_{m1, m2, m3, m4}
+   glm::vec2 const& m1, glm::vec2 const& m2,
+   glm::vec2 const& m3, glm::vec2 const& m4)
+    :c_{c}
+    ,mics_{m1, m2, m3, m4}
+    ,toas_(4, 0)
 {
-    min_.x = std::min(std::min(std::min(mics_[0].position.x , mics_[1].position.x), mics_[2].position.x), mics_[3].position.x);
-    max_.x = std::max(std::max(std::max(mics_[0].position.x , mics_[1].position.x), mics_[2].position.x), mics_[3].position.x);
+    min_.x = std::min(std::min(std::min(mics_[0].x , mics_[1].x), mics_[2].x), mics_[3].x);
+    max_.x = std::max(std::max(std::max(mics_[0].x , mics_[1].x), mics_[2].x), mics_[3].x);
 
-    min_.y = std::min(std::min(std::min(mics_[0].position.y , mics_[1].position.y), mics_[2].position.y), mics_[3].position.y);
-    max_.y = std::max(std::max(std::max(mics_[0].position.y , mics_[1].position.y), mics_[2].position.y), mics_[3].position.y);
+    min_.y = std::min(std::min(std::min(mics_[0].y , mics_[1].y), mics_[2].y), mics_[3].y);
+    max_.y = std::max(std::max(std::max(mics_[0].y , mics_[1].y), mics_[2].y), mics_[3].y);
 
 /*
     for(unsigned mic_1_idx = 0; mic_1_idx < 4; ++mic_1_idx ) {
         for(unsigned mic_2_idx = 0; mic_2_idx < 4; ++mic_2_idx ) {
             //calculates the time of arrival that should be measured from one microphone to the other
-            distance_mic_low_to_high_[mic_1_idx][mic_2_idx] = glm::length(mics_[mic_1_idx].position - mics_[mic_2_idx].position) / 44100;
+            distance_mic_low_to_high_[mic_1_idx][mic_2_idx] = glm::length(mics_[mic_1_idx] - mics_[mic_2_idx]) / 44100;
         }
     }
 */
 }
 
 void TDOAtor::
-set_c(double in_c) {
+setSoundSpeed(double in_c) {
     c_ = in_c;
 }
 
 void TDOAtor::
 update_times(double a, double b, double c, double d) {
-    mics_[0].toa = a;
-    mics_[1].toa = b;
-    mics_[2].toa = c;
-    mics_[3].toa = d;
+    toas_[0] = a;
+    toas_[1] = b;
+    toas_[2] = c;
+    toas_[3] = d;
 };
 
 double TDOAtor::
-dif(glm::vec2 const& p, 
-                    Microphone const& mic1, 
-                    Microphone const& mic2) const {
-    double dtoa = (mic1.toa - mic2.toa) ;// 1000.0;
+dif(glm::vec2 const& p, unsigned m1, unsigned m2) const {
+    double dtoa = (toas_[m1] - toas_[m2]) ;// 1000.0;
 
-    return dtoa - (glm::length(p - mic1.position) - glm::length(p - mic2.position) ) / c_ ;
+    return dtoa - (glm::length(p - mics_[m1]) - glm::length(p - mics_[m2]) ) / c_ ;
 };
 
 glm::vec2 TDOAtor::
 locate() const {
-
 
     double located_x = min_.x;
     double located_y = min_.y;
@@ -78,7 +76,7 @@ locate() const {
                 for(int j = i+1; j < 4; ++j) {
 
 
-                    temp_dif += fabs(dif(test, mics_[i], mics_[j]));
+                    temp_dif += fabs(dif(test, i, j));
 
                 }
             }

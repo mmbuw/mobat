@@ -1,8 +1,11 @@
 #ifndef TDOATOR_HPP
 #define TDOATOR_HPP
 
-#include "microphone.hpp"
+//set default glm types double and request highest precision 
+#define GLM_PRECISION_HIGHP_DOUBLE
+#include <glm/glm.hpp>
 
+#include <vector>
 #include <map>
 
 struct ErrorOf2DPos {
@@ -14,10 +17,10 @@ class TDOAtor{
   public:
 
     TDOAtor(double c,
-           Microphone const& m1, Microphone const& m2, Microphone const& m3, Microphone const& m4);
+           glm::vec2 const& m1, glm::vec2 const& m2, glm::vec2 const& m3, glm::vec2 const& m4);
 
     // set the speed of sound
-    void set_c(double c);
+    void setSoundSpeed(double c);
 
     // set the signal arrival times
     void update_times(double a, double b, double c, double d);
@@ -28,13 +31,14 @@ class TDOAtor{
     
   private:
     // calculates the difference of ?
-    double dif(glm::vec2 const& p, Microphone const& mic1, Microphone const& mic2) const;
+    double dif(glm::vec2 const& p, unsigned m1, unsigned m2) const;
 
     //m/s
     double c_;
 
     //with toa in s
-    Microphone mics_[4];
+    std::vector<glm::vec2> mics_;
+    std::vector<float> toas_;
     glm::vec2 min_;
     glm::vec2 max_;
 
