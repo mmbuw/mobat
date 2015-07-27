@@ -16,7 +16,7 @@ TableVisualizer(std::vector<glm::vec2> const& microphone_positions,
 
     if(!microphone_positions.empty()) {
         for(auto const& pos : microphone_positions) {
-            microphones_.push_back(MicrophoneObject(id_counter++, pos) );
+            microphones_.push_back(Microphone(id_counter++, pos) );
         }
     } else {
         std::vector<glm::vec2> default_microphone_positions_;
@@ -26,7 +26,7 @@ TableVisualizer(std::vector<glm::vec2> const& microphone_positions,
             default_microphone_positions_.push_back(glm::vec2{physical_table_size_.x, physical_table_size_.y});
 
         for(auto const& pos : default_microphone_positions_) {
-            microphones_.push_back(MicrophoneObject(id_counter++, pos) );
+            microphones_.push_back(Microphone(id_counter++, pos) );
         }
     }
     
@@ -100,7 +100,7 @@ Draw(sf::RenderWindow& canvas) const {
 
 
 void TableVisualizer::
-Reset_Microphones(std::vector<MicrophoneObject> const& microphones) {
+Reset_Microphones(std::vector<Microphone> const& microphones) {
     microphones_ = microphones;
 }
 

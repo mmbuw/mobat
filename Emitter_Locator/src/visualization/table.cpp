@@ -16,7 +16,7 @@ Draw(sf::RenderWindow& canvas) const {
 }
 
 void Table::
-Draw(sf::RenderWindow& canvas, std::vector<MicrophoneObject> const& microphones, glm::vec4 const& toas) const {
+Draw(sf::RenderWindow& canvas, std::vector<Microphone> const& microphones, glm::vec4 const& toas) const {
 
 	//sf::Shader error_vis_shader;
 /*

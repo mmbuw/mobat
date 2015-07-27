@@ -1,11 +1,11 @@
-#ifndef TTT_MicrophoneObject_H
-#define TTT_MicrophoneObject_H
+#ifndef TTT_Microphone_H
+#define TTT_Microphone_H
 
 #include "drawable_object.h"
 
 namespace TTT {
 
-class MicrophoneObject : DrawableObject {
+class Microphone : DrawableObject {
 
 	private:
 		unsigned id_;
@@ -14,7 +14,7 @@ class MicrophoneObject : DrawableObject {
 	public:
 		glm::vec2 physical_position_;
 		
-		MicrophoneObject(unsigned in_id, glm::vec2 const& in_position );
+		Microphone(unsigned in_id, glm::vec2 const& in_position );
 		virtual void Draw(sf::RenderWindow& canvas) const;
 		virtual void recalculateGeometry();
 
