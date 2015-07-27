@@ -1,7 +1,7 @@
 #ifndef TTT_Token_H
 #define TTT_Token_H
 
-#include "drawable_object.h"
+#include "drawable_object.hpp"
 
 namespace TTT {
 

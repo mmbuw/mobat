@@ -1,4 +1,4 @@
-#include "score.h"
+#include "score.hpp"
 
 #include <iostream>
 
@@ -34,7 +34,6 @@ Score::Score(int maxpoints){
 		}
 	}else{	//spielfeld horizontal
 		float distance = (max.y - min.y) / (points_.size()) - size.x; 
-	// std::cout<<"HHHHHHHAAAAAAAAAAAAAAAAAAALLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLOOOOOOOOOOOOOOOOOOOOOOOOOOOOO!\n";
 		for(int i = 0; i < maxpoints_; ++i){
 		// points_.push_back(sf::RectangleShape());
 			if(i < maxpoints / 2){

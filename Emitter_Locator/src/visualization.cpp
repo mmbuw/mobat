@@ -1,7 +1,7 @@
 #include "locator.hpp"
 #include "table_visualizer.hpp"
-#include "drawable_object.h"
-#include "score.h"
+#include "drawable_object.hpp"
+#include "score.hpp"
 #include "configurator.hpp"
 
 #include <SFML/Graphics.hpp>

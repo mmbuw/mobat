@@ -1,7 +1,7 @@
 #ifndef TTT_Microphone_H
 #define TTT_Microphone_H
 
-#include "drawable_object.h"
+#include "drawable_object.hpp"
 
 namespace TTT {
 

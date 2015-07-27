@@ -5,7 +5,7 @@
 #include "microphone.hpp"
 #include "token.hpp"
 // #include "Ball.h"
-#include "score.h"
+#include "score.hpp"
 
 #include <vector>
 #include <map>

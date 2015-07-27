@@ -1,7 +1,7 @@
 #ifndef TTT_Table_H
 #define TTT_Table_H
 
-#include "drawable_object.h"
+#include "drawable_object.hpp"
 #include "microphone.hpp"
 #include <glm/glm.hpp>
 
