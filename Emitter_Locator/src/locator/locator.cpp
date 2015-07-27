@@ -19,10 +19,10 @@ Locator::Locator(unsigned int num_mics):
  locator_frame_counter_(cached_positions[0].size()),
  current_signal_chunk_(0)
  {
-    locator = TDOAtor(330.0, Microphone( configurator().getVec("microphone1_pos") ),
-                            Microphone( configurator().getVec("microphone2_pos") ),
-                           Microphone( configurator().getVec("microphone3_pos") ),
-                          Microphone(  configurator().getVec("microphone4_pos") ) );
+    locator = TDOAtor(330.0, configurator().getVec("microphone1_pos"),
+                            configurator().getVec("microphone2_pos"),
+                           configurator().getVec("microphone3_pos"),
+                          configurator().getVec("microphone4_pos") );
 
  }
 
@@ -121,7 +121,7 @@ load_recognized_vis_sample_positions() const {
 
         if(false == work_on_old_signal) {
             current_signal_chunk_ = 0;
-            collector.from_interleaved(recorder.buffer());
+            collector.fromInterleaved(recorder.buffer());
 
             recorder.requestRecording();
 

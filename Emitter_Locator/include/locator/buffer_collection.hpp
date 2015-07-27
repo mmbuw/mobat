@@ -13,7 +13,7 @@ struct buffer_collection {
 
     ~buffer_collection();
     //copy data from interleaved buffer, assumes that the sourcesize equals length * count 
-    void from_interleaved(unsigned char* source);
+    void fromInterleaved(unsigned char* source);
 
     int* const& operator[](std::size_t i);
     int* const& operator[](std::size_t i) const;
