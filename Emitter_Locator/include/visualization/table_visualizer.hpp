@@ -1,7 +1,7 @@
 #ifndef TableVisualizer_H
 #define TableVisualizer_H
 
-#include "Table_Object.h"
+#include "table.hpp"
 #include "microphone_object.h"
 #include "token.hpp"
 // #include "Ball.h"
@@ -21,7 +21,7 @@ namespace TTT {
 class TableVisualizer : DrawableObject {
 
 	private:
-		Table_Object table_;
+		Table table_;
 		std::vector<MicrophoneObject> microphones_;
 		//register them with their frequency
 		std::map<unsigned, Token> recognized_tokens_;

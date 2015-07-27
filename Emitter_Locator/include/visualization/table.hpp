@@ -1,5 +1,5 @@
-#ifndef TTT_TABLE_OBJECT_H
-#define TTT_TABLE_OBJECT_H
+#ifndef TTT_Table_H
+#define TTT_Table_H
 
 #include "drawable_object.h"
 #include "microphone_object.h"
@@ -7,7 +7,7 @@
 
 namespace TTT {
 
-class Table_Object : DrawableObject {
+class Table : DrawableObject {
 
 	private:
 		sf::RectangleShape table_rectangle_shape_;

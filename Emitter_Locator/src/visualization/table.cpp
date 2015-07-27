@@ -1,9 +1,9 @@
-#include "Table_Object.h"
+#include "table.hpp"
 #include <iostream>
 
 namespace TTT {
 
-void Table_Object::
+void Table::
 Draw(sf::RenderWindow& canvas) const {
 	canvas.draw(table_rectangle_shape_);
 	canvas.draw(middle_);
@@ -15,7 +15,7 @@ Draw(sf::RenderWindow& canvas) const {
 	canvas.draw(left_line_);
 }
 
-void Table_Object::
+void Table::
 Draw(sf::RenderWindow& canvas, std::vector<MicrophoneObject> const& microphones, glm::vec4 const& toas) const {
 
 	//sf::Shader error_vis_shader;
@@ -41,7 +41,7 @@ Draw(sf::RenderWindow& canvas, std::vector<MicrophoneObject> const& microphones,
 	//sf::Shader::bind(NULL);
 }
 
-void Table_Object::
+void Table::
 recalculateGeometry() {
 	table_rectangle_shape_.setSize(toProjectionSize(physical_table_size_));
 	table_rectangle_shape_.setPosition(toProjectionSpace(glm::vec2{0.0f}));
@@ -83,7 +83,7 @@ recalculateGeometry() {
 	right_goal_.setFillColor(sf::Color::Transparent);
 }
 
-void Table_Object::
+void Table::
 setFillColor(sf::Color const& in_fill_color) {
 	
 	table_rectangle_shape_.setFillColor(in_fill_color);
