@@ -3,7 +3,7 @@
 
 #include "Table_Object.h"
 #include "microphone_object.h"
-#include "Recognized_Token_Object.h"
+#include "token.hpp"
 // #include "Ball.h"
 #include "score.h"
 
@@ -24,7 +24,7 @@ class TableVisualizer : DrawableObject {
 		Table_Object table_;
 		std::vector<MicrophoneObject> microphones_;
 		//register them with their frequency
-		std::map<unsigned, Recognized_Token_Object> recognized_tokens_;
+		std::map<unsigned, Token> recognized_tokens_;
 
 		std::map<unsigned, sf::Color> token_color_mapping_;
 
@@ -111,9 +111,9 @@ class TableVisualizer : DrawableObject {
 
 		unsigned Get_Elapsed_Milliseconds();
 
-		std::pair<bool, glm::vec2> ball_intersect(Recognized_Token_Object const& paddle) const;
+		std::pair<bool, glm::vec2> ball_intersect(Token const& paddle) const;
 
-		void move_ball_out_of_token(Recognized_Token_Object const& paddle, glm::vec2 const& dir = glm::vec2{0.0f});
+		void move_ball_out_of_token(Token const& paddle, glm::vec2 const& dir = glm::vec2{0.0f});
 
 		std::pair<bool, std::string> game_over();
 

@@ -115,7 +115,7 @@ recalculateGeometry() {
         if(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - time_of_last_goal_).count() > ball_respawn_delay_){
 
             bool already_moved_out = false;
-            Recognized_Token_Object last_token;
+            Token last_token;
             for(auto const& i : recognized_tokens_){
 
                 auto intersection = ball_intersect(i.second);
@@ -266,7 +266,7 @@ Signal_Token(unsigned int in_id, glm::vec2 const& in_position) {
     }
 
     //std::cout << "Inserting new token with id: " << in_id << "\n";
-    recognized_tokens_[in_id] = Recognized_Token_Object(in_id, in_position); 
+    recognized_tokens_[in_id] = Token(in_id, in_position); 
 
     std::map<unsigned, sf::Color>::iterator token_color_mapping_iterator = 
         token_color_mapping_.find(in_id);
@@ -328,7 +328,7 @@ Get_Elapsed_Milliseconds(){
     return elapsed_milliseconds_since_last_frame_;//.asMilliseconds();
 }
 
-std::pair<bool, glm::vec2> TableVisualizer::ball_intersect(Recognized_Token_Object const& paddle) const{
+std::pair<bool, glm::vec2> TableVisualizer::ball_intersect(Token const& paddle) const{
     glm::vec2 mid_paddle{paddle.get_physical_position()};
 
     float dist = glm::length(ball_pos_ - mid_paddle);
@@ -343,7 +343,7 @@ std::pair<bool, glm::vec2> TableVisualizer::ball_intersect(Recognized_Token_Obje
     return std::pair<bool, glm::vec2>{intersects, normal}; 
 }
 
-void TableVisualizer::move_ball_out_of_token(Recognized_Token_Object const& paddle, glm::vec2 const& dir){
+void TableVisualizer::move_ball_out_of_token(Token const& paddle, glm::vec2 const& dir){
       
     glm::vec2 mid_paddle{paddle.get_physical_position()};
     

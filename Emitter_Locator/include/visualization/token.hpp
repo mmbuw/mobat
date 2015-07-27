@@ -1,11 +1,11 @@
-#ifndef TTT_RECOGNIZED_TOKEN_OBJECT_H
-#define TTT_RECOGNIZED_TOKEN_OBJECT_H
+#ifndef TTT_Token_H
+#define TTT_Token_H
 
 #include "drawable_object.h"
 
 namespace TTT {
 
-class Recognized_Token_Object : DrawableObject {
+class Token : DrawableObject {
 
 	private:
 		//the id is in this case the frequency
@@ -26,7 +26,7 @@ class Recognized_Token_Object : DrawableObject {
 
 		glm::vec2 physical_position_;
 		
-		Recognized_Token_Object(unsigned in_id = 0, 
+		Token(unsigned in_id = 0, 
 								glm::vec2 in_position = glm::vec2(-500.0, -500.0),
 								unsigned in_life_time_in_ms = 10000);
 		virtual void Draw(sf::RenderWindow& canvas) const;
@@ -49,7 +49,7 @@ class Recognized_Token_Object : DrawableObject {
 		sf::CircleShape get_Circle() const;
 		glm::vec2 const& get_physical_position() const;
 
-}; //end class Recognized_Token_Object
+}; //end class Token
 
 
 }; //namespace TTT

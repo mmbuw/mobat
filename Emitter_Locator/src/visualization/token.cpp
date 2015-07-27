@@ -1,10 +1,10 @@
-#include "Recognized_Token_Object.h"
+#include "token.hpp"
 
 #include <iostream>
 namespace TTT {
 
-Recognized_Token_Object::
-Recognized_Token_Object(unsigned in_id, 
+Token::
+Token(unsigned in_id, 
 						glm::vec2 in_position, 
 						unsigned in_life_time_in_ms ) 
 						: id_(in_id),
@@ -15,7 +15,7 @@ Recognized_Token_Object(unsigned in_id,
 	token_circle_shape_.setOutlineColor(sf::Color(0, 0, 0, 255.0));
 }
 
-void Recognized_Token_Object::
+void Token::
 Draw(sf::RenderWindow& canvas) const {
 	//std::cout << "Drawing Token: \n";
 	//std::cout << id_ << "Hz @ ";
@@ -24,19 +24,19 @@ Draw(sf::RenderWindow& canvas) const {
 	canvas.draw(token_circle_shape_);
 }
 
-void Recognized_Token_Object::
+void Token::
 recalculateGeometry() {
 	float radius = 0.04* pixel_per_projection_;
 	token_circle_shape_.setPosition(toProjectionSpace(physical_position_, radius));
 	token_circle_shape_.setRadius(radius);
 }
 
-void Recognized_Token_Object::
+void Token::
 setFillColor(sf::Color const& in_fill_color) {
 	token_circle_shape_.setFillColor(in_fill_color);
 }
 
-void Recognized_Token_Object::
+void Token::
 Update_Alpha_Value(float in_alpha) {
 	sf::Color new_color = token_circle_shape_.getFillColor();
 	new_color.a = sf::Uint8(255.0 * in_alpha);
@@ -47,12 +47,12 @@ Update_Alpha_Value(float in_alpha) {
 }
 
 
-void Recognized_Token_Object::
+void Token::
 Set_Life_Time(unsigned in_life_time_in_ms) {
 	life_time_in_ms_ = in_life_time_in_ms;
 }
 
-bool Recognized_Token_Object::
+bool Token::
 Update_Token(bool in_was_recognized, 
 			 unsigned in_passed_time_in_ms, 
 			 glm::vec2 const& in_position) {
@@ -79,17 +79,17 @@ Update_Token(bool in_was_recognized,
 		return true;
 }
 
-unsigned Recognized_Token_Object::
+unsigned Token::
 Get_Id() const {
 	return id_;
 }
 
 
-sf::CircleShape Recognized_Token_Object::get_Circle() const{
+sf::CircleShape Token::get_Circle() const{
 	return token_circle_shape_;
 }
 
-glm::vec2 const& Recognized_Token_Object::get_physical_position() const {
+glm::vec2 const& Token::get_physical_position() const {
 	return physical_position_;
 }
 
