@@ -2,7 +2,7 @@
 #define TTT_TABLE_OBJECT_H
 
 #include "drawable_object.h"
-#include "Microphone_Object.h"
+#include "microphone_object.h"
 #include <glm/glm.hpp>
 
 namespace TTT {
@@ -21,9 +21,9 @@ class Table_Object : DrawableObject {
 
 	public:
 		virtual void Draw(sf::RenderWindow& canvas) const;
-		void Draw(sf::RenderWindow& canvas, std::vector<Microphone_Object> const& microphones, glm::vec4 const& toas) const;
-		virtual void Recalculate_Geometry();
-		void Set_Fill_Color(sf::Color const& in_fill_color);
+		void Draw(sf::RenderWindow& canvas, std::vector<MicrophoneObject> const& microphones, glm::vec4 const& toas) const;
+		virtual void recalculateGeometry();
+		void setFillColor(sf::Color const& in_fill_color);
 };
 
 

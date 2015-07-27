@@ -2,7 +2,7 @@
 #define TABLE_VISUALIZER_H
 
 #include "Table_Object.h"
-#include "Microphone_Object.h"
+#include "microphone_object.h"
 #include "Recognized_Token_Object.h"
 // #include "Ball.h"
 #include "score.h"
@@ -22,7 +22,7 @@ class Table_Visualizer : DrawableObject {
 
 	private:
 		Table_Object table_;
-		std::vector<Microphone_Object> microphones_;
+		std::vector<MicrophoneObject> microphones_;
 		//register them with their frequency
 		std::map<unsigned, Recognized_Token_Object> recognized_tokens_;
 
@@ -90,9 +90,9 @@ class Table_Visualizer : DrawableObject {
 
 		virtual void Draw(sf::RenderWindow& in_canvas) const;
 
-		void Reset_Microphones(std::vector<Microphone_Object> const& in_microphones);
+		void Reset_Microphones(std::vector<MicrophoneObject> const& in_microphones);
 
-		void Recalculate_Geometry();
+		void recalculateGeometry();
 
 		void Set_Canvas_Resolution(glm::vec2 const& in_resolution );
 

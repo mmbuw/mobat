@@ -16,7 +16,7 @@ class Score : DrawableObject{
     sf::Color color_red_;
   	sf::Color color_blue_;
     int maxpoints_;
-  //virtual void Recalculate_Geometry(sf::Vector2f const& resolution) = 0;
+  //virtual void recalculateGeometry(sf::Vector2f const& resolution) = 0;
 
   public:
     Score(){};

@@ -16,7 +16,7 @@ Draw(sf::RenderWindow& canvas) const {
 }
 
 void Table_Object::
-Draw(sf::RenderWindow& canvas, std::vector<Microphone_Object> const& microphones, glm::vec4 const& toas) const {
+Draw(sf::RenderWindow& canvas, std::vector<MicrophoneObject> const& microphones, glm::vec4 const& toas) const {
 
 	//sf::Shader error_vis_shader;
 /*
@@ -42,7 +42,7 @@ Draw(sf::RenderWindow& canvas, std::vector<Microphone_Object> const& microphones
 }
 
 void Table_Object::
-Recalculate_Geometry() {
+recalculateGeometry() {
 	table_rectangle_shape_.setSize(toProjectionSize(physical_table_size_));
 	table_rectangle_shape_.setPosition(toProjectionSpace(glm::vec2{0.0f}));
 
@@ -84,7 +84,7 @@ Recalculate_Geometry() {
 }
 
 void Table_Object::
-Set_Fill_Color(sf::Color const& in_fill_color) {
+setFillColor(sf::Color const& in_fill_color) {
 	
 	table_rectangle_shape_.setFillColor(in_fill_color);
 }

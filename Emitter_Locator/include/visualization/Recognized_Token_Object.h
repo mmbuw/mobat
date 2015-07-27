@@ -30,9 +30,9 @@ class Recognized_Token_Object : DrawableObject {
 								glm::vec2 in_position = glm::vec2(-500.0, -500.0),
 								unsigned in_life_time_in_ms = 10000);
 		virtual void Draw(sf::RenderWindow& canvas) const;
-		virtual void Recalculate_Geometry();
+		virtual void recalculateGeometry();
 
-		void Set_Fill_Color(sf::Color const& in_fill_color);
+		void setFillColor(sf::Color const& in_fill_color);
 		void Set_Life_Time(unsigned in_life_time_in_ms = 10000);
 
 		//update remaining_life_time_ and physical_position_

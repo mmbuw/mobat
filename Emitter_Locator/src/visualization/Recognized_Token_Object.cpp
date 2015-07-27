@@ -25,14 +25,14 @@ Draw(sf::RenderWindow& canvas) const {
 }
 
 void Recognized_Token_Object::
-Recalculate_Geometry() {
+recalculateGeometry() {
 	float radius = 0.04* pixel_per_projection_;
 	token_circle_shape_.setPosition(toProjectionSpace(physical_position_, radius));
 	token_circle_shape_.setRadius(radius);
 }
 
 void Recognized_Token_Object::
-Set_Fill_Color(sf::Color const& in_fill_color) {
+setFillColor(sf::Color const& in_fill_color) {
 	token_circle_shape_.setFillColor(in_fill_color);
 }
 

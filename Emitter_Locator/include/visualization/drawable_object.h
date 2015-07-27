@@ -12,7 +12,7 @@ class DrawableObject {
 		virtual ~DrawableObject();
 
 		virtual void Draw(sf::RenderWindow& canvas) const = 0;
-		//virtual void Recalculate_Geometry(sf::Vector2f const& resolution) = 0;
+		//virtual void recalculateGeometry(sf::Vector2f const& resolution) = 0;
 		static glm::vec2 const& getPhysTableSize();
 		static void setPhysTableSize(glm::vec2 const& size);
 		static void setProjection(glm::vec2 const& origin, glm::vec2 const& size);

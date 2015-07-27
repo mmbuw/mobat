@@ -103,7 +103,7 @@ int main(int argc, char** argv) {
 
             table_visualizer.handle_keyboard_input();
 
-            table_visualizer.Recalculate_Geometry();
+            table_visualizer.recalculateGeometry();
 
             table_visualizer.Draw(window);
 
