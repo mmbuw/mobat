@@ -64,10 +64,10 @@ int main(int argc, char** argv) {
     TTT::DrawableObject::setProjection(configurator().getVec("projection_offset"), configurator().getVec("projection_size"));
 
     TTT::TableVisualizer TableVisualizer(microphone_positions_);
-    TableVisualizer.Set_Token_Recognition_Timeout(configurator().getUint("recognition_timeout"));
+    TableVisualizer.setTokenRecognitionTimeout(configurator().getUint("recognition_timeout"));
 
-    TableVisualizer.Set_Token_Fill_Color(configurator().getUint("player1"), sf::Color(0,0,255) );
-    TableVisualizer.Set_Token_Fill_Color(configurator().getUint("player2"), sf::Color(255, 0, 0) );
+    TableVisualizer.setTokenFillColor(configurator().getUint("player1"), sf::Color(0,0,255) );
+    TableVisualizer.setTokenFillColor(configurator().getUint("player2"), sf::Color(255, 0, 0) );
     
 // game
     std::string winner;
@@ -92,20 +92,20 @@ int main(int argc, char** argv) {
         if(window.pollEvent(event)) {
             if(event.type == sf::Event::KeyPressed){
                if(event.key.code == sf::Keyboard::Space){
-                    TableVisualizer.change_gm();
+                    TableVisualizer.toggleGame();
 
                 }
             }
         }
 
-        if(!TableVisualizer.game_over().first){
+        if(!TableVisualizer.gameOver().first){
             window.clear();
 
-            TableVisualizer.handle_keyboard_input();
+            TableVisualizer.handleKeyboardInput();
 
             TableVisualizer.recalculateGeometry();
 
-            TableVisualizer.Draw(window);
+            TableVisualizer.draw(window);
 
             std::map<unsigned, std::pair<unsigned, glm::vec2> > positions = locator.load_position();
             
@@ -118,7 +118,7 @@ int main(int argc, char** argv) {
                         current_iteration_timestamp_peak = positions[frequency_position_entry.first].first;
 
                         TableVisualizer
-                            .Signal_Token(frequency_position_entry.first, 
+                            .signalToken(frequency_position_entry.first, 
                                           glm::vec2(positions[frequency_position_entry.first].second.x,
                                            1.0 - positions[frequency_position_entry.first].second.y));
                     }
@@ -135,7 +135,7 @@ int main(int argc, char** argv) {
                 //}
             }
 
-            TableVisualizer.update_tokens();
+            TableVisualizer.updateTokens();
             
             if(show_signalvis) {
                 draw_signal_plot(signal_plot_window_, locator);
@@ -146,7 +146,7 @@ int main(int argc, char** argv) {
 
             if(draw_endscreen_){
 
-                winner = TableVisualizer.game_over().second;
+                winner = TableVisualizer.gameOver().second;
 
                if(winner == "Red"){
                     window.draw(rect_red);
@@ -158,7 +158,7 @@ int main(int argc, char** argv) {
                 draw_endscreen_ = false;
             }
 
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Return) || !TableVisualizer.wanna_play()) {
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Return) || !TableVisualizer.gameActive()) {
                 draw_endscreen_ = true;
                 TableVisualizer.restart();
             }

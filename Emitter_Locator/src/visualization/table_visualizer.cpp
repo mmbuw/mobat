@@ -30,8 +30,8 @@ TableVisualizer(std::vector<glm::vec2> const& microphone_positions,
         }
     }
     
-    Set_Table_Fill_Color( in_table_fill_color );
-    Set_Microphone_Fill_Color( in_microphone_fill_color );
+    setTableFillColor( in_table_fill_color );
+    setMicrophoneFillColor( in_microphone_fill_color );
 
     projection_shape_.setFillColor(sf::Color::Transparent);
     projection_shape_.setOutlineColor(sf::Color::Yellow);
@@ -72,26 +72,26 @@ TableVisualizer::
 ~TableVisualizer() {}
 
 void TableVisualizer::
-Draw(sf::RenderWindow& canvas) const {
+draw(sf::RenderWindow& canvas) const {
 
-    table_.Draw(canvas);
+    table_.draw(canvas);
     canvas.draw(projection_shape_);
     
     if(gamemode_ == true){
-        points_.Draw(canvas);
+        points_.draw(canvas);
     }
 
 
     for(auto const& mic_obj : microphones_) {
-        mic_obj.Draw(canvas);
+        mic_obj.draw(canvas);
     }
 
     for( auto& id_token_pair : recognized_tokens_ ) {
-        id_token_pair.second.Draw(canvas);
+        id_token_pair.second.draw(canvas);
     }
 
 
-    // ball_.Draw(canvas);
+    // ball_.draw(canvas);
     if(gamemode_ == true && (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - time_of_last_goal_).count() > ball_respawn_delay_)){
         canvas.draw(ball_);
 
@@ -100,7 +100,7 @@ Draw(sf::RenderWindow& canvas) const {
 
 
 void TableVisualizer::
-Reset_Microphones(std::vector<Microphone> const& microphones) {
+resetMicrophones(std::vector<Microphone> const& microphones) {
     microphones_ = microphones;
 }
 
@@ -118,16 +118,16 @@ recalculateGeometry() {
             Token last_token;
             for(auto const& i : recognized_tokens_){
 
-                auto intersection = ball_intersect(i.second);
+                auto intersection = ballIntersect(i.second);
                 if(intersection.first){
                     last_token = i.second;
                     // dont use new move direction when still on paddle
                     if(moved_out_) {
-                        move_ball_out_of_token(i.second, last_moved_dir_);
+                        moveBallOutOfToken(i.second, last_moved_dir_);
                     }
                     else {
                         last_moved_dir_ = intersection.second;
-                        move_ball_out_of_token(i.second);
+                        moveBallOutOfToken(i.second);
                     }
 
                     if(!move_ball_) {
@@ -168,7 +168,7 @@ recalculateGeometry() {
                 }
                 // orevent ball getting stuck between wall & paddle
                 if(already_moved_out) {
-                    ball_dir_ = glm::normalize(ball_pos_ - last_token.get_physical_position());
+                    ball_dir_ = glm::normalize(ball_pos_ - last_token.getPhysicalPosition());
                     already_moved_out = false;
                 }
                 
@@ -223,17 +223,17 @@ recalculateGeometry() {
 }
 
 void TableVisualizer::
-Set_Canvas_Resolution(glm::vec2 const& in_resolution ) {
+setCanvasResolution(glm::vec2 const& in_resolution ) {
     resolution_ = in_resolution;
 }
 
 void TableVisualizer::
-Set_Table_Fill_Color( sf::Color const& in_table_fill_color ) {
+setTableFillColor( sf::Color const& in_table_fill_color ) {
     table_.setFillColor(in_table_fill_color);
 }
 
 void TableVisualizer::
-Set_Microphone_Fill_Color( sf::Color const& in_microphone_fill_color ) {
+setMicrophoneFillColor( sf::Color const& in_microphone_fill_color ) {
 
     for(auto& mic : microphones_) {
         mic.setFillColor(in_microphone_fill_color);
@@ -242,7 +242,7 @@ Set_Microphone_Fill_Color( sf::Color const& in_microphone_fill_color ) {
 }
 
 void TableVisualizer::
-Set_Token_Fill_Color(unsigned frequency, sf::Color const& in_token_fill_color ) {
+setTokenFillColor(unsigned frequency, sf::Color const& in_token_fill_color ) {
 
     token_color_mapping_[frequency] = in_token_fill_color;
 
@@ -252,14 +252,14 @@ Set_Token_Fill_Color(unsigned frequency, sf::Color const& in_token_fill_color ) 
 }
 
 void TableVisualizer::
-Set_Token_Recognition_Timeout( unsigned in_timeout_in_ms ) {
+setTokenRecognitionTimeout( unsigned in_timeout_in_ms ) {
     for( auto& id_token_pair : recognized_tokens_ ) {
-        id_token_pair.second.Set_Life_Time(in_timeout_in_ms);
+        id_token_pair.second.setLifeTime(in_timeout_in_ms);
     }
 }
 
 void TableVisualizer::
-Signal_Token(unsigned int in_id, glm::vec2 const& in_position) {
+signalToken(unsigned int in_id, glm::vec2 const& in_position) {
 
     if( recognized_tokens_.end() != recognized_tokens_.find(in_id) ) {
         tokens_to_refresh_.insert(in_id);
@@ -277,9 +277,9 @@ Signal_Token(unsigned int in_id, glm::vec2 const& in_position) {
 }
 
 void TableVisualizer::
-update_tokens() {
+updateTokens() {
     Calculate_Elapsed_Milliseconds();
-    unsigned int Elapsed_Milliseconds = Get_Elapsed_Milliseconds();
+    unsigned int Elapsed_Milliseconds = getElapsedMilliseconds();
     
     std::set<unsigned> tokens_to_remove;
 
@@ -294,7 +294,7 @@ update_tokens() {
 
         
         if( ! id_token_pair.second
-            .Update_Token(refresh_token, 
+            .update(refresh_token, 
                           Elapsed_Milliseconds, 
                           id_token_pair.second.physical_position_) ) {
             tokens_to_remove.insert(id_token_pair.first);
@@ -324,16 +324,16 @@ Calculate_Elapsed_Milliseconds() {
 }
 
 unsigned TableVisualizer::
-Get_Elapsed_Milliseconds(){
+getElapsedMilliseconds(){
     return elapsed_milliseconds_since_last_frame_;//.asMilliseconds();
 }
 
-std::pair<bool, glm::vec2> TableVisualizer::ball_intersect(Token const& paddle) const{
-    glm::vec2 mid_paddle{paddle.get_physical_position()};
+std::pair<bool, glm::vec2> TableVisualizer::ballIntersect(Token const& paddle) const{
+    glm::vec2 mid_paddle{paddle.getPhysicalPosition()};
 
     float dist = glm::length(ball_pos_ - mid_paddle);
 
-    bool intersects = dist < (ball_.getRadius() + paddle.get_Circle().getRadius() + paddle.get_Circle().getOutlineThickness()) / pixel_per_projection_;
+    bool intersects = dist < (ball_.getRadius() + paddle.getCircle().getRadius() + paddle.getCircle().getOutlineThickness()) / pixel_per_projection_;
 
     glm::vec2 normal{-1.0f, 0.0f};
     if(intersects) {    
@@ -343,24 +343,24 @@ std::pair<bool, glm::vec2> TableVisualizer::ball_intersect(Token const& paddle) 
     return std::pair<bool, glm::vec2>{intersects, normal}; 
 }
 
-void TableVisualizer::move_ball_out_of_token(Token const& paddle, glm::vec2 const& dir){
+void TableVisualizer::moveBallOutOfToken(Token const& paddle, glm::vec2 const& dir){
       
-    glm::vec2 mid_paddle{paddle.get_physical_position()};
+    glm::vec2 mid_paddle{paddle.getPhysicalPosition()};
     
     glm::vec2 normal = dir;
     if(dir == glm::vec2{0.0f}) {
-       normal = ball_intersect(paddle).second;
+       normal = ballIntersect(paddle).second;
     }    
 
-    glm::vec2 new_ball_pos{mid_paddle + normal * float(ball_.getRadius() + paddle.get_Circle().getRadius() + paddle.get_Circle().getOutlineThickness()) * 1.01f / pixel_per_projection_};
+    glm::vec2 new_ball_pos{mid_paddle + normal * float(ball_.getRadius() + paddle.getCircle().getRadius() + paddle.getCircle().getOutlineThickness()) * 1.01f / pixel_per_projection_};
 
     ball_pos_ = new_ball_pos;
 }
 
 
-std::pair<bool, std::string> TableVisualizer::game_over(){
+std::pair<bool, std::string> TableVisualizer::gameOver(){
     int tmp = left_goals_ - right_goals_;
-    if(abs(tmp) < points_.get_maxpoints() / 2){
+    if(abs(tmp) < points_.getMaxpoints() / 2){
         return {false, "Chuck Norris"};
     }else{
         if(tmp > 0){  //>= 3
@@ -394,7 +394,7 @@ void TableVisualizer::restart(){
 
 }
 
-void TableVisualizer::change_gm(){
+void TableVisualizer::toggleGame(){
     if(gamemode_ == true){
         gamemode_ = false;
     }else{
@@ -403,12 +403,12 @@ void TableVisualizer::change_gm(){
 }
 
 
-bool TableVisualizer::wanna_play(){
+bool TableVisualizer::gameActive(){
     return gamemode_;
 }
 
 
-void TableVisualizer::handle_keyboard_input() {
+void TableVisualizer::handleKeyboardInput() {
     glm::vec2 field_max{TTT::DrawableObject::physical_projection_offset_ + TTT::DrawableObject::physical_projection_size_ - glm::vec2{0.02f, 0.02f}};
     glm::vec2 field_min{TTT::DrawableObject::physical_projection_offset_ + glm::vec2{0.02f, 0.02f}};
         
@@ -431,7 +431,7 @@ void TableVisualizer::handle_keyboard_input() {
         }
 
         player1_pos_ = glm::clamp(player1_pos_ + pl1_dir, field_min, field_max);
-        Signal_Token(configurator().getUint("player1"), player1_pos_);
+        signalToken(configurator().getUint("player1"), player1_pos_);
     }
      //left player
     if(player2_keyboard_) {
@@ -454,7 +454,7 @@ void TableVisualizer::handle_keyboard_input() {
         }
 
         player2_pos_ = glm::clamp(player2_pos_ + pl2_dir, field_min, field_max);
-        Signal_Token(configurator().getUint("player2"), player2_pos_);
+        signalToken(configurator().getUint("player2"), player2_pos_);
     }
 }
 

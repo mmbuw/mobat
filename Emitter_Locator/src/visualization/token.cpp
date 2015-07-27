@@ -16,7 +16,7 @@ Token(unsigned in_id,
 }
 
 void Token::
-Draw(sf::RenderWindow& canvas) const {
+draw(sf::RenderWindow& canvas) const {
 	//std::cout << "Drawing Token: \n";
 	//std::cout << id_ << "Hz @ ";
 	//std::cout << token_circle_shape_.getPosition().x << " ";
@@ -37,7 +37,7 @@ setFillColor(sf::Color const& in_fill_color) {
 }
 
 void Token::
-Update_Alpha_Value(float in_alpha) {
+updateAlphaValue(float in_alpha) {
 	sf::Color new_color = token_circle_shape_.getFillColor();
 	new_color.a = sf::Uint8(255.0 * in_alpha);
 
@@ -48,12 +48,12 @@ Update_Alpha_Value(float in_alpha) {
 
 
 void Token::
-Set_Life_Time(unsigned in_life_time_in_ms) {
+setLifeTime(unsigned in_life_time_in_ms) {
 	life_time_in_ms_ = in_life_time_in_ms;
 }
 
 bool Token::
-Update_Token(bool in_was_recognized, 
+update(bool in_was_recognized, 
 			 unsigned in_passed_time_in_ms, 
 			 glm::vec2 const& in_position) {
 
@@ -62,7 +62,7 @@ Update_Token(bool in_was_recognized,
 		//reset life time if token was recognized
 		if(in_was_recognized) {
 			remaining_life_time_in_ms_ = life_time_in_ms_;
-			Update_Alpha_Value(1.0);
+			updateAlphaValue(1.0);
 			physical_position_ = in_position;
 			return true;
 		}
@@ -75,21 +75,21 @@ Update_Token(bool in_was_recognized,
 		remaining_life_time_in_ms_-=in_passed_time_in_ms;
 
 		//std::cout << "Remaining life time for token with id " << id_ << "   ms: " << remaining_life_time_in_ms_;
-		Update_Alpha_Value(remaining_life_time_in_ms_/(float)life_time_in_ms_);
+		updateAlphaValue(remaining_life_time_in_ms_/(float)life_time_in_ms_);
 		return true;
 }
 
 unsigned Token::
-Get_Id() const {
+getID() const {
 	return id_;
 }
 
 
-sf::CircleShape Token::get_Circle() const{
+sf::CircleShape Token::getCircle() const{
 	return token_circle_shape_;
 }
 
-glm::vec2 const& Token::get_physical_position() const {
+glm::vec2 const& Token::getPhysicalPosition() const {
 	return physical_position_;
 }
 

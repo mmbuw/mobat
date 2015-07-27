@@ -10,7 +10,7 @@ Microphone(unsigned in_id, glm::vec2 const& in_position ) {
 }
 
 void Microphone::
-Draw(sf::RenderWindow& canvas) const {
+draw(sf::RenderWindow& canvas) const {
 	canvas.draw(microphone_circle_shape_);
 }
 

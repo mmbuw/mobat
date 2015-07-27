@@ -88,42 +88,42 @@ class TableVisualizer : DrawableObject {
 						);
 		~TableVisualizer();
 
-		virtual void Draw(sf::RenderWindow& in_canvas) const;
+		virtual void draw(sf::RenderWindow& in_canvas) const;
 
-		void Reset_Microphones(std::vector<Microphone> const& in_microphones);
+		void resetMicrophones(std::vector<Microphone> const& in_microphones);
 
 		void recalculateGeometry();
 
-		void Set_Canvas_Resolution(glm::vec2 const& in_resolution );
+		void setCanvasResolution(glm::vec2 const& in_resolution );
 
-		void Set_Table_Fill_Color(sf::Color const& in_table_fill_color);
+		void setTableFillColor(sf::Color const& in_table_fill_color);
 
-		void Set_Microphone_Fill_Color( sf::Color const& in_microphone_fill_color );
+		void setMicrophoneFillColor( sf::Color const& in_microphone_fill_color );
 
-		void Set_Token_Fill_Color(unsigned frequency, sf::Color const& in_token_fill_color );
+		void setTokenFillColor(unsigned frequency, sf::Color const& in_token_fill_color );
 
-		void Set_Token_Recognition_Timeout( unsigned in_timeout_in_ms );
+		void setTokenRecognitionTimeout( unsigned in_timeout_in_ms );
 
-		void Signal_Token(unsigned int in_id, glm::vec2 const& in_position);
+		void signalToken(unsigned int in_id, glm::vec2 const& in_position);
 
-		void update_tokens();
+		void updateTokens();
 
 
-		unsigned Get_Elapsed_Milliseconds();
+		unsigned getElapsedMilliseconds();
 
-		std::pair<bool, glm::vec2> ball_intersect(Token const& paddle) const;
+		std::pair<bool, glm::vec2> ballIntersect(Token const& paddle) const;
 
-		void move_ball_out_of_token(Token const& paddle, glm::vec2 const& dir = glm::vec2{0.0f});
+		void moveBallOutOfToken(Token const& paddle, glm::vec2 const& dir = glm::vec2{0.0f});
 
-		std::pair<bool, std::string> game_over();
+		std::pair<bool, std::string> gameOver();
 
 		void restart();
 
-		void change_gm();
+		void toggleGame();
 
-		bool wanna_play();
+		bool gameActive();
 
-		void handle_keyboard_input();
+		void handleKeyboardInput();
 
 };
 

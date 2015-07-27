@@ -51,7 +51,7 @@ Score::Score(int maxpoints){
 }
 
 void Score::
-Draw(sf::RenderWindow& canvas) const {
+draw(sf::RenderWindow& canvas) const {
 	for(auto const& i : points_){
 
 		canvas.draw(i);
@@ -104,7 +104,7 @@ reset(){
 }
 
 int Score::
-get_maxpoints(){
+getMaxpoints(){
 	return maxpoints_;
 }
 

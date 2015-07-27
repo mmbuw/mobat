@@ -20,8 +20,8 @@ class Table : DrawableObject {
 		sf::CircleShape right_goal_;
 
 	public:
-		virtual void Draw(sf::RenderWindow& canvas) const;
-		void Draw(sf::RenderWindow& canvas, std::vector<Microphone> const& microphones, glm::vec4 const& toas) const;
+		virtual void draw(sf::RenderWindow& canvas) const;
+		void draw(sf::RenderWindow& canvas, std::vector<Microphone> const& microphones, glm::vec4 const& toas) const;
 		virtual void recalculateGeometry();
 		void setFillColor(sf::Color const& in_fill_color);
 };

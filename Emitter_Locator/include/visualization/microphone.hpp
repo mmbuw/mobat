@@ -15,7 +15,7 @@ class Microphone : DrawableObject {
 		glm::vec2 physical_position_;
 		
 		Microphone(unsigned in_id, glm::vec2 const& in_position );
-		virtual void Draw(sf::RenderWindow& canvas) const;
+		virtual void draw(sf::RenderWindow& canvas) const;
 		virtual void recalculateGeometry();
 
 		void setFillColor(sf::Color const& in_fill_color);

@@ -22,10 +22,10 @@ class Score : DrawableObject{
     Score(){};
     ~Score(){};
     Score(int maxpoints);
-    void Draw(sf::RenderWindow& canvas) const;
+    void draw(sf::RenderWindow& canvas) const;
     void update(int r_goals, int l_goals); //changes colors according to given scores
     void reset();
-    int get_maxpoints();
+    int getMaxpoints();
 };
 
 };//Namespace TTT

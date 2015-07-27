@@ -4,7 +4,7 @@
 namespace TTT {
 
 void Table::
-Draw(sf::RenderWindow& canvas) const {
+draw(sf::RenderWindow& canvas) const {
 	canvas.draw(table_rectangle_shape_);
 	canvas.draw(middle_);
 	canvas.draw(middle_line1_);
@@ -16,7 +16,7 @@ Draw(sf::RenderWindow& canvas) const {
 }
 
 void Table::
-Draw(sf::RenderWindow& canvas, std::vector<Microphone> const& microphones, glm::vec4 const& toas) const {
+draw(sf::RenderWindow& canvas, std::vector<Microphone> const& microphones, glm::vec4 const& toas) const {
 
 	//sf::Shader error_vis_shader;
 /*
