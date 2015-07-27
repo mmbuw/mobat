@@ -110,9 +110,9 @@ bool Config::configure(snd_pcm_t* pcm_handle) {
   return true;
 }
 
-bool Config::is_supported(snd_pcm_t* pcm_handle) const{
+bool Config::isSupported(snd_pcm_t* pcm_handle) const{
   if(!pcm_handle) {
-    // std::cerr << "Config::is_supported - device not initialized" << std::endl;
+    // std::cerr << "Config::isSupported - device not initialized" << std::endl;
     return false;
   }
 
@@ -149,11 +149,11 @@ bool Config::is_supported(snd_pcm_t* pcm_handle) const{
   return true;
 }
 
-void Config::set_period_time(std::size_t time) {
+void Config::setPeriodTime(std::size_t time) {
   period_time_ = time;
 }
 
-std::pair<std::size_t, std::size_t> Config::period_time_extremes() const {
+std::pair<std::size_t, std::size_t> Config::periodTimeExtremes() const {
   unsigned int min = 0;
   int err = snd_pcm_hw_params_get_period_time_min(params_, &min, 0);
   if(err < 0) {
@@ -175,32 +175,32 @@ unsigned Config::channels() const {
   return channels_;
 }
 
-std::size_t Config::period_bytes() const {
+std::size_t Config::periodBytes() const {
   // frames per period * channels * samplesize(depending on format)
   int sample_bytes = snd_pcm_hw_params_get_sbits(params_) / 8;
   if(sample_bytes < 0) {
     std::cerr << "no format specified, cant compute period size - " << snd_strerror(sample_bytes) << std::endl;
   }
-  return period_frames() * channels_ * sample_bytes;
+  return periodFrames() * channels_ * sample_bytes;
 }
 
-std::size_t Config::period_time() const {
+std::size_t Config::periodTime() const {
   // how long a period takes in us
   unsigned period_time;
   snd_pcm_hw_params_get_period_time(params_, &period_time, 0);
   return period_time;
 }
 
-std::size_t Config::period_frames() const {
+std::size_t Config::periodFrames() const {
   snd_pcm_uframes_t num_frames;
   // number of frames per period
   snd_pcm_hw_params_get_period_size(params_, &num_frames, 0);
   return num_frames;
 }
 
-std::size_t Config::buffer_bytes(std::size_t useconds) const {
+std::size_t Config::bufferBytes(std::size_t useconds) const {
   // extra brackets necessary, otherwise result is totally wrong
-  return period_bytes() * (useconds / period_time());
+  return periodBytes() * (useconds / periodTime());
 }
 
  void swap(Config& a, Config& b) {

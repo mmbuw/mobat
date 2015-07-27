@@ -8,9 +8,9 @@ Recorder::Recorder(unsigned chan, std::size_t frames, std::size_t recording_time
   new_recording_{false},
   shutdown_{false}
 {
-  std::vector<std::string> devices{get_pcms()};
+  std::vector<std::string> devices{getPcms()};
 
-  std::vector<std::string> capture_devices{get_supporting_devices(devices, config_, SND_PCM_STREAM_CAPTURE)};
+  std::vector<std::string> capture_devices{getSupportingDevices(devices, config_, SND_PCM_STREAM_CAPTURE)};
 
   std::string capture_name{capture_devices[0]};
   for(auto device : capture_devices) {
@@ -32,7 +32,7 @@ Recorder::Recorder(unsigned chan, std::size_t frames, std::size_t recording_time
     return;
   }
 
-  auto extremes = config_.period_time_extremes();
+  auto extremes = config_.periodTimeExtremes();
   std::size_t period_time = extremes.second;
   // find largest period size fitting in recording buffer
   if(recording_time_ < period_time) {
@@ -48,10 +48,10 @@ Recorder::Recorder(unsigned chan, std::size_t frames, std::size_t recording_time
     std::cerr << "could not find period matching recording time" << std::endl;
     return;
   }
-  config_.set_period_time(period_time);
+  config_.setPeriodTime(period_time);
   // install configuration and allocate buffer
   config_.install(device_);
-  buffer_length_ = config_.buffer_bytes(recording_time_);
+  buffer_length_ = config_.bufferBytes(recording_time_);
   buffer_ = new uint8_t[buffer_length_];
 }
 
@@ -59,7 +59,7 @@ Recorder::~Recorder() {
   delete [] buffer_;
 }
 
-std::string const& Recorder::device_name() const {
+std::string const& Recorder::deviceName() const {
   return device_.name;
 }
 Config& Recorder::config() {
@@ -69,18 +69,18 @@ Config& Recorder::config() {
 void Recorder::record() {
 
   // prevent under- or overruns
-  std::size_t loops = recording_time_ / config_.period_time();
-  if(loops * config_.period_bytes() > buffer_length_) {
+  std::size_t loops = recording_time_ / config_.periodTime();
+  if(loops * config_.periodBytes() > buffer_length_) {
     std::cerr << "Recorder::record - buffer size to small" << std::endl;
     return;
   }
-  else if(loops * config_.period_bytes() < buffer_length_) {
+  else if(loops * config_.periodBytes() < buffer_length_) {
     std::cerr << "Recorder::record - buffer size too large" << std::endl;
   }
 
-  for(uint8_t* start = &buffer_[0]; start < &buffer_[buffer_length_ / sizeof(*buffer_)]; start += config_.period_bytes()) {
-    int err = snd_pcm_readi(device_, start, config_.period_frames());
-    if(err != int(config_.period_frames())) {
+  for(uint8_t* start = &buffer_[0]; start < &buffer_[buffer_length_ / sizeof(*buffer_)]; start += config_.periodBytes()) {
+    int err = snd_pcm_readi(device_, start, config_.periodFrames());
+    if(err != int(config_.periodFrames())) {
       // handle buffer overrun
       if(err == -EPIPE) {
         int new_err = snd_pcm_recover(device_, err, 1);
@@ -92,8 +92,8 @@ void Recorder::record() {
         }
         // try to record again
         else {
-          err = snd_pcm_readi(device_, start, config_.period_frames());
-          if(err != int(config_.period_frames())) { 
+          err = snd_pcm_readi(device_, start, config_.periodFrames());
+          if(err != int(config_.periodFrames())) { 
             std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
             new_recording_ = false; 
             return;
@@ -109,7 +109,7 @@ void Recorder::record() {
   new_recording_ = true;  
 }
 
-std::size_t Recorder::buffer_bytes() const {
+std::size_t Recorder::bufferBytes() const {
   return buffer_length_;
 }
 
@@ -117,7 +117,7 @@ uint8_t* Recorder::buffer() {
   return buffer_;
 }
 
-bool Recorder::new_recording() const {
+bool Recorder::newRecording() const {
   return new_recording_;
 }
 
@@ -125,11 +125,11 @@ void Recorder::shutdown() {
   shutdown_ = true;
 }
 
-void Recorder::request_recording() {
+void Recorder::requestRecording() {
   new_recording_ = false;
 }
 
-void Recorder::recording_loop() {
+void Recorder::recordingLoop() {
   while(!shutdown_) {
     if(!new_recording_) {
       record();
@@ -137,12 +137,12 @@ void Recorder::recording_loop() {
   }
 }
 
-std::vector<std::string> Recorder::get_supporting_devices(std::vector<std::string> const& devices, Config const& config, snd_pcm_stream_t type) {
+std::vector<std::string> Recorder::getSupportingDevices(std::vector<std::string> const& devices, Config const& config, snd_pcm_stream_t type) {
   std::vector<std::string> supporting_devices{};
   for(auto const& curr_device : devices) {
     device test_handle{curr_device, type};
     if(test_handle) {
-      if(config.is_supported(test_handle)) {
+      if(config.isSupported(test_handle)) {
        supporting_devices.push_back(curr_device);  
       }
     }
@@ -150,7 +150,7 @@ std::vector<std::string> Recorder::get_supporting_devices(std::vector<std::strin
   return supporting_devices;
 }
 
-std::vector<std::string> Recorder::get_pcms() {
+std::vector<std::string> Recorder::getPcms() {
   int err;
   std::vector<std::string> devices{};
 
@@ -181,7 +181,7 @@ std::vector<std::string> Recorder::get_pcms() {
   return devices;
 }
 
-void Recorder::output_cards() {
+void Recorder::outputCards() {
   int err;
 
   // std::cout << "----Cards --------------------------------------------------" << std::endl;

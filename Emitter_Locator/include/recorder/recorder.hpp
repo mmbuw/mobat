@@ -12,21 +12,21 @@ class Recorder {
   Recorder(unsigned chan = 2, std::size_t frames = 44100, std::size_t recording_time = 2000000);
   ~Recorder();
 
-  static void output_cards();
-  std::size_t buffer_bytes() const;
+  static void outputCards();
+  std::size_t bufferBytes() const;
   uint8_t* buffer();
 
-  std::string const& device_name() const;
+  std::string const& deviceName() const;
   Config& config();
   void record();
-  bool new_recording() const;
-  void request_recording();
+  bool newRecording() const;
+  void requestRecording();
 
-  void recording_loop();
+  void recordingLoop();
   void shutdown();
 
-  static std::vector<std::string> get_pcms();
-  static std::vector<std::string> get_supporting_devices(std::vector<std::string> const&, Config const&, snd_pcm_stream_t);
+  static std::vector<std::string> getPcms();
+  static std::vector<std::string> getSupportingDevices(std::vector<std::string> const&, Config const&, snd_pcm_stream_t);
  private:
 
   Config config_;

@@ -13,7 +13,7 @@
 Locator::Locator(unsigned int num_mics):
  shutdown{false},
  recorder{num_mics, 44100, 130000},
- collector{recorder.buffer_bytes() / num_mics, num_mics},
+ collector{recorder.bufferBytes() / num_mics, num_mics},
  //locator{330, {0.06, 0.075}, {0.945,  0.09}, {0.925,  1.915} , {0.06,  1.905}},
  locator{330, {0.00, 0.0}, {0.0,  0.0}, {0.0,  0.0} , {0.0,  0.0}},
  locator_frame_counter_(cached_positions[0].size()),
@@ -102,7 +102,7 @@ load_recognized_vis_sample_positions() const {
  void Locator::record_position() {
 
     // start recording loop
-    auto recording_thread = std::thread{&Recorder::recording_loop, &recorder};
+    auto recording_thread = std::thread{&Recorder::recordingLoop, &recorder};
 
     bool first_signal_available = false;
     while (!shutdown)
@@ -113,7 +113,7 @@ load_recognized_vis_sample_positions() const {
         }
 
         bool work_on_old_signal = false; 
-        if(!recorder.new_recording()) {
+        if(!recorder.newRecording()) {
             work_on_old_signal = true;
         } else {
             first_signal_available = true;
@@ -123,7 +123,7 @@ load_recognized_vis_sample_positions() const {
             current_signal_chunk_ = 0;
             collector.from_interleaved(recorder.buffer());
 
-            recorder.request_recording();
+            recorder.requestRecording();
 
 
         } else {

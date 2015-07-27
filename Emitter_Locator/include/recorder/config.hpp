@@ -20,26 +20,26 @@ class Config {
 
   snd_pcm_hw_params_t* params();
 
-  bool is_supported(snd_pcm_t* pcm_handle) const;
+  bool isSupported(snd_pcm_t* pcm_handle) const;
 
-  void set_period_time(std::size_t time);
+  void setPeriodTime(std::size_t time);
   
   // returns the min and max time of a period in us
-  std::pair<std::size_t, std::size_t> period_time_extremes() const;
+  std::pair<std::size_t, std::size_t> periodTimeExtremes() const;
 
   unsigned channels() const;
   
   // return size of buffer required to record one period
-  std::size_t period_bytes() const;
+  std::size_t periodBytes() const;
 
   // return time a period takes in us
-  std::size_t period_time() const;
+  std::size_t periodTime() const;
 
   // return number of samples during one period
-  std::size_t period_frames() const;
+  std::size_t periodFrames() const;
 
   // returns size of buffer required to record time of useconds
-  std::size_t buffer_bytes(std::size_t useconds) const;
+  std::size_t bufferBytes(std::size_t useconds) const;
 
   friend void swap(Config& a, Config& b);
 
