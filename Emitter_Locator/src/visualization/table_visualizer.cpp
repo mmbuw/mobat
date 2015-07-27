@@ -1,12 +1,12 @@
-#include "Table_Visualizer.h"
+#include "table_visualizer.hpp"
 #include "configurator.hpp"
 #include "glm/gtx/string_cast.hpp"
 #include <iostream>
 
 namespace TTT {
 
-Table_Visualizer::
-Table_Visualizer(std::vector<glm::vec2> const& microphone_positions,
+TableVisualizer::
+TableVisualizer(std::vector<glm::vec2> const& microphone_positions,
                   sf::Color const& in_table_fill_color,
                   sf::Color const& in_microphone_fill_color,
                   sf::Color const& in_token_fill_color,
@@ -68,10 +68,10 @@ Table_Visualizer(std::vector<glm::vec2> const& microphone_positions,
     
 }
 
-Table_Visualizer::
-~Table_Visualizer() {}
+TableVisualizer::
+~TableVisualizer() {}
 
-void Table_Visualizer::
+void TableVisualizer::
 Draw(sf::RenderWindow& canvas) const {
 
     table_.Draw(canvas);
@@ -99,12 +99,12 @@ Draw(sf::RenderWindow& canvas) const {
 }
 
 
-void Table_Visualizer::
+void TableVisualizer::
 Reset_Microphones(std::vector<MicrophoneObject> const& microphones) {
     microphones_ = microphones;
 }
 
-void Table_Visualizer::
+void TableVisualizer::
 recalculateGeometry() {
 
     for( auto& id_token_pair : recognized_tokens_ ) {
@@ -222,17 +222,17 @@ recalculateGeometry() {
 // }
 }
 
-void Table_Visualizer::
+void TableVisualizer::
 Set_Canvas_Resolution(glm::vec2 const& in_resolution ) {
     resolution_ = in_resolution;
 }
 
-void Table_Visualizer::
+void TableVisualizer::
 Set_Table_Fill_Color( sf::Color const& in_table_fill_color ) {
     table_.setFillColor(in_table_fill_color);
 }
 
-void Table_Visualizer::
+void TableVisualizer::
 Set_Microphone_Fill_Color( sf::Color const& in_microphone_fill_color ) {
 
     for(auto& mic : microphones_) {
@@ -241,7 +241,7 @@ Set_Microphone_Fill_Color( sf::Color const& in_microphone_fill_color ) {
 
 }
 
-void Table_Visualizer::
+void TableVisualizer::
 Set_Token_Fill_Color(unsigned frequency, sf::Color const& in_token_fill_color ) {
 
     token_color_mapping_[frequency] = in_token_fill_color;
@@ -251,14 +251,14 @@ Set_Token_Fill_Color(unsigned frequency, sf::Color const& in_token_fill_color ) 
     }
 }
 
-void Table_Visualizer::
+void TableVisualizer::
 Set_Token_Recognition_Timeout( unsigned in_timeout_in_ms ) {
     for( auto& id_token_pair : recognized_tokens_ ) {
         id_token_pair.second.Set_Life_Time(in_timeout_in_ms);
     }
 }
 
-void Table_Visualizer::
+void TableVisualizer::
 Signal_Token(unsigned int in_id, glm::vec2 const& in_position) {
 
     if( recognized_tokens_.end() != recognized_tokens_.find(in_id) ) {
@@ -276,7 +276,7 @@ Signal_Token(unsigned int in_id, glm::vec2 const& in_position) {
     }
 }
 
-void Table_Visualizer::
+void TableVisualizer::
 update_tokens() {
     Calculate_Elapsed_Milliseconds();
     unsigned int Elapsed_Milliseconds = Get_Elapsed_Milliseconds();
@@ -310,7 +310,7 @@ update_tokens() {
 }
 
 
-void Table_Visualizer::
+void TableVisualizer::
 Calculate_Elapsed_Milliseconds() {
     current_time_ = std::chrono::high_resolution_clock::now();
 
@@ -323,12 +323,12 @@ Calculate_Elapsed_Milliseconds() {
     elapsed_milliseconds_since_last_frame_ = elapsed_milliseconds.count();
 }
 
-unsigned Table_Visualizer::
+unsigned TableVisualizer::
 Get_Elapsed_Milliseconds(){
     return elapsed_milliseconds_since_last_frame_;//.asMilliseconds();
 }
 
-std::pair<bool, glm::vec2> Table_Visualizer::ball_intersect(Recognized_Token_Object const& paddle) const{
+std::pair<bool, glm::vec2> TableVisualizer::ball_intersect(Recognized_Token_Object const& paddle) const{
     glm::vec2 mid_paddle{paddle.get_physical_position()};
 
     float dist = glm::length(ball_pos_ - mid_paddle);
@@ -343,7 +343,7 @@ std::pair<bool, glm::vec2> Table_Visualizer::ball_intersect(Recognized_Token_Obj
     return std::pair<bool, glm::vec2>{intersects, normal}; 
 }
 
-void Table_Visualizer::move_ball_out_of_token(Recognized_Token_Object const& paddle, glm::vec2 const& dir){
+void TableVisualizer::move_ball_out_of_token(Recognized_Token_Object const& paddle, glm::vec2 const& dir){
       
     glm::vec2 mid_paddle{paddle.get_physical_position()};
     
@@ -358,7 +358,7 @@ void Table_Visualizer::move_ball_out_of_token(Recognized_Token_Object const& pad
 }
 
 
-std::pair<bool, std::string> Table_Visualizer::game_over(){
+std::pair<bool, std::string> TableVisualizer::game_over(){
     int tmp = left_goals_ - right_goals_;
     if(abs(tmp) < points_.get_maxpoints() / 2){
         return {false, "Chuck Norris"};
@@ -374,7 +374,7 @@ std::pair<bool, std::string> Table_Visualizer::game_over(){
 
 
 
-void Table_Visualizer::restart(){
+void TableVisualizer::restart(){
 
 
     ball_pos_ = glm::vec2{physical_projection_offset_ + physical_projection_size_ * 0.5f};
@@ -394,7 +394,7 @@ void Table_Visualizer::restart(){
 
 }
 
-void Table_Visualizer::change_gm(){
+void TableVisualizer::change_gm(){
     if(gamemode_ == true){
         gamemode_ = false;
     }else{
@@ -403,12 +403,12 @@ void Table_Visualizer::change_gm(){
 }
 
 
-bool Table_Visualizer::wanna_play(){
+bool TableVisualizer::wanna_play(){
     return gamemode_;
 }
 
 
-void Table_Visualizer::handle_keyboard_input() {
+void TableVisualizer::handle_keyboard_input() {
     glm::vec2 field_max{TTT::DrawableObject::physical_projection_offset_ + TTT::DrawableObject::physical_projection_size_ - glm::vec2{0.02f, 0.02f}};
     glm::vec2 field_min{TTT::DrawableObject::physical_projection_offset_ + glm::vec2{0.02f, 0.02f}};
         

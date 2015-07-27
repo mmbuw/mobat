@@ -1,5 +1,5 @@
-#ifndef TABLE_VISUALIZER_H
-#define TABLE_VISUALIZER_H
+#ifndef TableVisualizer_H
+#define TableVisualizer_H
 
 #include "Table_Object.h"
 #include "microphone_object.h"
@@ -18,7 +18,7 @@ namespace TTT {
 
 
 
-class Table_Visualizer : DrawableObject {
+class TableVisualizer : DrawableObject {
 
 	private:
 		Table_Object table_;
@@ -76,7 +76,7 @@ class Table_Visualizer : DrawableObject {
 
 		sf::RectangleShape projection_shape_;
 	public:
-		Table_Visualizer(std::vector<glm::vec2> const& microphone_positions
+		TableVisualizer(std::vector<glm::vec2> const& microphone_positions
 						 	= std::vector<glm::vec2>(),
 						 sf::Color const& in_table_fill_color 
 						 	= sf::Color::White,
@@ -86,7 +86,7 @@ class Table_Visualizer : DrawableObject {
 						 	= sf::Color(255,0,0),
 						 double ball_size = 25
 						);
-		~Table_Visualizer();
+		~TableVisualizer();
 
 		virtual void Draw(sf::RenderWindow& in_canvas) const;
 
