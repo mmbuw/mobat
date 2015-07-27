@@ -1,6 +1,6 @@
 #include "locator.hpp"
 #include "Table_Visualizer.h"
-#include "Drawable_Object.h"
+#include "drawable_object.h"
 #include "score.h"
 #include "configurator.hpp"
 
@@ -58,10 +58,10 @@ int main(int argc, char** argv) {
                                                     configurator().getVec("microphone4_pos")};
 
     // initialize measures for drawing & simulation 
-    TTT::Drawable_Object::set_basis(configurator().getVec("right"), configurator().getVec("up"));
-    TTT::Drawable_Object::set_resolution(windowResolution);
-    TTT::Drawable_Object::set_phys_table_size(configurator().getVec("table_size"));
-    TTT::Drawable_Object::set_projection(configurator().getVec("projection_offset"), configurator().getVec("projection_size"));
+    TTT::DrawableObject::setBasis(configurator().getVec("right"), configurator().getVec("up"));
+    TTT::DrawableObject::setResolution(windowResolution);
+    TTT::DrawableObject::setPhysTableSize(configurator().getVec("table_size"));
+    TTT::DrawableObject::setProjection(configurator().getVec("projection_offset"), configurator().getVec("projection_size"));
 
     TTT::Table_Visualizer table_visualizer(microphone_positions_);
     table_visualizer.Set_Token_Recognition_Timeout(configurator().getUint("recognition_timeout"));

@@ -1,11 +1,11 @@
 #ifndef TTT_MICROPHONE_OBJECT_H
 #define TTT_MICROPHONE_OBJECT_H
 
-#include "Drawable_Object.h"
+#include "drawable_object.h"
 
 namespace TTT {
 
-class Microphone_Object : Drawable_Object {
+class Microphone_Object : DrawableObject {
 
 	private:
 		unsigned id_;

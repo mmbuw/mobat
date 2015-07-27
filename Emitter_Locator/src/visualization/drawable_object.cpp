@@ -1,32 +1,32 @@
-#include "Drawable_Object.h"
+#include "drawable_object.h"
 #include <iostream>
 
 namespace TTT {
 
-glm::vec2 Drawable_Object::physical_table_size_ = glm::vec2(0.0f, 0.0f);
-glm::vec2 Drawable_Object::resolution_ = glm::vec2(0,0);
-glm::vec2 Drawable_Object::up_ = glm::vec2(0,0);
-glm::vec2 Drawable_Object::right_ = glm::vec2(0,0);
-glm::vec2 Drawable_Object::pixel_projection_offset_ = glm::vec2(0,0);
-glm::vec2 Drawable_Object::physical_projection_offset_ = glm::vec2(0,0);
-glm::vec2 Drawable_Object::physical_projection_size_ = glm::vec2(0,0);
-glm::vec2 Drawable_Object::pixel_projection_size_ = glm::vec2(0,0);
-float Drawable_Object::pixel_per_projection_ = 0.0f;
-float Drawable_Object::line_thickness_ = 0.0f;
+glm::vec2 DrawableObject::physical_table_size_ = glm::vec2(0.0f, 0.0f);
+glm::vec2 DrawableObject::resolution_ = glm::vec2(0,0);
+glm::vec2 DrawableObject::up_ = glm::vec2(0,0);
+glm::vec2 DrawableObject::right_ = glm::vec2(0,0);
+glm::vec2 DrawableObject::pixel_projection_offset_ = glm::vec2(0,0);
+glm::vec2 DrawableObject::physical_projection_offset_ = glm::vec2(0,0);
+glm::vec2 DrawableObject::physical_projection_size_ = glm::vec2(0,0);
+glm::vec2 DrawableObject::pixel_projection_size_ = glm::vec2(0,0);
+float DrawableObject::pixel_per_projection_ = 0.0f;
+float DrawableObject::line_thickness_ = 0.0f;
 
-Drawable_Object::Drawable_Object()
+DrawableObject::DrawableObject()
 {};
 
-Drawable_Object::~Drawable_Object()
+DrawableObject::~DrawableObject()
 {};
 
-void Drawable_Object::set_basis(glm::vec2 const& right, glm::vec2 const& up) {
+void DrawableObject::setBasis(glm::vec2 const& right, glm::vec2 const& up) {
     right_ = right;
     up_ = up;
 
 }
 
-void Drawable_Object::set_projection(glm::vec2 const& origin, glm::vec2 const& size) {
+void DrawableObject::setProjection(glm::vec2 const& origin, glm::vec2 const& size) {
     physical_projection_offset_ = origin;
     physical_projection_size_ = size;
     glm::vec2 size2 = right_ * size.x + up_ * size.y;
@@ -42,12 +42,12 @@ void Drawable_Object::set_projection(glm::vec2 const& origin, glm::vec2 const& s
     pixel_projection_size_ = size2 * pixel_per_projection_;
 }
 
-void Drawable_Object::set_resolution(glm::vec2 const& res) {
+void DrawableObject::setResolution(glm::vec2 const& res) {
     resolution_ = res;   
     line_thickness_ = std::min(resolution_.x, resolution_.y) * 0.007;
 }
 
-sf::Vector2f Drawable_Object::to_projection_space(glm::vec2 pos, float radius) {
+sf::Vector2f DrawableObject::toProjectionSpace(glm::vec2 pos, float radius) {
     pos -= physical_projection_offset_;
     pos *= pixel_per_projection_;
     // add margin
@@ -60,10 +60,10 @@ sf::Vector2f Drawable_Object::to_projection_space(glm::vec2 pos, float radius) {
         pos.x = resolution_.x - pos.x;
     }
     pos -= glm::vec2{radius, radius};
-    return to_sf(pos);
+    return toSf(pos);
 } 
 
-sf::Vector2f Drawable_Object::to_projection_size(glm::vec2 size) {
+sf::Vector2f DrawableObject::toProjectionSize(glm::vec2 size) {
     if((up_ + right_).y < 0) {
         if((up_ + right_).x < 0) {
             size = right_ * size.x + up_ * size.y;
@@ -83,22 +83,22 @@ sf::Vector2f Drawable_Object::to_projection_size(glm::vec2 size) {
     return sf::Vector2f{size.x * pixel_per_projection_, size.y * pixel_per_projection_};
 }
 
-glm::vec2 Drawable_Object::pixel_projection_offset() {
+glm::vec2 DrawableObject::pixelProjectionOffset() {
     return pixel_projection_offset_;
 }
-glm::vec2 Drawable_Object::pixel_projection_size() {
+glm::vec2 DrawableObject::pixelProjectionSize() {
     return pixel_projection_size_;
 }
 
-void Drawable_Object::set_phys_table_size(glm::vec2 const& size) {
+void DrawableObject::setPhysTableSize(glm::vec2 const& size) {
     physical_table_size_ = size;
 }
 
-sf::Vector2f to_sf(glm::vec2 const& vec) {
+sf::Vector2f toSf(glm::vec2 const& vec) {
     return sf::Vector2f{vec.x, vec.y};
 }
 
-glm::vec2 to_glm(sf::Vector2f const& vec) {
+glm::vec2 toGlm(sf::Vector2f const& vec) {
     return glm::vec2{vec.x, vec.y};
 }
 

@@ -1,13 +1,13 @@
 #ifndef TTT_TABLE_OBJECT_H
 #define TTT_TABLE_OBJECT_H
 
-#include "Drawable_Object.h"
+#include "drawable_object.h"
 #include "Microphone_Object.h"
 #include <glm/glm.hpp>
 
 namespace TTT {
 
-class Table_Object : Drawable_Object {
+class Table_Object : DrawableObject {
 
 	private:
 		sf::RectangleShape table_rectangle_shape_;

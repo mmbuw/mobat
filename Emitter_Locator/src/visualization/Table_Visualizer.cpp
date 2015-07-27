@@ -36,8 +36,8 @@ Table_Visualizer(std::vector<glm::vec2> const& microphone_positions,
     projection_shape_.setFillColor(sf::Color::Transparent);
     projection_shape_.setOutlineColor(sf::Color::Yellow);
     projection_shape_.setOutlineThickness(line_thickness_);
-    projection_shape_.setPosition(to_projection_space(physical_projection_offset_ + glm::vec2{line_thickness_ / pixel_per_projection_}));
-    projection_shape_.setSize(to_projection_size(physical_projection_size_ - glm::vec2{2.0f * line_thickness_ / pixel_per_projection_}));
+    projection_shape_.setPosition(toProjectionSpace(physical_projection_offset_ + glm::vec2{line_thickness_ / pixel_per_projection_}));
+    projection_shape_.setSize(toProjectionSize(physical_projection_size_ - glm::vec2{2.0f * line_thickness_ / pixel_per_projection_}));
 
     table_.Recalculate_Geometry();
 
@@ -61,8 +61,8 @@ Table_Visualizer(std::vector<glm::vec2> const& microphone_positions,
 
     player_speed_ = configurator().getFloat("player_speed");
 
-    player1_pos_ = glm::vec2{TTT::Drawable_Object::physical_projection_offset_ + TTT::Drawable_Object::physical_projection_size_ * glm::vec2{0.5f, 0.3f}};
-    player2_pos_ = glm::vec2{TTT::Drawable_Object::physical_projection_offset_ + TTT::Drawable_Object::physical_projection_size_ * glm::vec2{0.5f, 0.6f}};
+    player1_pos_ = glm::vec2{TTT::DrawableObject::physical_projection_offset_ + TTT::DrawableObject::physical_projection_size_ * glm::vec2{0.5f, 0.3f}};
+    player2_pos_ = glm::vec2{TTT::DrawableObject::physical_projection_offset_ + TTT::DrawableObject::physical_projection_size_ * glm::vec2{0.5f, 0.6f}};
 
     restart();
     
@@ -212,7 +212,7 @@ Recalculate_Geometry() {
                     }
                 }
 
-                ball_.setPosition(to_projection_space(ball_pos_, ball_.getRadius())); 
+                ball_.setPosition(toProjectionSpace(ball_pos_, ball_.getRadius())); 
             }
 
             if(!moved_out_ && already_moved_out) moved_out_ = true;
@@ -409,8 +409,8 @@ bool Table_Visualizer::wanna_play(){
 
 
 void Table_Visualizer::handle_keyboard_input() {
-    glm::vec2 field_max{TTT::Drawable_Object::physical_projection_offset_ + TTT::Drawable_Object::physical_projection_size_ - glm::vec2{0.02f, 0.02f}};
-    glm::vec2 field_min{TTT::Drawable_Object::physical_projection_offset_ + glm::vec2{0.02f, 0.02f}};
+    glm::vec2 field_max{TTT::DrawableObject::physical_projection_offset_ + TTT::DrawableObject::physical_projection_size_ - glm::vec2{0.02f, 0.02f}};
+    glm::vec2 field_min{TTT::DrawableObject::physical_projection_offset_ + glm::vec2{0.02f, 0.02f}};
         
     if(player1_keyboard_) {
         glm::vec2 pl1_dir{0, 0};

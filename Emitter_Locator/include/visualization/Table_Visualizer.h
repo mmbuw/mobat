@@ -18,7 +18,7 @@ namespace TTT {
 
 
 
-class Table_Visualizer : Drawable_Object {
+class Table_Visualizer : DrawableObject {
 
 	private:
 		Table_Object table_;

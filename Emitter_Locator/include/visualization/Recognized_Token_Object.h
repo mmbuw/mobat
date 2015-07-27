@@ -1,11 +1,11 @@
 #ifndef TTT_RECOGNIZED_TOKEN_OBJECT_H
 #define TTT_RECOGNIZED_TOKEN_OBJECT_H
 
-#include "Drawable_Object.h"
+#include "drawable_object.h"
 
 namespace TTT {
 
-class Recognized_Token_Object : Drawable_Object {
+class Recognized_Token_Object : DrawableObject {
 
 	private:
 		//the id is in this case the frequency

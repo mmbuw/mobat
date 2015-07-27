@@ -17,7 +17,7 @@ Draw(sf::RenderWindow& canvas) const {
 void Microphone_Object::
 Recalculate_Geometry() {
 	float radius = 10.0f;  
-	microphone_circle_shape_.setPosition(to_projection_space(physical_position_, radius));
+	microphone_circle_shape_.setPosition(toProjectionSpace(physical_position_, radius));
 	microphone_circle_shape_.setRadius(radius);
 }
 
