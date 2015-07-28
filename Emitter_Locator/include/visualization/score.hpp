@@ -24,7 +24,7 @@ class Score : DrawableObject{
     Score(int maxpoints);
     void draw(sf::RenderWindow& canvas) const;
     void update(int r_goals, int l_goals); //changes colors according to given scores
-    void reset();
+    void reset(); //sets colors back to the startcondition (like a tie)
     int getMaxpoints();
 };
 
