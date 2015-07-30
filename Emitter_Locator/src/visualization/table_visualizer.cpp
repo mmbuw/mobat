@@ -360,7 +360,7 @@ void TableVisualizer::moveBallOutOfToken(Token const& paddle, glm::vec2 const& d
 
 std::pair<bool, std::string> TableVisualizer::gameOver(){
     int tmp = left_goals_ - right_goals_;
-    if(abs(tmp) < points_.getMaxpoints() / 2){
+    if(abs(tmp) < points_.getMaxPoints() / 2){
         return {false, "Chuck Norris"};
     }else{
         if(tmp > 0){  //>= 3
