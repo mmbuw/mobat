@@ -8,10 +8,10 @@ buffer_collection::buffer_collection(std::size_t bufferbytes, std::size_t buffer
 {
 	buffers = (int**)malloc(buffernum * sizeof(int*));
 
-	if(buffers) {
-		for(std::size_t i = 0; i < count; ++i) {
+	if (buffers) {
+		for (std::size_t i = 0; i < count; ++i) {
 			buffers[i] = (int*)malloc(bufferbytes);
-			if(!buffers[i]) {
+			if (!buffers[i]) {
 				throw std::logic_error("memory allocation failed");
 			}
 		}
@@ -20,13 +20,13 @@ buffer_collection::buffer_collection(std::size_t bufferbytes, std::size_t buffer
 }
 
 buffer_collection::~buffer_collection() {
-	for(std::size_t i = 0; i < count; ++i) {
+	for (std::size_t i = 0; i < count; ++i) {
 		if(buffers[i]) {
 			free(buffers[i]);
 			buffers[i] = nullptr;
 		}
 	}
-	if(buffers) {
+	if (buffers) {
 		free(buffers);
 	}
 }
@@ -34,9 +34,9 @@ buffer_collection::~buffer_collection() {
 //copy data from interleaved buffer, assumes that the sourcesize equals length * count 
 void buffer_collection::fromInterleaved(unsigned char* source) {
 	// fill each channel
-	for(std::size_t current_buffer = 0; current_buffer < count; ++current_buffer) {
+	for (std::size_t current_buffer = 0; current_buffer < count; ++current_buffer) {
 		// and each int
-	   for(std::size_t buffer_offset_pos = 0; buffer_offset_pos < length; ++buffer_offset_pos) {
+	   for (std::size_t buffer_offset_pos = 0; buffer_offset_pos < length; ++buffer_offset_pos) {
 
 			buffers[current_buffer][buffer_offset_pos] 
 				= 0x0 

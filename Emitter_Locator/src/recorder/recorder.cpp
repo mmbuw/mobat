@@ -1,4 +1,5 @@
 #include "recorder.hpp"
+#include <stdexcept>
 
 Recorder::Recorder(unsigned chan, std::size_t frames, std::size_t recording_time) :
   config_{chan, frames, 0},
@@ -13,44 +14,46 @@ Recorder::Recorder(unsigned chan, std::size_t frames, std::size_t recording_time
   std::vector<std::string> capture_devices{getSupportingDevices(devices, config_, SND_PCM_STREAM_CAPTURE)};
 
   std::string capture_name{capture_devices[0]};
-  for(auto device : capture_devices) {
+  for (auto device : capture_devices) {
 
     //check for strings that contain the behringer id string
     //other device
-    if( "hw:CARD=UMC404,DEV=0" == device ) {
+    if ( "hw:CARD=UMC404,DEV=0" == device ) {
       capture_name = device;
       break;
     }
   }
-  if(capture_name == capture_devices[0]) {
+  if (capture_name == capture_devices[0]) {
     std::cerr << "Behringer UMC not found, using \"" << capture_name << "\""<< std::endl;
   }
   // open chosen device
   device_ =  device{capture_name, SND_PCM_STREAM_CAPTURE};
-  if(!device_) {
+  if (!device_) {
     std::cerr << "no usable device found" << std::endl;
     return;
   }
-
+  // get avaible period times
   auto extremes = config_.periodTimeExtremes();
   std::size_t period_time = extremes.second;
   // find largest period size fitting in recording buffer
-  if(recording_time_ < period_time) {
+  if (recording_time_ < period_time) {
     period_time = recording_time_;
   }
   else {
-    while(recording_time_ % period_time != 0) {
+    while (recording_time_ % period_time != 0) {
       --period_time; 
     }
   }
   // is no usable time was found recoding is impossible
-  if(period_time < extremes.first) {
-    std::cerr << "could not find period matching recording time" << std::endl;
-    return;
+  if (period_time < extremes.first) {
+    throw std::out_of_range("could not find period matching recording time");
   }
+
   config_.setPeriodTime(period_time);
-  // install configuration and allocate buffer
+  
+  // install configuration
   config_.install(device_);
+  // allocate buffer
   buffer_length_ = config_.bufferBytes(recording_time_);
   buffer_ = new uint8_t[buffer_length_];
 }
@@ -62,7 +65,7 @@ Recorder::~Recorder() {
 std::string const& Recorder::deviceName() const {
   return device_.name;
 }
-Config& Recorder::config() {
+Config const& Recorder::config() const {
   return config_;
 }
 
@@ -70,22 +73,22 @@ void Recorder::record() {
 
   // prevent under- or overruns
   std::size_t loops = recording_time_ / config_.periodTime();
-  if(loops * config_.periodBytes() > buffer_length_) {
+  if (loops * config_.periodBytes() > buffer_length_) {
     std::cerr << "Recorder::record - buffer size to small" << std::endl;
     return;
   }
-  else if(loops * config_.periodBytes() < buffer_length_) {
+  else if (loops * config_.periodBytes() < buffer_length_) {
     std::cerr << "Recorder::record - buffer size too large" << std::endl;
   }
-
-  for(uint8_t* start = &buffer_[0]; start < &buffer_[buffer_length_ / sizeof(*buffer_)]; start += config_.periodBytes()) {
+  // record until buffer is full
+  for (uint8_t* start = &buffer_[0]; start < &buffer_[buffer_length_ / sizeof(*buffer_)]; start += config_.periodBytes()) {
     int err = snd_pcm_readi(device_, start, config_.periodFrames());
-    if(err != int(config_.periodFrames())) {
+    if (err != int(config_.periodFrames())) {
       // handle buffer overrun
-      if(err == -EPIPE) {
+      if (err == -EPIPE) {
         int new_err = snd_pcm_recover(device_, err, 1);
         // recovery failed
-        if(new_err == err) {
+        if (new_err == err) {
           std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
           new_recording_ = false;
           return;
@@ -93,12 +96,13 @@ void Recorder::record() {
         // try to record again
         else {
           err = snd_pcm_readi(device_, start, config_.periodFrames());
-          if(err != int(config_.periodFrames())) { 
+          if (err != int(config_.periodFrames())) { 
             std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
             new_recording_ = false; 
             return;
           }
         }
+        // other error occured, recording aborted
       } else {
         std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
         new_recording_ = false; 
@@ -130,8 +134,8 @@ void Recorder::requestRecording() {
 }
 
 void Recorder::recordingLoop() {
-  while(!shutdown_) {
-    if(!new_recording_) {
+  while (!shutdown_) {
+    if (!new_recording_) {
       record();
     }
   }
@@ -139,10 +143,10 @@ void Recorder::recordingLoop() {
 
 std::vector<std::string> Recorder::getSupportingDevices(std::vector<std::string> const& devices, Config const& config, snd_pcm_stream_t type) {
   std::vector<std::string> supporting_devices{};
-  for(auto const& curr_device : devices) {
+  for (auto const& curr_device : devices) {
     device test_handle{curr_device, type};
-    if(test_handle) {
-      if(config.isSupported(test_handle)) {
+    if (test_handle) {
+      if (config.isSupported(test_handle)) {
        supporting_devices.push_back(curr_device);  
       }
     }
@@ -158,19 +162,19 @@ std::vector<std::string> Recorder::getPcms() {
   char** hints;
 
   err = snd_device_name_hint(-1, "pcm",(void***)&hints);
-  if(err != 0) {
+  if (err != 0) {
     std::cerr << "cannot open audio device list " << snd_strerror(err) << std::endl;
     return devices;
   }
 
-  for(char** n = hints; *n != nullptr; ++n) {
+  for (char** n = hints; *n != nullptr; ++n) {
     char* name = snd_device_name_get_hint(*n, "NAME");
     char* io = snd_device_name_get_hint(*n, "IOID");
 
-    if(name != nullptr && strcmp("null", name) != 0 && strcmp("null", name)) {
-      if(io == nullptr || strcmp("Output", io) != 0) {
+    if (name != nullptr && strcmp("null", name) != 0 && strcmp("null", name)) {
+      if (io == nullptr || strcmp("Output", io) != 0) {
         devices.push_back(name);
-        // if(io != nullptr)std::cout << name << " " << std::string{io} << std::endl;
+        // if (io != nullptr)std::cout << name << " " << std::string{io} << std::endl;
       }
       free(name);
       free(io);
@@ -196,8 +200,8 @@ void Recorder::outputCards() {
 
   err = snd_card_next(&card_index);
   // iterate over cards until method fails
-  while(card_index > -1) {
-    if(err != 0) {
+  while (card_index > -1) {
+    if (err != 0) {
       std::cerr << "cannot get next audio card " << snd_strerror(err) << std::endl;
     }
 
@@ -212,7 +216,7 @@ void Recorder::outputCards() {
 
     //get sound card info 
     err = snd_ctl_card_info(card_handle, card_info);
-    if(err < 0) {
+    if (err < 0) {
       std::cerr << "cannot open control hardware info (" << card_index << ") :" << snd_strerror(err) << std::endl;
       snd_ctl_close(card_handle);
       return;
@@ -227,8 +231,8 @@ void Recorder::outputCards() {
 
     int device_index = -1;
     err = snd_ctl_pcm_next_device(card_handle, &device_index);
-    while(device_index > -1) {
-      if(err != 0) {
+    while (device_index > -1) {
+      if (err != 0) {
         std::cerr << "cannot get next pcm device " << snd_strerror(err) << std::endl;
       }
 
@@ -238,8 +242,8 @@ void Recorder::outputCards() {
       // snd_pcm_info_set_stream(pcm_info, SND_PCM_STREAM_PLAYBACK);
       
       err = snd_ctl_pcm_info(card_handle, pcm_info);
-      if(err < 0) {
-        if(err != -ENOENT) {
+      if (err < 0) {
+        if (err != -ENOENT) {
           std::cerr << "cannot get control digital audio info (" << card_index << "," << device_index << "):" << snd_strerror(err) << std::endl;
           return;
         }
