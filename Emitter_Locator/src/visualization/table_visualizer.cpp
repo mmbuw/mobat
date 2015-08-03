@@ -112,10 +112,12 @@ recalculateGeometry() {
     }
 
     if(gamemode_ == true){
+        // ensures pause after goal
         if(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - time_of_last_goal_).count() > ball_respawn_delay_){
 
             bool already_moved_out = false;
             Token last_token;
+            // check for intersections with all tokens
             for(auto const& i : recognized_tokens_){
 
                 auto intersection = ballIntersect(i.second);
@@ -129,16 +131,16 @@ recalculateGeometry() {
                         last_moved_dir_ = intersection.second;
                         moveBallOutOfToken(i.second);
                     }
-
+                    // if ball intersects with token it should move
                     if(!move_ball_) {
                         move_ball_ = true;
                         ball_dir_ = intersection.second;
                     }
                     else {
-                        //ball_dir_ = glm::reflect(ball_dir_, intersection.second);
                         ball_dir_ = intersection.second;
                     }                       
                     contact_time_ = current_time_;
+                    // "push"-effect
                     ball_speed_ = ball_speed_max_;
 
                     already_moved_out = true;
@@ -149,7 +151,7 @@ recalculateGeometry() {
                 ball_speed_max_ *= ball_acceleration_;
                 ball_speed_min_ *= ball_acceleration_;
             }
-
+            // ballradius in meter
             float b_rad = ball_.getRadius() / pixel_per_projection_;
 
             glm::vec2 field_min{physical_projection_offset_ + glm::vec2{b_rad}};
@@ -166,7 +168,7 @@ recalculateGeometry() {
                     ball_pos_.x = field_max.x;
                     ball_dir_ = glm::reflect(ball_dir_, glm::vec2{-1.0f ,0.0f});
                 }
-                // orevent ball getting stuck between wall & paddle
+                // prevent ball from getting stuck between wall & paddle
                 if(already_moved_out) {
                     ball_dir_ = glm::normalize(ball_pos_ - last_token.getPhysicalPosition());
                     already_moved_out = false;
@@ -182,12 +184,12 @@ recalculateGeometry() {
                     ++right_goals_;
                 }
                 points_.update(right_goals_, left_goals_);
-
+                // set ball back to mid_point
                 ball_dir_ = glm::vec2{0};
                 ball_pos_ = physical_projection_offset_ + physical_projection_size_ * 0.5f;
                 move_ball_ = false;
                 ball_reset_ = true;
-
+                // timestamp used to ensure pause after goal
                 time_of_last_goal_ = std::chrono::high_resolution_clock::now();
 
             }
@@ -215,11 +217,14 @@ recalculateGeometry() {
                 ball_.setPosition(toProjectionSpace(ball_pos_, ball_.getRadius())); 
             }
 
-            if(!moved_out_ && already_moved_out) moved_out_ = true;
-            else moved_out_ = false;
-        } 
+            if(!moved_out_ && already_moved_out){
+                moved_out_ = true;
+            }
+            else{
+                moved_out_ = false;
+            }
+        }
     }
-// }
 }
 
 void TableVisualizer::
