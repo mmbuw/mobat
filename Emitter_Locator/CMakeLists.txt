@@ -4,6 +4,8 @@ project (TTT)
 
 include_directories(external/glm0.9.6.3/)
 
+option(ODROID_BUILD "Build visualisation for odroid/raspberry" OFF)
+
 # recorder
 file(GLOB RECORDER_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/recorder/*.cpp)
 add_library(recorder STATIC ${RECORDER_SOURCES})
@@ -16,8 +18,8 @@ target_link_libraries(recorder -lasound)
 file(GLOB SIGNALTRANS_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/signaltrans/*.cpp)
 add_library(signaltrans STATIC ${SIGNALTRANS_SOURCES})
 target_include_directories(signaltrans PUBLIC include/signaltrans include/locator)
-# requires fftw3-dev and libsndfile1-dev
-target_link_libraries(signaltrans -lfftw3_threads -lfftw3 -lm -lsndfile visualization)
+# requires fftw3-dev
+target_link_libraries(signaltrans -lfftw3_threads -lfftw3 -lm visualization)
 
 # locator
 file(GLOB LOCATOR_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/locator/*.cpp)
@@ -31,17 +33,22 @@ add_library(visualization STATIC ${RECORDER_SOURCES})
 target_include_directories(visualization PUBLIC include/visualization)
 # requires libsfml-dev
 target_link_libraries(visualization -lm -lsfml-graphics -lsfml-window -lsfml-system)
+if(ODROID_BUILD)
+  target_link_libraries(visualization -lxcb -lxcb-randr -lxcb-icccm -lxcb-image -ludev)
+endif()
 
 
 # output executables
 add_executable(ttt src/visualization.cpp)
-target_link_libraries(ttt recorder signaltrans locator visualization -lX11 -lpthread -lm)
-
+target_link_libraries(ttt recorder signaltrans locator visualization -lpthread)
+if(ODROID_BUILD)
+  target_link_libraries(ttt -lX11 -lX11-xcb)
+endif()
 
 #request C++11 if on unix, stop at all warnings but ignore specific warning in glm headers
 set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 if(UNIX)
-  add_definitions( -std=c++11 -Wall -Werror  -Wno-strict-aliasing -lpthread -lm)
+  add_definitions( -std=c++11 -Wall -Werror  -Wno-strict-aliasing)
 endif(UNIX)
 
 

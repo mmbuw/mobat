@@ -38,8 +38,8 @@ int main(int argc, char** argv) {
                        , "Transformed_Frequencies");
 
     sf::ContextSettings settings;
-    settings.antialiasingLevel = 8;
-    
+    //settings.antialiasingLevel = 8;
+
     sf::Uint32 style = sf::Style::Default;
     if(configurator().getUint("fullscreen") > 0) {
         style = sf::Style::Fullscreen;
@@ -180,6 +180,7 @@ void draw_signal_plot(sf::RenderWindow& window, Locator const& locator) {
     std::array< std::vector<double>, 4> signal_vis_samples =  locator.load_signal_vis_samples();
         
     window.clear(sf::Color(255, 255, 255));
+
 
 
     std::array<unsigned, 4> recognized_vis_sample_pos = locator.load_recognized_vis_sample_positions();
