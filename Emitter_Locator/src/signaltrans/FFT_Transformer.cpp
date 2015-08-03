@@ -133,9 +133,9 @@ void FFT_Transformer::set_listened_frequencies(std::vector<unsigned> const& list
 }
 
 void FFT_Transformer::perform_FFT_on_channels(int** signal_buffers, unsigned ints_per_channel, unsigned window_size, unsigned signal_half_chunk) {
-        float num_chunks = configurator().getFloat("num_splitted_fourier_chunks");
+        static float num_chunks = configurator().getFloat("num_splitted_fourier_chunks");
 
-        for (unsigned int channel_iterator = 0; channel_iterator < 4	; ++channel_iterator) {
+        for (unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
             set_FFT_buffers(4, 
                     ints_per_channel,
                 (int**)&signal_buffers[channel_iterator]);   
