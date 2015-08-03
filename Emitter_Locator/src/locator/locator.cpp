@@ -117,7 +117,7 @@ load_recognized_vis_sample_positions() const {
       first_signal_available = true;
     }
 
-    if (false == work_on_old_signal) {
+    if (!work_on_old_signal) {
       current_signal_chunk_ = 0;
       collector.fromInterleaved(recorder.buffer());
 
