@@ -31,12 +31,19 @@ int main(int argc, char** argv) {
     auto recording_thread = std::thread(&Locator::record_position, &locator);
 
 // visualisation
-
+// signal_vis
     bool show_signalvis = configurator().getUint("show_signalvis") > 0;
-
+    
     sf::RenderWindow signal_plot_window_(sf::VideoMode(280, 400)
-                       , "Transformed_Frequencies");
+                           , "Transformed_Frequencies");
 
+    auto signal_vis_thread = std::thread(draw_signal_plot, std::ref(signal_plot_window_), std::ref(locator));
+    // auto signal_vis_thread = std::thread(foo, std::ref(signal_plot_window_)/*, &locator*/);
+    if(!show_signalvis){
+        signal_plot_window_.close();
+        signal_vis_thread.join();
+    }
+// table_vis
     sf::ContextSettings settings;
     settings.antialiasingLevel = 8;
     
@@ -137,9 +144,9 @@ int main(int argc, char** argv) {
 
             TableVisualizer.updateTokens();
             
-            if(show_signalvis) {
+            /*if(show_signalvis) {
                 draw_signal_plot(signal_plot_window_, locator);
-            }
+            }*/
             
         }
         else {
@@ -169,6 +176,9 @@ int main(int argc, char** argv) {
 
     locator.shut_down();
     recording_thread.join();
+    if(show_signalvis){
+        signal_vis_thread.join();
+    }
 
     return 0;
 }
