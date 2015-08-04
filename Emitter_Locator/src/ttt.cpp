@@ -28,8 +28,8 @@ int main(int argc, char *argv[])
 
   // stream_buffer(std::cout, buffer, sizeof(buffer) / sizeof(*buffer));
 
-  unsigned char* buffer = recorder.buffer(); 
-  for(unsigned char* start = &buffer[0]; start < &buffer[recorder.buffer_bytes()]; start += playback_config.period_bytes()) {
+  uint8_t* buffer = recorder.buffer(); 
+  for(uint8_t* start = &buffer[0]; start < &buffer[recorder.buffer_bytes()]; start += playback_config.period_bytes()) {
     int err = snd_pcm_writei(playback_device, start, playback_config.period_frames());
     if(err == -EPIPE) {
       snd_pcm_prepare(playback_device);

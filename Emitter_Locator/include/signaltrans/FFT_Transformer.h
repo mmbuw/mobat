@@ -3,6 +3,7 @@
 #define FFT_TRANSFORMER_H
 
 #include "ring_buffer.h"
+#include "buffer_collection.hpp"
 
 #include <fftw3.h>
 #include <iostream>
@@ -26,7 +27,7 @@ class FFT_Transformer {
 
 		unsigned int audio_buffer_size_;
 		unsigned int num_audio_buffers_;
-		int** audio_buffers_;
+		int* audio_buffers_;
 
 		unsigned short fft_frame_size_;
 		double* fft_in_;
@@ -61,7 +62,7 @@ class FFT_Transformer {
 
 		void set_listened_frequencies(std::vector<unsigned> const& listening_to_frequencies);
 
-		void perform_FFT_on_channels(int** signal_buffers, unsigned bytes_per_channel, unsigned window_size, unsigned signal_chunk);
+		void perform_FFT_on_channels(buffer_collection const& buffers, unsigned bytes_per_channel, unsigned window_size, unsigned signal_chunk);
 
 		void set_FFT_input( unsigned int offset);
 		unsigned perform_FFT(unsigned );
@@ -71,7 +72,7 @@ class FFT_Transformer {
 	
 		void set_FFT_buffers( unsigned int num_buffers,
 							  unsigned int buffer_size,
-							  int** buffers);
+							  int32_t* buffers);
 
 		std::map<unsigned, std::array<std::vector<double>,4> > signal_results_per_frequency_;
 

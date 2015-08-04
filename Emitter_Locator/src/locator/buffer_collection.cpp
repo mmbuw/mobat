@@ -1,16 +1,16 @@
 #include "buffer_collection.hpp"
 #include <stdexcept>
 
-buffer_collection::buffer_collection(std::size_t bufferbytes, std::size_t buffernum) :
- count{buffernum},
- bytes{bufferbytes},
- length{bufferbytes / 4}
+buffer_collection::buffer_collection(std::size_t bufferbytes, std::size_t buffernum)
+ :count{buffernum}
+ ,bytes{bufferbytes}
+ ,length{bufferbytes / 4}
 {
-	buffers = (int**)malloc(buffernum * sizeof(int*));
+	buffers = (int32_t**)malloc(buffernum * sizeof(int32_t*));
 
 	if (buffers) {
 		for (std::size_t i = 0; i < count; ++i) {
-			buffers[i] = (int*)malloc(bufferbytes);
+			buffers[i] = (int32_t*)malloc(bufferbytes);
 			if (!buffers[i]) {
 				throw std::logic_error("memory allocation failed");
 			}
@@ -32,7 +32,7 @@ buffer_collection::~buffer_collection() {
 }
 
 //copy data from interleaved buffer, assumes that the sourcesize equals length * count 
-void buffer_collection::fromInterleaved(unsigned char* source) {
+void buffer_collection::fromInterleaved(uint8_t* source) {
 	// fill each channel
 	for (std::size_t current_buffer = 0; current_buffer < count; ++current_buffer) {
 		// and each int
@@ -48,10 +48,10 @@ void buffer_collection::fromInterleaved(unsigned char* source) {
 	}
 }
 
-int* const& buffer_collection::operator[](std::size_t i) {
+int32_t* const& buffer_collection::operator[](std::size_t i) {
 	return buffers[i];
 }
 
-int* const& buffer_collection::operator[](std::size_t i) const {
+int32_t* const& buffer_collection::operator[](std::size_t i) const {
 	return buffers[i];
 }

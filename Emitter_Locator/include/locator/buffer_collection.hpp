@@ -2,6 +2,7 @@
 #define BUFFERCOLLECTION_HPP
 
 #include <cstdlib>
+#include <cstdint>
 #include <vector>
 
 struct buffer_collection {
@@ -13,10 +14,10 @@ struct buffer_collection {
     buffer_collection& operator=(buffer_collection const&) = delete;
 
     //copy data from interleaved buffer, assumes that the sourcesize equals length * count 
-    void fromInterleaved(unsigned char* source);
+    void fromInterleaved(uint8_t* source);
     // random access operators without index check
-    int* const& operator[](std::size_t i);
-    int* const& operator[](std::size_t i) const;
+    int32_t* const& operator[](std::size_t i);
+    int32_t* const& operator[](std::size_t i) const;
     
     // number of buffers
     std::size_t count;
@@ -24,6 +25,6 @@ struct buffer_collection {
     std::size_t bytes;
     // length in ints
     std::size_t length;
-    int** buffers;
+    int32_t** buffers;
 };
 #endif //BUFFERCOLLECTION_HPP

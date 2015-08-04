@@ -132,31 +132,29 @@ void FFT_Transformer::set_listened_frequencies(std::vector<unsigned> const& list
 	listening_to_those_frequencies = listening_to_frequencies;
 }
 
-void FFT_Transformer::perform_FFT_on_channels(int** signal_buffers, unsigned ints_per_channel, unsigned window_size, unsigned signal_half_chunk) {
-        static float num_chunks = configurator().getFloat("num_splitted_fourier_chunks");
+void FFT_Transformer::perform_FFT_on_channels(buffer_collection const& signal_buffers, unsigned ints_per_channel, unsigned window_size, unsigned signal_half_chunk) {
+    static float num_chunks = configurator().getFloat("num_splitted_fourier_chunks");
 
-        for (unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
-            set_FFT_buffers(4, 
-                    ints_per_channel,
-                (int**)&signal_buffers[channel_iterator]);   
+    for (unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
+        set_FFT_buffers(4, ints_per_channel, signal_buffers[channel_iterator]);
 
-            unsigned signal_chunk = 2.0 * signal_half_chunk;
-            reset_sample_counters(channel_iterator);
-            clear_cached_fft_results(channel_iterator);
-            for(unsigned int i = signal_chunk * (ints_per_channel/num_chunks) ; i < (signal_chunk+1)*(ints_per_channel/num_chunks) - 50; ++i) {
-                unsigned offset = 1 * i;
-                if(offset > (signal_chunk+1)*(ints_per_channel/num_chunks) - 50 )
-                    break;
-					
-				set_analyzation_range(0+offset, window_size+50 + offset);
-                
+        unsigned signal_chunk = 2.0 * signal_half_chunk;
+        reset_sample_counters(channel_iterator);
+        clear_cached_fft_results(channel_iterator);
+        for(unsigned int i = signal_chunk * (ints_per_channel/num_chunks) ; i < (signal_chunk+1)*(ints_per_channel/num_chunks) - 50; ++i) {
+            unsigned offset = 1 * i;
+            if(offset > (signal_chunk+1)*(ints_per_channel/num_chunks) - 50 )
+                break;
+				
+			set_analyzation_range(0+offset, window_size+50 + offset);
+            
 
-                perform_FFT(channel_iterator);           
-            } 
-        }
+            perform_FFT(channel_iterator);           
+        } 
+    }
 }
 
-void FFT_Transformer::set_FFT_buffers(unsigned int num_buffers, unsigned int buffer_size, int** buffers) {
+void FFT_Transformer::set_FFT_buffers(unsigned int num_buffers, unsigned int buffer_size, int32_t* buffers) {
 	num_audio_buffers_ = num_buffers;
 	audio_buffer_size_ = buffer_size;
 	audio_buffers_ = buffers;
@@ -170,7 +168,7 @@ void FFT_Transformer::set_FFT_input( unsigned int offset ) {
 				++frame_idx) {
 
 				//std::cout << "buffer content: " << audio_buffers_[0][(offset) + frame_idx] << "\n";
-				fft_in_[frame_idx] = window_[frame_idx] * (audio_buffers_[0][    (offset) + frame_idx]) / 2147483647.0;
+				fft_in_[frame_idx] = window_[frame_idx] * (audio_buffers_[(offset) + frame_idx]) / float(INT32_MAX);
 			}
 		}
 	} else {
