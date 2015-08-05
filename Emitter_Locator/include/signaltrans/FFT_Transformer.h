@@ -62,7 +62,7 @@ class FFT_Transformer {
 
 		void set_listened_frequencies(std::vector<unsigned> const& listening_to_frequencies);
 
-		void perform_FFT_on_channels(buffer_collection const& buffers, unsigned bytes_per_channel, unsigned window_size, unsigned signal_chunk);
+		void perform_FFT_on_channels(buffer_collection const& buffers, unsigned window_size, unsigned signal_chunk);
 
 		void set_FFT_input( unsigned int offset);
 		unsigned perform_FFT(unsigned );

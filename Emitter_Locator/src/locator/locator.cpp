@@ -12,7 +12,7 @@
 
 Locator::Locator(unsigned int num_mics):
  shutdown{false},
- recorder{num_mics, 44100, 130000},
+ recorder{num_mics, 44100, configurator().getUint("max_recording_time")},
  collector{recorder.bufferBytes() / num_mics, num_mics},
  //locator{330, {0.06, 0.075}, {0.945,  0.09}, {0.925,  1.915} , {0.06,  1.905}},
  locator{330, {0.00, 0.0}, {0.0,  0.0}, {0.0,  0.0} , {0.0,  0.0}},

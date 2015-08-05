@@ -1,13 +1,16 @@
 #include "recorder.hpp"
 #include <stdexcept>
+#include <cstring>
 
-Recorder::Recorder(unsigned chan, std::size_t frames, std::size_t recording_time) :
-  config_{chan, frames, 0},
-  device_{},
-  recording_time_{recording_time},
-  buffer_length_{0},
-  new_recording_{false},
-  shutdown_{false}
+Recorder::Recorder(unsigned chan, std::size_t frames, std::size_t recording_time)
+  :config_{chan, frames, 0}
+  ,device_{}
+  ,recording_time_{recording_time}
+  ,buffer_bytes_{0}
+  ,writing_offset_{0}
+  ,recorded_bytes_{0}
+  ,new_recording_{false}
+  ,shutdown_{false}
 {
   std::vector<std::string> devices{getPcms()};
 
@@ -53,13 +56,15 @@ Recorder::Recorder(unsigned chan, std::size_t frames, std::size_t recording_time
   
   // install configuration
   config_.install(device_);
-  // allocate buffer
-  buffer_length_ = config_.bufferBytes(recording_time_);
-  buffer_ = new uint8_t[buffer_length_];
+  // allocate buffers
+  buffer_bytes_ = config_.bufferBytes(recording_time_);
+  buffer_ = new uint8_t[buffer_bytes_];
+  output_buffer_ = new uint8_t[buffer_bytes_];
 }
 
 Recorder::~Recorder() {
   delete [] buffer_;
+  delete [] output_buffer_;
 }
 
 std::string const& Recorder::deviceName() const {
@@ -70,18 +75,17 @@ Config const& Recorder::config() const {
 }
 
 void Recorder::record() {
-
   // prevent under- or overruns
   std::size_t loops = recording_time_ / config_.periodTime();
-  if (loops * config_.periodBytes() > buffer_length_) {
+  if (loops * config_.periodBytes() > buffer_bytes_) {
     std::cerr << "Recorder::record - buffer size to small" << std::endl;
     return;
   }
-  else if (loops * config_.periodBytes() < buffer_length_) {
+  else if (loops * config_.periodBytes() < buffer_bytes_) {
     std::cerr << "Recorder::record - buffer size too large" << std::endl;
   }
   // record until buffer is full
-  for (uint8_t* start = &buffer_[0]; start < &buffer_[buffer_length_ / sizeof(*buffer_)]; start += config_.periodBytes()) {
+  for (uint8_t* start = &buffer_[0]; start < &buffer_[buffer_bytes_ / sizeof(*buffer_)]; start += config_.periodBytes()) {
     int err = snd_pcm_readi(device_, start, config_.periodFrames());
     if (err != int(config_.periodFrames())) {
       // handle buffer overrun
@@ -109,20 +113,33 @@ void Recorder::record() {
         return;
       }
     }
+    else {
+      writing_offset_ += config_.periodBytes() % buffer_bytes_;
+      recorded_bytes_ += config_.periodBytes();
+    }
   }
   new_recording_ = true;  
 }
 
 std::size_t Recorder::bufferBytes() const {
-  return buffer_length_;
+  return buffer_bytes_;
 }
 
 uint8_t* Recorder::buffer() {
-  return buffer_;
+  std::memcpy(output_buffer_, buffer_ + writing_offset_, buffer_bytes_ - writing_offset_);
+  std::memcpy(output_buffer_ + (buffer_bytes_ - writing_offset_), buffer_, writing_offset_);
+  // reset recorded bytes
+  recorded_bytes_ = 0;
+  return output_buffer_;
 }
 
 bool Recorder::newRecording() const {
   return new_recording_;
+}
+
+std::size_t Recorder::recordedBytes() const {
+  // return recorded bytes, cant be greater than ringbuffer
+  return std::min(recorded_bytes_, buffer_bytes_);
 }
 
 void Recorder::shutdown() {

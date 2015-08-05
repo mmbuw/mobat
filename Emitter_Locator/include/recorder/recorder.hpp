@@ -32,6 +32,8 @@ class Recorder {
   void requestRecording();
   // check if new recording was created since last request
   bool newRecording() const;
+  // number of new bytes recorded since last request, max is buffer_bytes_
+  std::size_t recordedBytes() const;
   // loop to record when requested
   void recordingLoop();
   // stop recording loop
@@ -47,11 +49,16 @@ class Recorder {
   Config config_;
   device device_;
   std::size_t recording_time_;
-  std::size_t buffer_length_;
+  std::size_t buffer_bytes_;
+  // offset from buffer beginning in bytes
+  std::size_t writing_offset_;
+  // new bytes recorded since last request
+  std::size_t recorded_bytes_;
   bool new_recording_;
   bool shutdown_;
   // use char array for easy iteration over data
   uint8_t* buffer_;
+  uint8_t* output_buffer_;
 };
 
 #endif //RECORDER_HPP 

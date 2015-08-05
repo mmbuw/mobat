@@ -39,7 +39,7 @@ analyze(buffer_collection const& collector, unsigned signal_chunk){
     
     signal_detected_at_sample_per_frequency.clear();
 
-    fft_transformer.perform_FFT_on_channels(collector, collector.length, fft_window_size, signal_chunk);
+    fft_transformer.perform_FFT_on_channels(collector, fft_window_size, signal_chunk);
 
     double updated_times[4];
 
