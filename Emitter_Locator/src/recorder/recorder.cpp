@@ -102,23 +102,34 @@ void Recorder::record() {
           err = snd_pcm_readi(device_, start, config_.periodFrames());
           if (err != int(config_.periodFrames())) { 
             std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
-            new_recording_ = false; 
+            new_recording_ = false;
             return;
+          }
+          else {
+            increment_writer();  
           }
         }
         // other error occured, recording aborted
       } else {
         std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
-        new_recording_ = false; 
+        new_recording_ = false;
         return;
       }
     }
     else {
-      writing_offset_ += config_.periodBytes() % buffer_bytes_;
-      recorded_bytes_ += config_.periodBytes();
+      increment_writer();
     }
   }
-  new_recording_ = true;  
+  
+  new_recording_ = true;
+}
+
+void Recorder::increment_writer() {
+  writing_offset_ += config_.periodBytes() % buffer_bytes_;
+  recorded_bytes_ += config_.periodBytes();
+  // check if recording is complete
+  if (recorded_bytes_ >= buffer_bytes_) {
+  }
 }
 
 std::size_t Recorder::bufferBytes() const {
@@ -130,6 +141,7 @@ uint8_t* Recorder::buffer() {
   std::memcpy(output_buffer_ + (buffer_bytes_ - writing_offset_), buffer_, writing_offset_);
   // reset recorded bytes
   recorded_bytes_ = 0;
+  new_recording_ = false;
   return output_buffer_;
 }
 
@@ -152,9 +164,8 @@ void Recorder::requestRecording() {
 
 void Recorder::recordingLoop() {
   while (!shutdown_) {
-    if (!new_recording_) {
-      record();
-    }
+    // allways record 
+    record();
   }
 }
 

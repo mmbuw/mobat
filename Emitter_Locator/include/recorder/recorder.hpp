@@ -27,6 +27,8 @@ class Recorder {
   Config const& config() const;
   // do new recording to buffer
   void record();
+  // update writing_offset and recorded_bytes
+  void increment_writer();
   
   // trigger new recording in recordingLoop
   void requestRecording();

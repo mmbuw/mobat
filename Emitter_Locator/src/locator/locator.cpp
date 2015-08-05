@@ -99,7 +99,6 @@ load_recognized_vis_sample_positions() const {
  }
 
  void Locator::record_position() {
-
   // start recording loop
   auto recording_thread = std::thread{&Recorder::recordingLoop, &recorder};
 
@@ -121,7 +120,9 @@ load_recognized_vis_sample_positions() const {
 
     if (!work_on_old_signal) {
       current_signal_chunk_ = 0;
-      collector.fromInterleaved(recorder.buffer());
+      // TODO: make recordedBytes() independent from buffer() call
+      std::size_t buffer_bytes = recorder.recordedBytes() / collector.count;
+      collector.fromInterleaved(recorder.buffer(), buffer_bytes);
 
       recorder.requestRecording();
 

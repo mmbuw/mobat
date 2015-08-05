@@ -23,10 +23,10 @@ struct buffer_collection {
     
     // number of buffers
     std::size_t count;
-    // length in bytes
+    // length in bytes per buffer
     std::size_t bytes;
     std::size_t max_bytes;
-    // length in ints
+    // length in ints per buffer
     std::size_t length;
     std::size_t max_length;
     int32_t** buffers;

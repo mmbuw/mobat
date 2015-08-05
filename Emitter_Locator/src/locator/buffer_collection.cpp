@@ -41,6 +41,7 @@ void buffer_collection::fromInterleaved(uint8_t* source, std::size_t source_byte
   // set new sizes
   bytes = source_bytes;
   length = source_bytes / 4;
+
   fromInterleaved(source);
 }
 
