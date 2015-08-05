@@ -124,7 +124,7 @@ load_recognized_vis_sample_positions() const {
       std::size_t buffer_bytes = recorder.recordedBytes() / collector.count;
       collector.fromInterleaved(recorder.buffer(), buffer_bytes);
 
-      recorder.requestRecording();
+      // recorder.requestRecording();
 
     } else {
       if (!first_signal_available || ++current_signal_chunk_  >= num_chunks_to_analize)

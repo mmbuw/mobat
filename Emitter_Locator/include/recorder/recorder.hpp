@@ -29,14 +29,12 @@ class Recorder {
   void record();
   // update writing_offset and recorded_bytes
   void increment_writer();
-  
-  // trigger new recording in recordingLoop
-  void requestRecording();
-  // check if new recording was created since last request
+
+  // check if new recording was created since last buffer red
   bool newRecording() const;
-  // number of new bytes recorded since last request, max is buffer_bytes_
+  // number of new bytes recorded since last read, max is buffer_bytes_
   std::size_t recordedBytes() const;
-  // loop to record when requested
+  // loop to record
   void recordingLoop();
   // stop recording loop
   void shutdown();

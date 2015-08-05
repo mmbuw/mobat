@@ -60,6 +60,15 @@ Recorder::Recorder(unsigned chan, std::size_t frames, std::size_t recording_time
   buffer_bytes_ = config_.bufferBytes(recording_time_);
   buffer_ = new uint8_t[buffer_bytes_];
   output_buffer_ = new uint8_t[buffer_bytes_];
+ 
+  // prevent under- or overruns
+  std::size_t num_loops = recording_time_ / config_.periodTime();
+  if (num_loops * config_.periodBytes() > buffer_bytes_) {
+    throw std::length_error("Recorder::record - buffer size to small");
+  }
+  else if (num_loops * config_.periodBytes() < buffer_bytes_) {
+    throw std::length_error("Recorder::record - buffer size to large");
+  }
 }
 
 Recorder::~Recorder() {
@@ -75,15 +84,6 @@ Config const& Recorder::config() const {
 }
 
 void Recorder::record() {
-  // prevent under- or overruns
-  std::size_t loops = recording_time_ / config_.periodTime();
-  if (loops * config_.periodBytes() > buffer_bytes_) {
-    std::cerr << "Recorder::record - buffer size to small" << std::endl;
-    return;
-  }
-  else if (loops * config_.periodBytes() < buffer_bytes_) {
-    std::cerr << "Recorder::record - buffer size too large" << std::endl;
-  }
   // record until buffer is full
   for (uint8_t* start = &buffer_[0]; start < &buffer_[buffer_bytes_ / sizeof(*buffer_)]; start += config_.periodBytes()) {
     int err = snd_pcm_readi(device_, start, config_.periodFrames());
@@ -94,7 +94,6 @@ void Recorder::record() {
         // recovery failed
         if (new_err == err) {
           std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
-          new_recording_ = false;
           return;
         }
         // try to record again
@@ -102,7 +101,6 @@ void Recorder::record() {
           err = snd_pcm_readi(device_, start, config_.periodFrames());
           if (err != int(config_.periodFrames())) { 
             std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
-            new_recording_ = false;
             return;
           }
           else {
@@ -112,7 +110,6 @@ void Recorder::record() {
         // other error occured, recording aborted
       } else {
         std::cerr << "read from audio interface failed " << snd_strerror(err) << std::endl;
-        new_recording_ = false;
         return;
       }
     }
@@ -120,8 +117,6 @@ void Recorder::record() {
       increment_writer();
     }
   }
-  
-  new_recording_ = true;
 }
 
 void Recorder::increment_writer() {
@@ -129,6 +124,7 @@ void Recorder::increment_writer() {
   recorded_bytes_ += config_.periodBytes();
   // check if recording is complete
   if (recorded_bytes_ >= buffer_bytes_) {
+    new_recording_ = true;
   }
 }
 
@@ -156,10 +152,6 @@ std::size_t Recorder::recordedBytes() const {
 
 void Recorder::shutdown() {
   shutdown_ = true;
-}
-
-void Recorder::requestRecording() {
-  new_recording_ = false;
 }
 
 void Recorder::recordingLoop() {
