@@ -36,12 +36,8 @@ private:
 
     std::mutex frequency_to_record_setter_mutex;
 
-    bool shutdown;
     std::map<unsigned, std::pair<unsigned, glm::vec2> > located_positions;
     std::map<unsigned, std::pair<unsigned, glm::vec2> > cached_located_positions;
-
-    glm::vec4 toas;
-    glm::vec4 cached_toas;
 
     std::array<unsigned, 4> recognized_vis_sample_pos;
     std::array<unsigned, 4> cached_recognized_vis_sample_pos;
@@ -53,15 +49,16 @@ private:
 
     std::map<unsigned, std::array<std::pair<unsigned, glm::vec2>, 10> > cached_positions;
 
+    glm::vec4 toas_;
+    glm::vec4 cached_toas_;
 
-    Recorder recorder;
-    buffer_collection collector;
-
-    TDOAtor locator;
-    Signal_Analyzer signal_analyzer;
+    bool shutdown_;
+    Recorder recorder_;
+    buffer_collection collector_;
+    TDOAtor tdoator_;
+    Signal_Analyzer signal_analyzer_;
 
     unsigned locator_frame_counter_;
-
     unsigned current_signal_chunk_;
  };
 
