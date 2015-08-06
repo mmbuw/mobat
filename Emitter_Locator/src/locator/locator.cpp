@@ -102,7 +102,7 @@ load_recognized_vis_sample_positions() const {
   // start recording loop
   auto recording_thread = std::thread{&Recorder::recordingLoop, &recorder};
 
-  unsigned num_chunks_to_analize = configurator().getUint("num_analyzed_fourier_chunks");
+  unsigned num_chunks_to_analyze = configurator().getUint("num_analyzed_fourier_chunks");
 
   bool first_signal_available = false;
   while (!shutdown)
@@ -127,7 +127,7 @@ load_recognized_vis_sample_positions() const {
       // recorder.requestRecording();
 
     } else {
-      if (!first_signal_available || ++current_signal_chunk_  >= num_chunks_to_analize)
+      if (!first_signal_available || ++current_signal_chunk_  >= num_chunks_to_analyze)
         continue;
     }
 
