@@ -21,7 +21,6 @@ namespace TTT {
 class TableVisualizer : DrawableObject {
 
 	private:
-		Table table_;
 		std::vector<Microphone> microphones_;
 		//register them with their frequency
 		std::map<unsigned, Token> recognized_tokens_;
@@ -76,6 +75,8 @@ class TableVisualizer : DrawableObject {
 
 		sf::RectangleShape projection_shape_;
 	public:
+		Table table_;
+		
 		TableVisualizer(std::vector<glm::vec2> const& microphone_positions
 						 	= std::vector<glm::vec2>(),
 						 sf::Color const& in_table_fill_color 

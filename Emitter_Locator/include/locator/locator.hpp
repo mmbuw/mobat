@@ -27,6 +27,8 @@ class Locator {
 
      void shut_down();
 
+     friend int main(int argc, char** argv);
+
 private:
 
     mutable std::mutex position_mutex;
@@ -55,8 +57,8 @@ private:
     bool shutdown_;
     Recorder recorder_;
     buffer_collection collector_;
-    TDOAtor tdoator_;
     Signal_Analyzer signal_analyzer_;
+    TDOAtor tdoator_;
 
     unsigned locator_frame_counter_;
     unsigned current_signal_chunk_;
