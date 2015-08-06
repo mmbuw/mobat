@@ -18,9 +18,11 @@ void Test::update(unsigned const& freq, glm::vec2 const& pos){
 }
 
 void Test::write(){
-  entry_ += "\n";
-  myfile_.open(file_, std::ofstream::app);
-  myfile_ << entry_;
-  myfile_.close();
-  entry_ = "";
+  if(entry_ != ""){
+    entry_ += "\n";
+    myfile_.open(file_, std::ofstream::app);
+    myfile_ << entry_;
+    myfile_.close();
+    entry_ = "";
+  }
 }
