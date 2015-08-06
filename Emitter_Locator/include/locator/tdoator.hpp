@@ -22,12 +22,8 @@ class TDOAtor{
     // set the speed of sound
     void setSoundSpeed(double c);
 
-    // set the signal arrival times
-    void update_times(double a, double b, double c, double d);
-
-
     // calculate position from current parameters
-    glm::vec2 locate() const;
+    glm::vec2 locate(double time_1, double time_2, double time_3, double time_4);
     
   private:
     // calculates the difference of ?

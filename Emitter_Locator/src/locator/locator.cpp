@@ -151,9 +151,10 @@ load_recognized_vis_sample_positions() const {
 
         found_positions = true;
 
-        tdoator_.update_times(current_frequency_toas[0], current_frequency_toas[1], current_frequency_toas[2], current_frequency_toas[3]);
-
-        currently_located_positions[frequency_to_locate] = tdoator_.locate();
+        currently_located_positions[frequency_to_locate] = tdoator_.locate(current_frequency_toas[0],
+                                                                           current_frequency_toas[1],
+                                                                           current_frequency_toas[2],
+                                                                           current_frequency_toas[3]);
         currently_located_positions[frequency_to_locate].y = 1 - currently_located_positions[frequency_to_locate].y;
       }
     }
