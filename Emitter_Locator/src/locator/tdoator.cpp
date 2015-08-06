@@ -10,13 +10,13 @@ TDOAtor(double c, glm::vec2 const& m1, glm::vec2 const& m2, glm::vec2 const& m3,
  :c_{c}
  ,mics_{m1, m2, m3, m4}
  ,toas_(4, 0)
-{
-  min_.x = std::min(std::min(std::min(mics_[0].x , mics_[1].x), mics_[2].x), mics_[3].x);
-  max_.x = std::max(std::max(std::max(mics_[0].x , mics_[1].x), mics_[2].x), mics_[3].x);
-
-  min_.y = std::min(std::min(std::min(mics_[0].y , mics_[1].y), mics_[2].y), mics_[3].y);
-  max_.y = std::max(std::max(std::max(mics_[0].y , mics_[1].y), mics_[2].y), mics_[3].y);
-}
+ ,min_{std::min(std::min(std::min(mics_[0].x , mics_[1].x), mics_[2].x), mics_[3].x),
+      std::min(std::min(std::min(mics_[0].y , mics_[1].y), mics_[2].y), mics_[3].y)}
+ ,max_{std::max(std::max(std::max(mics_[0].x , mics_[1].x), mics_[2].x), mics_[3].x),
+       std::max(std::max(std::max(mics_[0].y , mics_[1].y), mics_[2].y), mics_[3].y)}
+ ,num_steps_{(max_.x - min_.x) / sample_size, (max_.y - min_.y) / sample_size}
+ ,error_mapping_(num_steps_.x, std::vector<float>(num_steps_.y, 0.0f))
+{}
 
 void TDOAtor::
 setSoundSpeed(double in_c) {
@@ -29,6 +29,10 @@ dif(glm::vec2 const& p, unsigned m1, unsigned m2) const {
 
   return dtoa - (glm::length(p - mics_[m1]) - glm::length(p - mics_[m2]) ) / c_ ;
 };
+
+std::vector<std::vector<float>> const& TDOAtor::getErrorDistribution() const {
+  return error_mapping_;
+}
 
 glm::vec2 TDOAtor::
 locate(double time_1, double time_2, double time_3, double time_4) {
@@ -43,29 +47,24 @@ locate(double time_1, double time_2, double time_3, double time_4) {
 
   glm::vec2 curr_pos;
 
-  std::size_t x_steps = (max_.x - min_.x) / sample_size;
-  std::size_t y_steps = (max_.y - min_.y) / sample_size;
-
-  std::vector<std::vector<float>> error_mapping(x_steps, std::vector<float>(y_steps, 0.0f));
-
-  for (std::size_t x = 0; x < x_steps; ++x ) {
+  for (std::size_t x = 0; x < num_steps_.x; ++x ) {
     curr_pos.x = min_.x + x * sample_size;
 
-    for (std::size_t y = 0; y < y_steps; ++y) {
+    for (std::size_t y = 0; y < num_steps_.y; ++y) {
       curr_pos.y = min_.y + y * sample_size;
 
-      double temp_dif = 0.0;
+      double curr_dif = 0.0;
 
       for (std::size_t mic_1 = 0; mic_1 < 3; ++mic_1) {
         for (std::size_t mic_2 = mic_1+1; mic_2 < 4; ++mic_2) {
-          temp_dif += fabs(dif(curr_pos, mic_1, mic_2));
+          curr_dif += fabs(dif(curr_pos, mic_1, mic_2));
         }
       }
 
-      error_mapping[x][y] = temp_dif;
+      error_mapping_[x][y] = curr_dif;
 
-      if(temp_dif < min_dif) {
-        min_dif = temp_dif;
+      if(curr_dif < min_dif) {
+        min_dif = curr_dif;
         located_pos = curr_pos;
       }
     }
