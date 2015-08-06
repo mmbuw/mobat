@@ -463,4 +463,12 @@ void TableVisualizer::handleKeyboardInput() {
     }
 }
 
+
+void TableVisualizer::writeTokens() {
+    for(auto const& i : recognized_tokens_){
+        std::cout<<"Token " << i.first <<" at: (" << i.second.physical_position_.x << ", " << i.second.physical_position_.y << "), ";
+    }
+    std::cout<<"\n";
+}
+
 }; //namespace TTT
