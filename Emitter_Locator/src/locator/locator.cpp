@@ -10,21 +10,17 @@
 #include <thread>
 
 
-Locator::Locator(unsigned int num_mics):
- shutdown{false},
- recorder{num_mics, 44100, configurator().getUint("max_recording_time")},
- collector{recorder.bufferBytes() / num_mics, num_mics},
- //locator{330, {0.06, 0.075}, {0.945,  0.09}, {0.925,  1.915} , {0.06,  1.905}},
- locator{330, {0.00, 0.0}, {0.0,  0.0}, {0.0,  0.0} , {0.0,  0.0}},
- locator_frame_counter_(cached_positions[0].size()),
- current_signal_chunk_(0)
- {
-    locator = TDOAtor(330.0, configurator().getVec("microphone1_pos"),
-                            configurator().getVec("microphone2_pos"),
-                           configurator().getVec("microphone3_pos"),
-                          configurator().getVec("microphone4_pos") );
-
- }
+Locator::Locator(unsigned int num_mics)
+ :shutdown_{false}
+ ,recorder_{num_mics, 44100, configurator().getUint("max_recording_time")}
+ ,collector_{recorder_.bufferBytes() / num_mics, num_mics}
+ ,tdoator_{330.0f, configurator().getVec("microphone1_pos"),
+                configurator().getVec("microphone2_pos"),
+                configurator().getVec("microphone3_pos"),
+                configurator().getVec("microphone4_pos")}
+ ,locator_frame_counter_(cached_positions[0].size())
+ ,current_signal_chunk_(0)
+{}
 
 
 std::map<unsigned, std::pair<unsigned, glm::vec2> > Locator::
@@ -45,12 +41,12 @@ glm::vec4 const Locator
 ::load_toas() const {
   // try to access current times of arrival
   if (toas_mutex.try_lock()) {
-    glm::vec4 temp = toas;
+    glm::vec4 temp = toas_;
     toas_mutex.unlock();
     return temp;
   }
   else {
-    return cached_toas;
+    return cached_toas_;
   }
 } 
 
@@ -100,19 +96,19 @@ load_recognized_vis_sample_positions() const {
 
  void Locator::record_position() {
   // start recording loop
-  auto recording_thread = std::thread{&Recorder::recordingLoop, &recorder};
+  auto recording_thread = std::thread{&Recorder::recordingLoop, &recorder_};
 
   unsigned num_chunks_to_analyze = configurator().getUint("num_analyzed_fourier_chunks");
 
   bool first_signal_available = false;
-  while (!shutdown)
+  while (!shutdown_)
   {
     for (unsigned frequency_to_analyze : frequencies_to_locate) {
-      signal_analyzer.start_listening_to(frequency_to_analyze);
+      signal_analyzer_.start_listening_to(frequency_to_analyze);
     }
 
     bool work_on_old_signal = false; 
-    if (!recorder.newRecording()) {
+    if (!recorder_.newRecording()) {
       work_on_old_signal = true;
     } else {
       first_signal_available = true;
@@ -121,17 +117,17 @@ load_recognized_vis_sample_positions() const {
     if (!work_on_old_signal) {
       current_signal_chunk_ = 0;
       // TODO: make recordedBytes() independent from buffer() call
-      std::size_t buffer_bytes = recorder.recordedBytes() / collector.count;
-      collector.fromInterleaved(recorder.buffer(), buffer_bytes);
+      std::size_t buffer_bytes = recorder_.recordedBytes() / collector_.count;
+      collector_.fromInterleaved(recorder_.buffer(), buffer_bytes);
 
-      // recorder.requestRecording();
+      // recorder_.requestRecording();
 
     } else {
       if (!first_signal_available || ++current_signal_chunk_  >= num_chunks_to_analyze)
         continue;
     }
 
-    signal_analyzer.analyze(collector, current_signal_chunk_); 
+    signal_analyzer_.analyze(collector_, current_signal_chunk_); 
     
     bool found_positions = false;
 
@@ -139,7 +135,7 @@ load_recognized_vis_sample_positions() const {
 
     for (unsigned frequency_to_locate : frequencies_to_locate) {
 
-      std::array<double, 4> current_frequency_toas = signal_analyzer.get_toas_for(frequency_to_locate);
+      std::array<double, 4> current_frequency_toas = signal_analyzer_.get_toas_for(frequency_to_locate);
 
       double const & (*d_min) (double const &, double const &) = std::min<double>;
       double const & (*d_max) (double const &, double const &) = std::max<double>;
@@ -155,13 +151,14 @@ load_recognized_vis_sample_positions() const {
 
         found_positions = true;
 
-        locator.update_times(current_frequency_toas[0], current_frequency_toas[1], current_frequency_toas[2], current_frequency_toas[3]);
-
-        currently_located_positions[frequency_to_locate] = locator.locate();
+        currently_located_positions[frequency_to_locate] = tdoator_.locate(current_frequency_toas[0],
+                                                                           current_frequency_toas[1],
+                                                                           current_frequency_toas[2],
+                                                                           current_frequency_toas[3]);
         currently_located_positions[frequency_to_locate].y = 1 - currently_located_positions[frequency_to_locate].y;
       }
     }
-    //cached_signal_vis_samples = signal_analyzer.get_signal_samples_for(17000);
+    //cached_signal_vis_samples = signal_analyzer_.get_signal_samples_for(17000);
 
     if (found_positions) {
       ++locator_frame_counter_;
@@ -210,22 +207,22 @@ load_recognized_vis_sample_positions() const {
       position_mutex.unlock();
     }
 
-    cached_signal_vis_samples = signal_analyzer.get_signal_samples_for(19000);
+    cached_signal_vis_samples = signal_analyzer_.get_signal_samples_for(19000);
     signal_vis_samples_mutex.lock();
     signal_vis_samples = cached_signal_vis_samples;
     signal_vis_samples_mutex.unlock();
 
-    cached_recognized_vis_sample_pos = signal_analyzer.get_vis_sample_pos_for(19000);
+    cached_recognized_vis_sample_pos = signal_analyzer_.get_vis_sample_pos_for(19000);
     recognized_vis_sample_pos_mutex.lock();
     recognized_vis_sample_pos = cached_recognized_vis_sample_pos;
     recognized_vis_sample_pos_mutex.unlock();
   }
 
   // stop recording loop
-  recorder.shutdown();
+  recorder_.shutdown();
   recording_thread.join();
  }
 
  void Locator::shut_down() {
-  shutdown = true;
+  shutdown_ = true;
  }

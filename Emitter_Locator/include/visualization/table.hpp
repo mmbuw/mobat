@@ -19,7 +19,13 @@ class Table : DrawableObject {
 		sf::CircleShape left_goal_;
 		sf::CircleShape right_goal_;
 
+		std::vector<std::vector<float>> error_distribution_;
+
+		sf::VertexArray error_vis_;
+
 	public:
+		void setErrorDistribution(std::vector<std::vector<float>>);
+
 		virtual void draw(sf::RenderWindow& canvas) const;
 		void draw(sf::RenderWindow& canvas, std::vector<Microphone> const& microphones, glm::vec4 const& toas) const;
 		virtual void recalculateGeometry();
