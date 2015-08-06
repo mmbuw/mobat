@@ -3,6 +3,7 @@
 #include "drawable_object.hpp"
 #include "score.hpp"
 #include "configurator.hpp"
+#include "test.h"
 
 #include <SFML/Graphics.hpp>
 
@@ -22,6 +23,9 @@ int main(int argc, char** argv) {
     configurator().read(file_name);
 
     glm::vec2 windowResolution{configurator().getVec("resolution")};
+
+// testing
+    Test test_logger;
 
 // calculation
     Locator locator{4};
@@ -88,7 +92,20 @@ int main(int argc, char** argv) {
 
     bool draw_endscreen_ = true;
 
+    bool testing = false;
+
     while (window.isOpen()) {
+        //write positions for testing
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::T)) {
+            // std::cout<<"turned on\n";
+            if(testing){
+                testing = false;
+            } else{
+                testing = true;
+            }
+        }
+
+
         if(window.pollEvent(event)) {
             if(event.type == sf::Event::KeyPressed){
                if(event.key.code == sf::Keyboard::Space){
@@ -111,6 +128,7 @@ int main(int argc, char** argv) {
 
             std::map<unsigned, std::pair<unsigned, glm::vec2> > positions = locator.load_position();
             
+            
             if(positions.size() != 0) {
 
                 unsigned current_iteration_timestamp_peak = 0;
@@ -123,7 +141,13 @@ int main(int argc, char** argv) {
                             .signalToken(frequency_position_entry.first, 
                                           glm::vec2(positions[frequency_position_entry.first].second.x,
                                            1.0 - positions[frequency_position_entry.first].second.y));
+                        if(testing){
+                            test_logger.update(frequency_position_entry.first, frequency_position_entry.second.second);
+                        }
                     }
+                }
+                if(testing){
+                    test_logger.write();
                 }
 
                 if(current_iteration_timestamp_peak > latest_received_timestamp) {
@@ -165,6 +189,7 @@ int main(int argc, char** argv) {
                 tisualizer.restart();
             }
         }
+
         
         window.display();  
     }

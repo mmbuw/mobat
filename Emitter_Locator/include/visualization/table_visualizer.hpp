@@ -126,6 +126,8 @@ class TableVisualizer : DrawableObject {
 
 		void handleKeyboardInput();
 
+		void writeTokens();
+
 };
 
 }; //end TTT
