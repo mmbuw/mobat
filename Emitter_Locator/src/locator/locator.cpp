@@ -130,7 +130,6 @@ load_recognized_vis_sample_positions() const {
         continue;
     }
 
-    std::cout << "Calling with signal chunk: " << current_signal_chunk_ << "\n";
     signal_analyzer.analyze(collector, current_signal_chunk_); 
     
     bool found_positions = false;
