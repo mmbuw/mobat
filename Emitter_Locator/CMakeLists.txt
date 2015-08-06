@@ -6,6 +6,12 @@ include_directories(external/glm0.9.6.3/)
 
 option(ODROID_BUILD "Build visualisation for odroid/raspberry" OFF)
 
+#testing
+file(GLOB TESTING_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/testing/*.cpp)
+add_library(testing STATIC ${TESTING_SOURCES})
+# populate both includedir and interfaceincludedir (include with targets linked with this)
+target_include_directories(testing PUBLIC include/testing)
+
 # recorder
 file(GLOB RECORDER_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/recorder/*.cpp)
 add_library(recorder STATIC ${RECORDER_SOURCES})
@@ -40,7 +46,7 @@ endif()
 
 # output executables
 add_executable(ttt src/visualization.cpp)
-target_link_libraries(ttt recorder signaltrans locator visualization -lpthread)
+target_link_libraries(ttt recorder signaltrans locator visualization testing -lpthread)
 if(ODROID_BUILD)
   target_link_libraries(ttt -lX11 -lX11-xcb)
 endif()
