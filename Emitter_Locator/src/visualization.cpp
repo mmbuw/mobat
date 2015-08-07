@@ -140,7 +140,7 @@ int main(int argc, char** argv) {
                         tisualizer
                             .signalToken(frequency_position_entry.first, 
                                           glm::vec2(positions[frequency_position_entry.first].second.x,
-                                           1.0 - positions[frequency_position_entry.first].second.y));
+                                        positions[frequency_position_entry.first].second.y));
                         if(testing){
                             test_logger.update(frequency_position_entry.first, frequency_position_entry.second.second);
                         }
