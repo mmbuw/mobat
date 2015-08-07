@@ -108,8 +108,28 @@ void Table::setErrorDistribution(std::vector<std::vector<float>> dist) {
     for (std::size_t y = 0; y < grid_dimensions_.y; ++y) {
       std::size_t base_index = (x * grid_dimensions_.y + y) * 4; 
     
-      float normalized_error = (dist[x][y] - min_error) / (max_error - min_error);
-      sf::Color color{sf::Uint8(normalized_error * 255), sf::Uint8((1.0f -normalized_error) * 255),0}; 
+      float normalized_error =  (dist[x][y] - min_error) / (max_error - min_error);
+
+      sf::Color color{sf::Color::Black};
+      float third = 1 / 3.0f;
+      if(normalized_error <= third) {
+        color.g = 255;
+        color.r = sf::Uint8(std::max(0.0f, (third - normalized_error) * 3.0f * 255));
+      }
+      else if(normalized_error <= third * 2.0f) { 
+        normalized_error -= third;
+        color.b = sf::Uint8(std::max(0.0f, (normalized_error * 3.0f) * 255));
+        color.g = sf::Uint8(std::max(0.0f, (third - normalized_error) * 3.0f * 255));        
+      }
+      else {
+        normalized_error -= 2.0f * third;
+        color.r = sf::Uint8(std::max(0.0f, (normalized_error * 3.0f) * 255));
+        color.b = sf::Uint8(std::max(0.0f, (third - normalized_error) * 3.0f * 255));        
+      }
+      // color.r = sf::Uint8(std::max(0.0f, (normalized_error - 1.0f) * 255));
+      // color.g = sf::Uint8(std::max(0.0f, (1.0f - normalized_error) * 255));
+      // color.b = 255 - color.g - color.r;
+      // sf::Uint8(std::max(0, normalized_error * 255)), sf::Uint8((1.0f -normalized_error) * 255),0}; 
       error_vis_[base_index].color = color;
       error_vis_[base_index + 1].color = color;
       error_vis_[base_index + 2].color = color;

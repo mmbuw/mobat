@@ -75,7 +75,7 @@ void TableVisualizer::
 draw(sf::RenderWindow& canvas) const {
 
     table_.draw(canvas);
-    canvas.draw(projection_shape_);
+    // canvas.draw(projection_shape_);
     
     if(gamemode_ == true){
         points_.draw(canvas);
