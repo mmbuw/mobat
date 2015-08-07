@@ -11,6 +11,9 @@ file(GLOB TESTING_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/testing/*.cpp
 add_library(testing STATIC ${TESTING_SOURCES})
 # populate both includedir and interfaceincludedir (include with targets linked with this)
 target_include_directories(testing PUBLIC include/testing)
+# requires boostlib
+target_link_libraries(testing -lboost_filesystem -lboost_system visualization)
+
 
 # recorder
 file(GLOB RECORDER_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/recorder/*.cpp)

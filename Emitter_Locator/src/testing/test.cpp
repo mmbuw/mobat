@@ -1,5 +1,8 @@
 #include "test.h"
 
+
+namespace TTT{
+
 Test::Test()
   : files_(),
     file_(),
@@ -25,3 +28,6 @@ void Test::closeFiles(){
     i.second.close();
   }
 }
+
+
+};

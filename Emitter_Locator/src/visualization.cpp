@@ -12,7 +12,7 @@
 #include <X11/Xlib.h>
 
 #include <time.h>
-// #include <boost/filesystem.hpp>
+#include <boost/filesystem.hpp>
 
 void draw_signal_plot(sf::RenderWindow& window, Locator const& locator);
 
@@ -31,7 +31,11 @@ int main(int argc, char** argv) {
     std::vector<unsigned> frequencies_to_record{configurator().getUint("player1"), configurator().getUint("player2") /*, 100000*/};
 
 // testing
-    Test test_logger;
+    TTT::Test test_logger;
+    for(auto const& i : frequencies_to_record){
+
+        if(boost::filesystem::create_directory(std::to_string(i))){}
+    }
 
 // calculation
     Locator locator{4};
@@ -119,7 +123,7 @@ int main(int argc, char** argv) {
                 std::vector<std::pair<std::string, std::string>> filenames;
                 for(auto const& freq : frequencies_to_record){
                     filenames.push_back({std::to_string(freq), timestamp});
-                    // boost::filesystem::create_directory(freq)
+
                     
                 }
                 test_logger.openFiles(filenames);
