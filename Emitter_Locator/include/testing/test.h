@@ -2,17 +2,18 @@
 #include <fstream>
 #include <glm/glm.hpp>
 #include <string>
+#include <map>
+#include <vector>
 
 class Test{
   private:
-    std::ofstream myfile_;
+    std::map<std::string, std::ofstream> files_;
     std::string file_;
     std::string entry_;
 
   public:
     Test();
-    Test(std::string const& file);
     void update(unsigned const& freq, glm::vec2 const& pos);
-    void write();
-	
+    void openFiles(std::vector<std::pair<std::string, std::string>> const& names);
+    void closeFiles();
 };

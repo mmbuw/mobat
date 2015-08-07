@@ -11,6 +11,9 @@
 #include <thread>
 #include <X11/Xlib.h>
 
+#include <time.h>
+// #include <boost/filesystem.hpp>
+
 void draw_signal_plot(sf::RenderWindow& window, Locator const& locator);
 
 int main(int argc, char** argv) {
@@ -24,13 +27,16 @@ int main(int argc, char** argv) {
 
     glm::vec2 windowResolution{configurator().getVec("resolution")};
 
+
+    std::vector<unsigned> frequencies_to_record{configurator().getUint("player1"), configurator().getUint("player2") /*, 100000*/};
+
 // testing
     Test test_logger;
 
 // calculation
     Locator locator{4};
 
-    locator.set_frequencies_to_record({configurator().getUint("player1"), configurator().getUint("player2") /*, 100000*/});
+    locator.set_frequencies_to_record(frequencies_to_record);
 
     auto recording_thread = std::thread(&Locator::record_position, &locator);
 
@@ -95,13 +101,28 @@ int main(int argc, char** argv) {
     bool testing = false;
 
     while (window.isOpen()) {
-        //write positions for testing
+        //turn testing on and off
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::T)) {
             // std::cout<<"turned on\n";
+            //get timestamp
+            time_t t = time(0);   // get time now
+            struct tm * now = localtime( & t );
+
+            std::string timestamp = 
+                std::to_string(now->tm_year + 1900) + "-" + std::to_string(now->tm_mon + 1) + "-" + std::to_string(now->tm_mday) + "_" + 
+                std::to_string((now->tm_hour)%24) + ":" + std::to_string((now->tm_min)%60) + ":" + std::to_string((now->tm_sec)%60);
             if(testing){
                 testing = false;
+                test_logger.closeFiles();
             } else{
                 testing = true;
+                std::vector<std::pair<std::string, std::string>> filenames;
+                for(auto const& freq : frequencies_to_record){
+                    filenames.push_back({std::to_string(freq), timestamp});
+                    // boost::filesystem::create_directory(freq)
+                    
+                }
+                test_logger.openFiles(filenames);
             }
         }
 
@@ -146,9 +167,7 @@ int main(int argc, char** argv) {
                         }
                     }
                 }
-                if(testing){
-                    test_logger.write();
-                }
+
 
                 if(current_iteration_timestamp_peak > latest_received_timestamp) {
                     latest_received_timestamp = current_iteration_timestamp_peak;
