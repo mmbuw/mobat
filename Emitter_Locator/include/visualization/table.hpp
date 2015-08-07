@@ -25,8 +25,11 @@ class Table : DrawableObject {
 
     // builds the vertex array for error visualisation
     void generateErrorGrid();
+    bool show_errorvis_;
 
   public:
+    Table();
+
     void setErrorDistribution(std::vector<std::vector<float>>);
 
     virtual void draw(sf::RenderWindow& canvas) const;

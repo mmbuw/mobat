@@ -4,6 +4,10 @@
 
 namespace TTT {
 
+Table::Table()
+ :show_errorvis_{configurator().getUint("show_errorvis") > 0}
+{}
+
 void Table::
 draw(sf::RenderWindow& canvas) const {
   canvas.draw(table_rectangle_shape_);
@@ -15,7 +19,9 @@ draw(sf::RenderWindow& canvas) const {
   canvas.draw(right_line_);
   canvas.draw(left_line_);
 
-  canvas.draw(error_vis_);
+  if(show_errorvis_) {
+    canvas.draw(error_vis_);
+  }
 }
 
 void Table::
@@ -117,7 +123,9 @@ recalculateGeometry() {
 
   table_rectangle_shape_.setSize(toProjectionSize(physical_table_size_));
   table_rectangle_shape_.setPosition(toProjectionSpace(glm::vec2{0.0f}));
-  generateErrorGrid();
+  if(show_errorvis_) {
+    generateErrorGrid();
+  }
 
   middle_.setRadius(pixel_per_projection_ * 0.1f);
   middle_.setPosition(toProjectionSpace(glm::vec2{physical_projection_offset_ + physical_projection_size_ * 0.5f}, middle_.getRadius()));

@@ -37,6 +37,7 @@ int main(int argc, char** argv) {
 // visualisation
 
     bool show_signalvis = configurator().getUint("show_signalvis") > 0;
+    bool show_errorvis = configurator().getUint("show_errorvis") > 0;
 
     sf::RenderWindow signal_plot_window_(sf::VideoMode(280, 400)
                        , "Transformed_Frequencies");
@@ -121,8 +122,10 @@ int main(int argc, char** argv) {
             tisualizer.handleKeyboardInput();
 
             tisualizer.recalculateGeometry();
-
-            tisualizer.table_.setErrorDistribution(locator.tdoator_.getErrorDistribution());
+            
+            if(show_errorvis) {
+                tisualizer.table_.setErrorDistribution(locator.tdoator_.getErrorDistribution());
+            }
 
             tisualizer.draw(window);
 
