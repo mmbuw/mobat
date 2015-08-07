@@ -155,7 +155,7 @@ load_recognized_vis_sample_positions() const {
                                                                            current_frequency_toas[1],
                                                                            current_frequency_toas[2],
                                                                            current_frequency_toas[3]);
-        currently_located_positions[frequency_to_locate].y = 1 - currently_located_positions[frequency_to_locate].y;
+        currently_located_positions[frequency_to_locate].y = currently_located_positions[frequency_to_locate].y;
       }
     }
     //cached_signal_vis_samples = signal_analyzer_.get_signal_samples_for(17000);

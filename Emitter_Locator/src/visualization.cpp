@@ -47,6 +47,7 @@ int main(int argc, char** argv) {
 // visualisation
 
     bool show_signalvis = configurator().getUint("show_signalvis") > 0;
+    bool show_errorvis = configurator().getUint("show_errorvis") > 0;
 
     sf::RenderWindow signal_plot_window_(sf::VideoMode(280, 400)
                        , "Transformed_Frequencies");
@@ -146,8 +147,10 @@ int main(int argc, char** argv) {
             tisualizer.handleKeyboardInput();
 
             tisualizer.recalculateGeometry();
-
-            tisualizer.table_.setErrorDistribution(locator.tdoator_.getErrorDistribution());
+            
+            if(show_errorvis) {
+                tisualizer.table_.setErrorDistribution(locator.tdoator_.getErrorDistribution());
+            }
 
             tisualizer.draw(window);
 
@@ -165,7 +168,7 @@ int main(int argc, char** argv) {
                         tisualizer
                             .signalToken(frequency_position_entry.first, 
                                           glm::vec2(positions[frequency_position_entry.first].second.x,
-                                           1.0 - positions[frequency_position_entry.first].second.y));
+                                        positions[frequency_position_entry.first].second.y));
                         if(testing){
                             test_logger.update(frequency_position_entry.first, frequency_position_entry.second.second);
                         }

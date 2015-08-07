@@ -9,27 +9,33 @@ namespace TTT {
 
 class Table : DrawableObject {
 
-	private:
-		sf::RectangleShape table_rectangle_shape_;
-		sf::RectangleShape middle_line1_;
-		sf::RectangleShape middle_line2_;
-		sf::RectangleShape left_line_;
-		sf::RectangleShape right_line_;
-		sf::CircleShape middle_;
-		sf::CircleShape left_goal_;
-		sf::CircleShape right_goal_;
+  private:
+    sf::RectangleShape table_rectangle_shape_;
+    sf::RectangleShape middle_line1_;
+    sf::RectangleShape middle_line2_;
+    sf::RectangleShape left_line_;
+    sf::RectangleShape right_line_;
+    sf::CircleShape middle_;
+    sf::CircleShape left_goal_;
+    sf::CircleShape right_goal_;
+    // quad array with for error cells
+    sf::VertexArray error_vis_;
+    // number of cells in error grid
+    glm::vec2 grid_dimensions_;
 
-		std::vector<std::vector<float>> error_distribution_;
+    // builds the vertex array for error visualisation
+    void generateErrorGrid();
+    bool show_errorvis_;
 
-		sf::VertexArray error_vis_;
+  public:
+    Table();
 
-	public:
-		void setErrorDistribution(std::vector<std::vector<float>>);
+    void setErrorDistribution(std::vector<std::vector<float>>);
 
-		virtual void draw(sf::RenderWindow& canvas) const;
-		void draw(sf::RenderWindow& canvas, std::vector<Microphone> const& microphones, glm::vec4 const& toas) const;
-		virtual void recalculateGeometry();
-		void setFillColor(sf::Color const& in_fill_color);
+    virtual void draw(sf::RenderWindow& canvas) const;
+    void draw(sf::RenderWindow& canvas, std::vector<Microphone> const& microphones, glm::vec4 const& toas) const;
+    virtual void recalculateGeometry();
+    void setFillColor(sf::Color const& in_fill_color);
 };
 
 

@@ -37,11 +37,13 @@ class TDOAtor{
     //with toa in s
     std::vector<glm::vec2> mics_;
     std::vector<float> toas_;
+    float sample_size_;
     glm::vec2 min_;
     glm::vec2 max_;
     glm::tvec2<std::size_t> num_steps_;
     // error per cell
     std::vector<std::vector<float>> error_mapping_;
+
 };
 
 #endif

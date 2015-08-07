@@ -1,21 +1,22 @@
 #include "tdoator.hpp"
 
+#include "configurator.hpp"
+
 #include <iostream>
 #include <math.h>
-// size of cell in meters
-float sample_size = 0.01f;
 
 TDOAtor::
 TDOAtor(double c, glm::vec2 const& m1, glm::vec2 const& m2, glm::vec2 const& m3, glm::vec2 const& m4)
  :c_{c}
  ,mics_{m1, m2, m3, m4}
  ,toas_(4, 0)
+ ,sample_size_{configurator().getFloat("sample_size")}
  ,min_{std::min(std::min(std::min(mics_[0].x , mics_[1].x), mics_[2].x), mics_[3].x),
       std::min(std::min(std::min(mics_[0].y , mics_[1].y), mics_[2].y), mics_[3].y)}
  ,max_{std::max(std::max(std::max(mics_[0].x , mics_[1].x), mics_[2].x), mics_[3].x),
        std::max(std::max(std::max(mics_[0].y , mics_[1].y), mics_[2].y), mics_[3].y)}
- ,num_steps_{(max_.x - min_.x) / sample_size, (max_.y - min_.y) / sample_size}
- ,error_mapping_(num_steps_.x, std::vector<float>(num_steps_.y, 0.0f))
+ ,num_steps_{(max_.x - min_.x) / sample_size_, (max_.y - min_.y) / sample_size_}
+ ,error_mapping_{num_steps_.x, std::vector<float>(num_steps_.y, 0.0f)}
 {}
 
 void TDOAtor::
@@ -48,10 +49,10 @@ locate(double time_1, double time_2, double time_3, double time_4) {
   glm::vec2 curr_pos;
 
   for (std::size_t x = 0; x < num_steps_.x; ++x ) {
-    curr_pos.x = min_.x + x * sample_size;
+    curr_pos.x = min_.x + x * sample_size_;
 
     for (std::size_t y = 0; y < num_steps_.y; ++y) {
-      curr_pos.y = min_.y + y * sample_size;
+      curr_pos.y = min_.y + y * sample_size_;
 
       double curr_dif = 0.0;
 

@@ -1,7 +1,12 @@
 #include "table.hpp"
+#include "configurator.hpp"
 #include <iostream>
 
 namespace TTT {
+
+Table::Table()
+ :show_errorvis_{configurator().getUint("show_errorvis") > 0}
+{}
 
 void Table::
 draw(sf::RenderWindow& canvas) const {
@@ -14,7 +19,9 @@ draw(sf::RenderWindow& canvas) const {
   canvas.draw(right_line_);
   canvas.draw(left_line_);
 
-  canvas.draw(error_vis_);
+  if(show_errorvis_) {
+    canvas.draw(error_vis_);
+  }
 }
 
 void Table::
@@ -43,52 +50,82 @@ draw(sf::RenderWindow& canvas, std::vector<Microphone> const& microphones, glm::
   //sf::Shader::bind(NULL);
 }
 
+void Table::generateErrorGrid() {
+  std::array<glm::vec2, 4> mics{ 
+    configurator().getVec("microphone1_pos"),
+    configurator().getVec("microphone2_pos"),
+    configurator().getVec("microphone3_pos"),
+    configurator().getVec("microphone4_pos")
+  };
+
+  glm::vec2 min{std::min(std::min(std::min(mics[0].x , mics[1].x), mics[2].x), mics[3].x),
+                std::min(std::min(std::min(mics[0].y , mics[1].y), mics[2].y), mics[3].y)};
+  glm::vec2 max{std::max(std::max(std::max(mics[0].x , mics[1].x), mics[2].x), mics[3].x),
+                std::max(std::max(std::max(mics[0].y , mics[1].y), mics[2].y), mics[3].y)};
+
+  grid_dimensions_ = glm::vec2{(max.x - min.x), (max.y - min.y)};
+  grid_dimensions_ /= configurator().getFloat("sample_size");
+  grid_dimensions_ = glm::floor(grid_dimensions_);
+
+  glm::vec2 step{physical_table_size_ / grid_dimensions_};
+
+  error_vis_ = sf::VertexArray(sf::Quads, 4 * grid_dimensions_.x * grid_dimensions_.y);
+  for (std::size_t x = 0; x < grid_dimensions_.x; ++x) {
+    for (std::size_t y = 0; y < grid_dimensions_.y; ++y) {
+      glm::vec2 origin{x * step.x, y * step.y};
+      std::size_t base_index = (x * grid_dimensions_.y + y) * 4; 
+
+      error_vis_[base_index].position     = sf::Vector2f{toProjectionSpace(origin)};
+      error_vis_[base_index + 1].position = sf::Vector2f{toProjectionSpace(origin + glm::vec2{0.0f, step.y})};
+      error_vis_[base_index + 2].position = sf::Vector2f{toProjectionSpace(origin + step)};
+      error_vis_[base_index + 3].position = sf::Vector2f{toProjectionSpace(origin + glm::vec2{step.x, 0.0f})};
+
+      error_vis_[base_index].color     = sf::Color::Red;
+      error_vis_[base_index + 1].color = sf::Color::Red;
+      error_vis_[base_index + 2].color = sf::Color::Red;
+      error_vis_[base_index + 3].color = sf::Color::Red;
+    }
+  }
+}
+
 void Table::setErrorDistribution(std::vector<std::vector<float>> dist) {
-  error_distribution_ = dist;
-  glm::vec2 dimensions{dist.size(), dist[0].size()};
-  glm::vec2 size{toGlm(table_rectangle_shape_.getSize())};
-  glm::vec2 step{physical_table_size_ / dimensions};
 
   float min_error = std::numeric_limits<float>::max();
-  for (std::size_t x = 0; x < dimensions.x; ++x) {
-    for (std::size_t y = 0; y < dimensions.y; ++y) {
+  for (std::size_t x = 0; x < grid_dimensions_.x; ++x) {
+    for (std::size_t y = 0; y < grid_dimensions_.y; ++y) {
       if (dist[x][y] < min_error) min_error = dist[x][y];
     }
   }
 
   float max_error = 0;
-  for (std::size_t x = 0; x < dimensions.x; ++x) {
-    for (std::size_t y = 0; y < dimensions.y; ++y) {
+  for (std::size_t x = 0; x < grid_dimensions_.x; ++x) {
+    for (std::size_t y = 0; y < grid_dimensions_.y; ++y) {
       if (dist[x][y] > max_error) max_error = dist[x][y];
     }
   }
 
-  error_vis_ = sf::VertexArray(sf::Quads, 4 * dimensions.x * dimensions.y);
-  for (std::size_t x = 0; x < dimensions.x; ++x) {
-    for (std::size_t y = 0; y < dimensions.y; ++y) {
-      glm::vec2 origin{x * step.x, y * step.y};
-
-      error_vis_[(x * dimensions.y + y) * 4].position     = sf::Vector2f{toProjectionSpace(origin)};
-      error_vis_[(x * dimensions.y + y) * 4 + 1].position = sf::Vector2f{toProjectionSpace(origin + glm::vec2{0.0f, step.y})};
-      error_vis_[(x * dimensions.y + y) * 4 + 2].position = sf::Vector2f{toProjectionSpace(origin + step)};
-      error_vis_[(x * dimensions.y + y) * 4 + 3].position = sf::Vector2f{toProjectionSpace(origin + glm::vec2{step.x, 0.0f})};
+  for (std::size_t x = 0; x < grid_dimensions_.x; ++x) {
+    for (std::size_t y = 0; y < grid_dimensions_.y; ++y) {
+      std::size_t base_index = (x * grid_dimensions_.y + y) * 4; 
     
       float normalized_error = (dist[x][y] - min_error) / (max_error - min_error);
       sf::Color color{sf::Uint8(normalized_error * 255), sf::Uint8((1.0f -normalized_error) * 255),0}; 
-      error_vis_[(x * dimensions.y + y) * 4].color = color;
-      error_vis_[(x * dimensions.y + y) * 4 + 1].color = color;
-      error_vis_[(x * dimensions.y + y) * 4 + 2].color = color;
-      error_vis_[(x * dimensions.y + y) * 4 + 3].color = color;
+      error_vis_[base_index].color = color;
+      error_vis_[base_index + 1].color = color;
+      error_vis_[base_index + 2].color = color;
+      error_vis_[base_index + 3].color = color;
     }
   }
 }
 
 void Table::
 recalculateGeometry() {
+
   table_rectangle_shape_.setSize(toProjectionSize(physical_table_size_));
   table_rectangle_shape_.setPosition(toProjectionSpace(glm::vec2{0.0f}));
-
-
+  if(show_errorvis_) {
+    generateErrorGrid();
+  }
 
   middle_.setRadius(pixel_per_projection_ * 0.1f);
   middle_.setPosition(toProjectionSpace(glm::vec2{physical_projection_offset_ + physical_projection_size_ * 0.5f}, middle_.getRadius()));
