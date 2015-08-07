@@ -40,9 +40,9 @@ int main(int argc, char** argv) {
 // calculation
     Locator locator{4};
 
-    locator.set_frequencies_to_record(frequencies_to_record);
+    locator.setFrequenciesToRecord(frequencies_to_record);
 
-    auto recording_thread = std::thread(&Locator::record_position, &locator);
+    auto recording_thread = std::thread(&Locator::recordPosition, &locator);
 
 // visualisation
 
@@ -154,7 +154,7 @@ int main(int argc, char** argv) {
 
             tisualizer.draw(window);
 
-            std::map<unsigned, std::pair<unsigned, glm::vec2> > positions = locator.load_position();
+            std::map<unsigned, std::pair<unsigned, glm::vec2> > positions = locator.loadPosition();
             
             
             if(positions.size() != 0) {
@@ -220,7 +220,7 @@ int main(int argc, char** argv) {
         window.display();  
     }
 
-    locator.shut_down();
+    locator.shutdown();
     recording_thread.join();
 
     return 0;
@@ -230,13 +230,15 @@ int main(int argc, char** argv) {
 
 
 void draw_signal_plot(sf::RenderWindow& window, Locator const& locator) {
-    std::array< std::vector<double>, 4> signal_vis_samples =  locator.load_signal_vis_samples();
+    std::array< std::vector<double>, 4> signal_vis_samples =  locator.loadSignalVisSamples();
         
     window.clear(sf::Color(255, 255, 255));
 
 
 
-    std::array<unsigned, 4> recognized_vis_sample_pos = locator.load_recognized_vis_sample_positions();
+    std::array<unsigned, 4> recognized_vis_sample_pos = locator.loadRecognizedVisSamplePositions();
+
+    std::map<unsigned, std::array<std::vector<unsigned> ,4> > peak_samples_per_frequency = locator.loadPeakSamples();
 
     sf::RectangleShape data_point;
     for(unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
@@ -254,6 +256,13 @@ void draw_signal_plot(sf::RenderWindow& window, Locator const& locator) {
                 data_point.setFillColor(sf::Color(255, 0, 0) ) ;
             } else {
                 data_point.setFillColor(sf::Color(0, 255, 0) ) ;          
+            }
+
+            for(auto const& peak_samples_of_channel : peak_samples_per_frequency[19000][channel_iterator]) {
+                if(sample_idx -2 <= peak_samples_of_channel && sample_idx + 2 >= peak_samples_of_channel) {
+                    data_point.setFillColor(sf::Color(255, 0, 255) ) ;
+                    break;   
+                }
             }
 
             window.draw(data_point);

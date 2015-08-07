@@ -24,7 +24,7 @@ Locator::Locator(unsigned int num_mics)
 
 
 std::map<unsigned, std::pair<unsigned, glm::vec2> > Locator::
-load_position() const {
+loadPosition() const {
   // try to access current position
   if (position_mutex.try_lock()) {
     std::map<unsigned, std::pair<unsigned, glm::vec2> > temp = located_positions;
@@ -38,7 +38,7 @@ load_position() const {
 }
 
 glm::vec4 const Locator
-::load_toas() const {
+::loadTOAs() const {
   // try to access current times of arrival
   if (toas_mutex.try_lock()) {
     glm::vec4 temp = toas_;
@@ -51,7 +51,7 @@ glm::vec4 const Locator
 } 
 
 std::array<std::vector<double>,4> const Locator::
-load_signal_vis_samples() const {
+loadSignalVisSamples() const {
   //try to access current signal vis samples
 
   if (signal_vis_samples_mutex.try_lock()) {
@@ -69,7 +69,7 @@ load_signal_vis_samples() const {
 }
 
 std::array<unsigned, 4> const Locator::
-load_recognized_vis_sample_positions() const {
+loadRecognizedVisSamplePositions() const {
   if (recognized_vis_sample_pos_mutex.try_lock()) {
     std::array<unsigned ,4> temp;
 
@@ -84,9 +84,24 @@ load_recognized_vis_sample_positions() const {
   }
 }
 
+std::map<unsigned, std::array<std::vector<unsigned> ,4> > const Locator::
+loadPeakSamples() const {
+  if (peak_sample_indices_mutex.try_lock()) {
+    std::map<unsigned, std::array<std::vector<unsigned> ,4> > temp;
+
+      temp = peak_sample_indices_; 
+    
+
+    peak_sample_indices_mutex.unlock();
+    return temp;
+  } else {
+    return cached_peak_sample_indices_;
+  }
+}
 
 
- void Locator::set_frequencies_to_record(std::vector<unsigned> const& frequencies_to_find) {
+
+ void Locator::setFrequenciesToRecord(std::vector<unsigned> const& frequencies_to_find) {
 
   if (frequency_to_record_setter_mutex.try_lock()) {
     frequencies_to_locate = frequencies_to_find;
@@ -94,7 +109,7 @@ load_recognized_vis_sample_positions() const {
   }
  }
 
- void Locator::record_position() {
+ void Locator::recordPosition() {
   // start recording loop
   auto recording_thread = std::thread{&Recorder::recordingLoop, &recorder_};
 
@@ -104,7 +119,7 @@ load_recognized_vis_sample_positions() const {
   while (!shutdown_)
   {
     for (unsigned frequency_to_analyze : frequencies_to_locate) {
-      signal_analyzer_.start_listening_to(frequency_to_analyze);
+      signal_analyzer_.startListeningTo(frequency_to_analyze);
     }
 
     bool work_on_old_signal = false; 
@@ -135,7 +150,7 @@ load_recognized_vis_sample_positions() const {
 
     for (unsigned frequency_to_locate : frequencies_to_locate) {
 
-      std::array<double, 4> current_frequency_toas = signal_analyzer_.get_toas_for(frequency_to_locate);
+      std::array<double, 4> current_frequency_toas = signal_analyzer_.getTOAsFor(frequency_to_locate);
 
       double const & (*d_min) (double const &, double const &) = std::min<double>;
       double const & (*d_max) (double const &, double const &) = std::max<double>;
@@ -207,15 +222,22 @@ load_recognized_vis_sample_positions() const {
       position_mutex.unlock();
     }
 
-    cached_signal_vis_samples = signal_analyzer_.get_signal_samples_for(19000);
+    cached_signal_vis_samples = signal_analyzer_.getSignalSamplesFor(19000);
+
     signal_vis_samples_mutex.lock();
     signal_vis_samples = cached_signal_vis_samples;
     signal_vis_samples_mutex.unlock();
 
-    cached_recognized_vis_sample_pos = signal_analyzer_.get_vis_sample_pos_for(19000);
+    cached_recognized_vis_sample_pos = signal_analyzer_.getVisSamplePosFor(19000);
+
     recognized_vis_sample_pos_mutex.lock();
     recognized_vis_sample_pos = cached_recognized_vis_sample_pos;
     recognized_vis_sample_pos_mutex.unlock();
+
+    cached_peak_sample_indices_ = signal_analyzer_.getRawPeakIndicesFor(19000);
+    peak_sample_indices_mutex.lock();
+    peak_sample_indices_ = cached_peak_sample_indices_;
+    peak_sample_indices_mutex.unlock();    
   }
 
   // stop recording loop
@@ -223,6 +245,6 @@ load_recognized_vis_sample_positions() const {
   recording_thread.join();
  }
 
- void Locator::shut_down() {
+ void Locator::shutdown() {
   shutdown_ = true;
  }

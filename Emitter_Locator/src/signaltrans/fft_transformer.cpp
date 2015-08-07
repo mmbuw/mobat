@@ -1,4 +1,4 @@
-#include "FFT_Transformer.h"
+#include "fft_transformer.h"
 
 #include "configurator.hpp"
 
@@ -8,7 +8,7 @@
 #define MATH_PI 3.14159265359 
 
 //helper function
-void FFT_Transformer::create_hamming_window() {
+void FftTransformer::createHammingWindow() {
 
   for(unsigned int i = 0; i < fft_window_size_; ++i) {
     window_[i] = 0.54f - (0.46f * std::cos( 2 * MATH_PI * (i / ((fft_window_size_ - 1) * 1.0))));
@@ -19,15 +19,13 @@ void FFT_Transformer::create_hamming_window() {
   normalization_value /= (fft_window_size_/2);
 }
 
-void FFT_Transformer::create_hann_window() {
+void FftTransformer::createHannWindow() {
   for(unsigned int i = 0; i < fft_window_size_; ++i) {
     window_[i] = 0.5f * (1.0 - std::cos(2 * MATH_PI * i / (fft_window_size_-1.0)));
-    
-  //normalization_value += window_[i];
   }
 }
 
-void FFT_Transformer::create_blackmann_harris_window() {
+void FftTransformer::createBlackmannHarrisWindow() {
   float a0 = 0.35875f;
   float a1 = 0.48829f;
   float a2 = 0.14128f;
@@ -48,9 +46,8 @@ void FFT_Transformer::create_blackmann_harris_window() {
 }
 
 
-void FFT_Transformer::reset_thread_performed_signals() {
+void FftTransformer::resetThreadPerformedSignals() {
 
-	std::cout << "Reset stuff.\n";
 	for( int thread_idx = 0; thread_idx < 4; ++thread_idx) {
 		ffts_performed_[thread_idx].store(false);
 		allow_fft_[thread_idx].store(false);
@@ -58,19 +55,19 @@ void FFT_Transformer::reset_thread_performed_signals() {
 
 }
 
-FFT_Transformer::FFT_Transformer(unsigned short fft_window_size) : start_sample_{ std::numeric_limits<unsigned int>::max() },
+FftTransformer::FftTransformer(unsigned short fft_window_size) : start_sample_{ std::numeric_limits<unsigned int>::max() },
 																  end_sample_{ std::numeric_limits<unsigned int>::max() }
 
 																  	{
 
 
-	reset_thread_performed_signals();
+	resetThreadPerformedSignals();
 
 
-	fft_threads_[0] = std::shared_ptr<std::thread>( new std::thread([&] { this->perform_FFT_on_certain_channel(0); } ) ); 
-	fft_threads_[1] = std::shared_ptr<std::thread>( new std::thread([&] { this->perform_FFT_on_certain_channel(1); } ) ); 
-	fft_threads_[2] = std::shared_ptr<std::thread>( new std::thread([&] { this->perform_FFT_on_certain_channel(2); } ) ); 
-	fft_threads_[3] = std::shared_ptr<std::thread>( new std::thread([&] { this->perform_FFT_on_certain_channel(3); } ) ); 
+	fft_threads_[0] = std::shared_ptr<std::thread>( new std::thread([&] { this->performFFTOnCertainChannel(0); } ) ); 
+	fft_threads_[1] = std::shared_ptr<std::thread>( new std::thread([&] { this->performFFTOnCertainChannel(1); } ) ); 
+	fft_threads_[2] = std::shared_ptr<std::thread>( new std::thread([&] { this->performFFTOnCertainChannel(2); } ) ); 
+	fft_threads_[3] = std::shared_ptr<std::thread>( new std::thread([&] { this->performFFTOnCertainChannel(3); } ) ); 
 
     audio_buffers_ = (int32_t**) malloc( 4 * sizeof(int32_t*));
 
@@ -98,13 +95,13 @@ FFT_Transformer::FFT_Transformer(unsigned short fft_window_size) : start_sample_
 
 
 
-	initialize_execution_plan();
-	//create_hamming_window();
-	//create_blackmann_harris_window();
-	create_hann_window();
+	initializeExecutionPlan();
+	//createHammingWindow();
+	//createBlackmannHarrisWindow();
+	createHannWindow();
 }
 
-FFT_Transformer::~FFT_Transformer() {
+FftTransformer::~FftTransformer() {
 	
 	for(int i = 0; i < 4; ++i) {
 
@@ -130,7 +127,7 @@ FFT_Transformer::~FFT_Transformer() {
 }
 
 
-void FFT_Transformer::reset_sample_counters(unsigned channel_num) {
+void FftTransformer::resetSampleCounters(unsigned channel_num) {
 
   for(unsigned iterated_frequency : listening_to_those_frequencies) {
     signal_results_per_frequency_[iterated_frequency][channel_num].clear();
@@ -138,14 +135,14 @@ void FFT_Transformer::reset_sample_counters(unsigned channel_num) {
   }
 }
 
-void FFT_Transformer::clear_cached_fft_results(unsigned channel_num) {
+void FftTransformer::clearCachedFFTResults(unsigned channel_num) {
 
   for(unsigned iterated_frequency : listening_to_those_frequencies) {
     fft_cached_results_per_frequency_ [iterated_frequency][channel_num].clear();
   }
 }
 
-void FFT_Transformer::initialize_execution_plan() {
+void FftTransformer::initializeExecutionPlan() {
 
 
 	//fftw_plan_with_nthreads(1);
@@ -154,19 +151,19 @@ void FFT_Transformer::initialize_execution_plan() {
 	}
 }
 
-void FFT_Transformer::set_analyzation_range(unsigned int start_sample, unsigned int end_sample, unsigned channel_num) {
+void FftTransformer::setAnalyzationRange(unsigned int start_sample, unsigned int end_sample, unsigned channel_num) {
 	if(start_sample < end_sample) {
 		start_sample_[channel_num] = start_sample;
 		end_sample_[channel_num] = end_sample;
 	}
 }
 
-void FFT_Transformer::set_listened_frequencies(std::vector<unsigned> const& listening_to_frequencies) {
+void FftTransformer::setListenedFrequencies(std::vector<unsigned> const& listening_to_frequencies) {
   listening_to_those_frequencies = listening_to_frequencies;
 }
 
 
-void FFT_Transformer::perform_FFT_on_certain_channel(unsigned channel_iterator) {
+void FftTransformer::performFFTOnCertainChannel(unsigned channel_iterator) {
 	
 
 
@@ -182,17 +179,17 @@ void FFT_Transformer::perform_FFT_on_certain_channel(unsigned channel_iterator) 
 			allow_fft_[channel_iterator].store(false);
 
 	        unsigned signal_chunk = 1.0 * signal_half_chunk_;
-	        reset_sample_counters(channel_iterator);
-	        clear_cached_fft_results(channel_iterator);
+	        resetSampleCounters(channel_iterator);
+	        clearCachedFFTResults(channel_iterator);
 	        for(unsigned int i = signal_chunk * (ints_per_channel_/num_chunks_) ; i < (signal_chunk+1)*(ints_per_channel_/num_chunks_) - 50; ++i) {
 	            unsigned offset = 1 * i;
 	            if(offset > (signal_chunk+1)*(ints_per_channel_/num_chunks_) - 50 )
 	                break;
 					
-				set_analyzation_range(0+offset, window_size_+50 + offset, channel_iterator);
+				setAnalyzationRange(0+offset, window_size_+50 + offset, channel_iterator);
 	            
 
-	            perform_FFT(channel_iterator);           
+	            performFFT(channel_iterator);           
 	        } 
 
 	        //std::cout << "Signal half chunk: " << signal_half_chunk_ << "\n";
@@ -202,7 +199,7 @@ void FFT_Transformer::perform_FFT_on_certain_channel(unsigned channel_iterator) 
 
 }
 
-void FFT_Transformer::perform_FFT_on_channels(buffer_collection const& signal_buffers, unsigned window_size, unsigned signal_half_chunk) {
+void FftTransformer::performFFTOnChannels(buffer_collection const& signal_buffers, unsigned window_size, unsigned signal_half_chunk) {
     static float num_chunks = configurator().getFloat("num_splitted_fourier_chunks");
 
     for(int i = 0; i < 4; ++i) {
@@ -215,7 +212,7 @@ void FFT_Transformer::perform_FFT_on_channels(buffer_collection const& signal_bu
 	num_chunks_ = num_chunks;
 
 
-    set_FFT_buffers(4, ints_per_channel_, signal_buffers);
+    setFFTBuffers(4, ints_per_channel_, signal_buffers);
 
     for(int i = 0; i < 4; ++i) {
 		  allow_fft_[i].store(true);
@@ -233,7 +230,7 @@ void FFT_Transformer::perform_FFT_on_channels(buffer_collection const& signal_bu
     
 }
 
-void FFT_Transformer::set_FFT_buffers(unsigned int num_buffers, unsigned int buffer_size, buffer_collection const& signal_buffers) {
+void FftTransformer::setFFTBuffers(unsigned int num_buffers, unsigned int buffer_size, buffer_collection const& signal_buffers) {
 	num_audio_buffers_ = num_buffers;
 	audio_buffer_size_ = buffer_size;
 
@@ -244,7 +241,7 @@ void FFT_Transformer::set_FFT_buffers(unsigned int num_buffers, unsigned int buf
 }
 
 
-void FFT_Transformer::set_FFT_input( unsigned int offset, unsigned int channel_num ) {
+void FftTransformer::setFFTInput( unsigned int offset, unsigned int channel_num ) {
 	
 	if(audio_buffer_size_ >= fft_window_size_) {
 		if(num_audio_buffers_ > 0) {
@@ -263,7 +260,7 @@ void FFT_Transformer::set_FFT_input( unsigned int offset, unsigned int channel_n
 
 }
 
-unsigned int FFT_Transformer::perform_FFT(unsigned channel_num) {
+unsigned int FftTransformer::performFFT(unsigned channel_num) {
 
 	//dummy insertion
 	//listening_to_those_frequencies.clear();
@@ -291,7 +288,7 @@ unsigned int FFT_Transformer::perform_FFT(unsigned channel_num) {
         == fft_cached_results_per_frequency_[first_frequency_listened_to][channel_num].end() ) {
         //std::cout << "Window Size: " << fft_window_size_ << "\n";
 
-				set_FFT_input(offset, channel_num);
+				setFFTInput(offset, channel_num);
 				fftw_execute(fftw_execution_plans_[channel_num]);
 
         //double temp_accum_18khz = 0.0;

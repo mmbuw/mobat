@@ -1,24 +1,24 @@
 #ifndef SIGNAL_ANALYZER_H
 #define SIGNAL_ANALYZER_H
 
-#include "FFT_Transformer.h"
+#include "fft_transformer.h"
 #include "buffer_collection.hpp"
 
 #include <array>
 
-class Signal_Analyzer {
+class SignalAnalyzer {
 
 	private:
 		unsigned short fft_window_size;
-    	FFT_Transformer fft_transformer;
+    	FftTransformer fft_transformer;
 
         std::map<unsigned, std::array<unsigned, 4> > vis_sample_pos_mapping;
     	std::map<unsigned, std::array<double, 4> > frequency_toas_mapping;
     	std::map<unsigned, bool>	is_frequency_toa_mapping_valid;
 
     public:
-    	Signal_Analyzer();
-    	~Signal_Analyzer();
+    	SignalAnalyzer();
+    	~SignalAnalyzer();
 
     	/*
           calls fast fourier transformation for the input channels.
@@ -31,16 +31,16 @@ class Signal_Analyzer {
     	/*
           unregisters a frequency in order to not analyze it anymore
         */
-    	void stop_listening_to(unsigned const frequency);
+    	void stopListeningTo(unsigned const frequency);
     	/*
           registers a frequency in order to analyze it
         */
-    	void start_listening_to(unsigned const frequency);
+    	void startListeningTo(unsigned const frequency);
 
     	/*
     	  retrieve the 4 toas for the specified frequency
     	*/
-    	std::array<double, 4> get_toas_for(unsigned const frequency);
+    	std::array<double, 4> getTOAsFor(unsigned const frequency);
 
 
         /*
@@ -48,7 +48,7 @@ class Signal_Analyzer {
           per channel
         */
         std::array<unsigned, 4> const
-        get_vis_sample_pos_for(unsigned const frequency);
+        getVisSamplePosFor(unsigned const frequency);
 
 
         /*
@@ -56,7 +56,7 @@ class Signal_Analyzer {
     	  the specified frequency
     	*/
     	std::array<std::vector<double>,4> const 
-    	get_signal_samples_for(unsigned const frequency);
+    	getSignalSamplesFor(unsigned const frequency);
 
     	/*
     	  stores the fourier transformed and accumulated samples 
@@ -64,6 +64,13 @@ class Signal_Analyzer {
     	*/
 		std::map<unsigned, std::array<unsigned, 4> > 
 		signal_detected_at_sample_per_frequency;
+
+        /*stores the raw indices of the detected peak sample in each signal*/
+        std::map<unsigned, std::array<std::vector<unsigned> ,4> >
+        peak_samples_per_frequency_;
+
+        std::map<unsigned, std::array<std::vector<unsigned> ,4> > const
+        getRawPeakIndicesFor(unsigned const frequency);
 };
 
 #endif

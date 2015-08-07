@@ -9,23 +9,24 @@
 #include "microphone.hpp"
 #include "recorder.hpp"
 #include "tdoator.hpp"
-#include "Signal_Analyzer.h"
+#include "signal_analyzer.h"
 #include "buffer_collection.hpp"
 
 class Locator {
- public:
+public:
     Locator(unsigned int num_mics);
 
-     std::map<unsigned, std::pair<unsigned, glm::vec2> > load_position() const;
-     glm::vec4 const load_toas() const;
-     std::array<std::vector<double>,4> const load_signal_vis_samples() const;
-     std::array<unsigned, 4> const load_recognized_vis_sample_positions() const;
+    std::map<unsigned, std::pair<unsigned, glm::vec2> > loadPosition() const;
+    glm::vec4 const loadTOAs() const;
+    std::array<std::vector<double>,4> const loadSignalVisSamples() const;
+    std::array<unsigned, 4> const loadRecognizedVisSamplePositions() const;
+    std::map<unsigned, std::array<std::vector<unsigned> ,4> > const loadPeakSamples() const;
 
-     void set_frequencies_to_record(std::vector<unsigned> const& frequencies_to_find);
+    void setFrequenciesToRecord(std::vector<unsigned> const& frequencies_to_find);
 
-     void record_position();
+    void recordPosition();
 
-     void shut_down();
+    void shutdown();
 
      friend int main(int argc, char** argv);
 
@@ -35,6 +36,7 @@ private:
     mutable std::mutex toas_mutex;
     mutable std::mutex signal_vis_samples_mutex;
     mutable std::mutex recognized_vis_sample_pos_mutex;
+    mutable std::mutex peak_sample_indices_mutex;
 
     std::mutex frequency_to_record_setter_mutex;
 
@@ -46,10 +48,13 @@ private:
 
     std::array<std::vector<double>,4> signal_vis_samples;
     std::array<std::vector<double>,4> cached_signal_vis_samples;
+
+    std::map<unsigned, std::array<std::vector<unsigned> ,4> > peak_sample_indices_;
+    std::map<unsigned, std::array<std::vector<unsigned> ,4> > cached_peak_sample_indices_;
     
     std::vector<unsigned> frequencies_to_locate;
 
-    std::map<unsigned, std::array<std::pair<unsigned, glm::vec2>, 10> > cached_positions;
+    std::map<unsigned, std::array<std::pair<unsigned, glm::vec2>, 20> > cached_positions;
 
     glm::vec4 toas_;
     glm::vec4 cached_toas_;
@@ -57,7 +62,7 @@ private:
     bool shutdown_;
     Recorder recorder_;
     buffer_collection collector_;
-    Signal_Analyzer signal_analyzer_;
+    SignalAnalyzer signal_analyzer_;
     TDOAtor tdoator_;
 
     unsigned locator_frame_counter_;

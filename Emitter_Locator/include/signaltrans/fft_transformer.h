@@ -16,7 +16,7 @@
 #include <atomic>
 #include <thread>
 
-class FFT_Transformer {
+class FftTransformer {
 	private:
 
 		float normalization_value;
@@ -59,33 +59,33 @@ class FFT_Transformer {
 		unsigned window_size_;
 		unsigned num_chunks_;
 
-		void create_hamming_window();
-		void create_hann_window();
-		void create_blackmann_harris_window();
+		void createHammingWindow();
+		void createHannWindow();
+		void createBlackmannHarrisWindow();
 
-        void perform_FFT_on_certain_channel(unsigned channel_iterator);
+        void performFFTOnCertainChannel(unsigned channel_iterator);
 
 	public:
-		FFT_Transformer(unsigned short fft_frame_size);
-		~FFT_Transformer();
+		FftTransformer(unsigned short fft_frame_size);
+		~FftTransformer();
 
-		void reset_sample_counters(unsigned );
-		void clear_cached_fft_results(unsigned);
+		void resetSampleCounters(unsigned );
+		void clearCachedFFTResults(unsigned);
 
-		void initialize_execution_plan();
+		void initializeExecutionPlan();
 
-		void set_listened_frequencies(std::vector<unsigned> const& listening_to_frequencies);
+		void setListenedFrequencies(std::vector<unsigned> const& listening_to_frequencies);
 
-		void perform_FFT_on_channels(buffer_collection const& buffers, unsigned window_size, unsigned signal_chunk);
+		void performFFTOnChannels(buffer_collection const& buffers, unsigned window_size, unsigned signal_chunk);
 
-		void set_FFT_input( unsigned int offset, unsigned int channel_num);
-		unsigned perform_FFT(unsigned int channel_num );
+		void setFFTInput( unsigned int offset, unsigned int channel_num);
+		unsigned performFFT(unsigned int channel_num );
 
-		void set_analyzation_range(unsigned int start_sample,
+		void setAnalyzationRange(unsigned int start_sample,
 								   unsigned int end_sample,
 								   unsigned int channel_num);
 	
-		void set_FFT_buffers( unsigned int num_buffers,
+		void setFFTBuffers( unsigned int num_buffers,
 							  unsigned int buffer_size,
 							  buffer_collection const& signal_buffers);
 
@@ -94,7 +94,7 @@ class FFT_Transformer {
 		//frequency, 4 channels, for each offset a value of fft sums
 		std::map<unsigned, std::array<std::map<unsigned, double>,4>> fft_cached_results_per_frequency_;
 
-		void reset_thread_performed_signals();
+		void resetThreadPerformedSignals();
 };
 
 #endif
