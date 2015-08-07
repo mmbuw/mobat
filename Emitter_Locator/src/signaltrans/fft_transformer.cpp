@@ -181,7 +181,9 @@ void FftTransformer::performFFTOnCertainChannel(unsigned channel_iterator) {
 	        unsigned signal_chunk = 1.0 * signal_half_chunk_;
 	        resetSampleCounters(channel_iterator);
 	        clearCachedFFTResults(channel_iterator);
-	        for(unsigned int i = signal_chunk * (ints_per_channel_/num_chunks_) ; i < (signal_chunk+1)*(ints_per_channel_/num_chunks_) - 50; ++i) {
+	        for(unsigned int i = signal_chunk * (ints_per_channel_/num_chunks_); 
+                           i < (signal_chunk+1)*(ints_per_channel_/num_chunks_) - 50; 
+                           ++i) {
 	            unsigned offset = 1 * i;
 	            if(offset > (signal_chunk+1)*(ints_per_channel_/num_chunks_) - 50 )
 	                break;
@@ -223,11 +225,9 @@ void FftTransformer::performFFTOnChannels(buffer_collection const& signal_buffer
     	   (ffts_performed_[1].load() == false) ||
     	   (ffts_performed_[2].load() == false) ||
     	   (ffts_performed_[3].load() == false)  )
-    {}
+    {}    
 
-
-
-    
+  smoothResults();
 }
 
 void FftTransformer::setFFTBuffers(unsigned int num_buffers, unsigned int buffer_size, buffer_collection const& signal_buffers) {
@@ -259,6 +259,37 @@ void FftTransformer::setFFTInput( unsigned int offset, unsigned int channel_num 
 	}
 
 }
+
+void FftTransformer::smoothResults() {
+
+
+  unsigned average_sample_num = 100;
+
+  
+  for(auto& frequency_slot : signal_results_per_frequency_) {
+    for(auto& channel_results : frequency_slot.second) {
+
+
+      std::size_t last_sample_idx = channel_results.size() - 1;
+
+      std::vector<double> average_result_vector(channel_results.size(), 0.0);
+      for(unsigned int sample_idx = 0; sample_idx <= last_sample_idx; ++sample_idx) {
+
+        double average_frequency_sum = 0.0;
+        for(unsigned int average_sample_idx = sample_idx; average_sample_idx < sample_idx + average_sample_num; ++average_sample_idx) {
+          unsigned abs_idx_val = std::abs(average_sample_idx);
+          unsigned int mirror_edge_index =  abs_idx_val > last_sample_idx ? abs_idx_val - (abs_idx_val % last_sample_idx ) : abs_idx_val;
+
+          average_frequency_sum += channel_results[mirror_edge_index];
+        }
+
+        average_result_vector[sample_idx] = average_frequency_sum  / (float)(average_sample_num);
+      }
+      channel_results = average_result_vector;
+    }
+  }
+
+};
 
 unsigned int FftTransformer::performFFT(unsigned channel_num) {
 
@@ -326,11 +357,6 @@ unsigned int FftTransformer::performFFT(unsigned channel_num) {
 
 
       }
-
-
-
-
-
 
     }
 

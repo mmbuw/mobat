@@ -64,6 +64,9 @@ class FftTransformer {
 		void createBlackmannHarrisWindow();
 
         void performFFTOnCertainChannel(unsigned channel_iterator);
+        
+        void smoothResults();
+
 
 	public:
 		FftTransformer(unsigned short fft_frame_size);
@@ -95,6 +98,8 @@ class FftTransformer {
 		std::map<unsigned, std::array<std::map<unsigned, double>,4>> fft_cached_results_per_frequency_;
 
 		void resetThreadPerformedSignals();
+
+
 };
 
 #endif
