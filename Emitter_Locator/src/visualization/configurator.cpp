@@ -28,11 +28,20 @@ void Configurator::read(std::string const& filename) {
        floats_[name] = atof(val.c_str());
       }
     }
-    else {
+    else if(count == 1) {
       std::string a, b;
       std::getline(line_stream, a, ',');
       std::getline(line_stream, b, ',');
       vecs_[name] = glm::vec2{atof(a.c_str()), atof(b.c_str())};
+    }
+    else {
+      std::string element;
+      std::vector<unsigned> list{};
+      while(std::getline(line_stream, element, ',')) {
+        list.push_back(atoi(element.c_str()));
+      }
+
+      lists_[name] = list;
     }
   }
 }
@@ -49,6 +58,14 @@ void Configurator::print() const{
   std::cout << "vecs" << std::endl;
   for (auto const& pair : vecs_) {
     std::cout << pair.first << ": " << pair.second.x << ", "<< pair.second.y << std::endl;
+  }
+  std::cout << "lists" << std::endl;
+  for (auto const& pair : lists_) {
+    std::cout << pair.first << ": ";
+    for( auto const& e : pair.second) {
+      std::cout << e << ", ";
+    }
+    std::cout << std::endl;
   }
 
 }
@@ -76,6 +93,14 @@ unsigned Configurator::getUint(std::string const& name) const {
   else throw std::out_of_range("key \'" + name + "\'' not found");
  
   return 0;
+}
+std::vector<unsigned> Configurator::getList(std::string const& name) const {
+  if (lists_.find(name) != lists_.end()) {
+    return lists_.at(name);
+  }
+  else throw std::out_of_range("key \'" + name + "\'' not found");
+ 
+  return std::vector<unsigned>{};
 }
 
 Configurator& Configurator::inst() {

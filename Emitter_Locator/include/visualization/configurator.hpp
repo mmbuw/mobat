@@ -3,6 +3,7 @@
 
 #include <glm/vec2.hpp>
 #include <map>
+#include <vector>
 #include <string>
 
 // config singleton
@@ -19,6 +20,7 @@ class Configurator {
   glm::vec2 const& getVec(std::string const& name) const;
   float getFloat(std::string const& name) const;
   unsigned getUint(std::string const& name) const;
+  std::vector<unsigned> getList(std::string const& name) const;
 
  private:
   // prevent construction by user
@@ -30,7 +32,8 @@ class Configurator {
   std::map<std::string, glm::vec2> vecs_;
   std::map<std::string, float> floats_;
   std::map<std::string, unsigned> uints_;
-  // static var to return when requested vec doesnt exist
+  std::map<std::string, std::vector<unsigned>> lists_; 
+  // static var to return,when requested vec doesnt exist
   static glm::vec2 identity_;
 };
 // get singleton sinstance
