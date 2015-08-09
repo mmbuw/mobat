@@ -33,7 +33,7 @@ class FftTransformer {
 		unsigned int num_audio_buffers_;
 		int** audio_buffers_;
 
-		unsigned short fft_frame_size_;
+		unsigned int fft_frame_size_;
 		std::array<double*,4> fft_in_;
 		std::array<fftw_complex*,4> fft_result_;
 		double* accumulated_result_;
@@ -56,20 +56,29 @@ class FftTransformer {
 
 		unsigned ints_per_channel_;
 		unsigned signal_half_chunk_;
-		unsigned window_size_;
-		unsigned num_chunks_;
+
+
 
 		void createHammingWindow();
 		void createHannWindow();
 		void createBlackmannHarrisWindow();
 
         void performFFTOnCertainChannel(unsigned channel_iterator);
-        
+
         void smoothResults();
 
+        // loads configurable parameters
+		void loadFFTParameters();
+
+		//configurable parameters
+		float normalization_range_lower_limit_;
+		float normalization_range_upper_limit_;
+		unsigned ffts_per_frame_;
+		unsigned window_size_;
+		unsigned num_chunks_;
 
 	public:
-		FftTransformer(unsigned short fft_frame_size);
+		FftTransformer(unsigned int fft_frame_size);
 		~FftTransformer();
 
 		void resetSampleCounters(unsigned );

@@ -55,11 +55,21 @@ void FftTransformer::resetThreadPerformedSignals() {
 
 }
 
-FftTransformer::FftTransformer(unsigned short fft_window_size) : start_sample_{ std::numeric_limits<unsigned int>::max() },
+void FftTransformer::loadFFTParameters() {
+
+  ffts_per_frame_ = configurator().getUint("ffts_per_frame");
+  num_chunks_ = configurator().getFloat("num_splitted_fourier_chunks");
+  normalization_range_lower_limit_ = configurator().getFloat("normalization_range_lower_limit");
+  normalization_range_upper_limit_ = configurator().getFloat("normalization_range_upper_limit");
+}
+
+FftTransformer::FftTransformer(unsigned int fft_window_size) : start_sample_{ std::numeric_limits<unsigned int>::max() },
 																  end_sample_{ std::numeric_limits<unsigned int>::max() }
 
 																  	{
 
+
+  loadFFTParameters();
 
 	resetThreadPerformedSignals();
 
@@ -167,6 +177,7 @@ void FftTransformer::performFFTOnCertainChannel(unsigned channel_iterator) {
 	
 
 
+
 	    std::cout << "Trying to perform fft with thread "<< channel_iterator << "\n";
 		//thread is supposed to start here!
 
@@ -182,13 +193,13 @@ void FftTransformer::performFFTOnCertainChannel(unsigned channel_iterator) {
 	        resetSampleCounters(channel_iterator);
 	        clearCachedFFTResults(channel_iterator);
 	        for(unsigned int i = signal_chunk * (ints_per_channel_/num_chunks_); 
-                           i < (signal_chunk+1)*(ints_per_channel_/num_chunks_) - 50; 
+                           i < (signal_chunk+1)*(ints_per_channel_/num_chunks_) - ffts_per_frame_; 
                            ++i) {
 	            unsigned offset = 1 * i;
-	            if(offset > (signal_chunk+1)*(ints_per_channel_/num_chunks_) - 50 )
+	            if(offset > (signal_chunk+1)*(ints_per_channel_/num_chunks_) - ffts_per_frame_)
 	                break;
 					
-				setAnalyzationRange(0+offset, window_size_+50 + offset, channel_iterator);
+				setAnalyzationRange(0+offset, window_size_+ffts_per_frame_ + offset, channel_iterator);
 	            
 
 	            performFFT(channel_iterator);           
@@ -202,16 +213,21 @@ void FftTransformer::performFFTOnCertainChannel(unsigned channel_iterator) {
 }
 
 void FftTransformer::performFFTOnChannels(buffer_collection const& signal_buffers, unsigned window_size, unsigned signal_half_chunk) {
-    static float num_chunks = configurator().getFloat("num_splitted_fourier_chunks");
-
     for(int i = 0; i < 4; ++i) {
     	ffts_performed_[i].store(false);
     }
 
+  for(unsigned iterated_frequency : listening_to_those_frequencies) {
+    for(int channel_idx = 0; channel_idx < 4; ++channel_idx) {
+      signal_results_per_frequency_[iterated_frequency][channel_idx].reserve(ffts_per_frame_);
+
+    }
+  }
+
 	ints_per_channel_ = signal_buffers.length;
 	signal_half_chunk_ = signal_half_chunk;
 	window_size_ = window_size;
-	num_chunks_ = num_chunks;
+
 
 
     setFFTBuffers(4, ints_per_channel_, signal_buffers);
@@ -228,6 +244,7 @@ void FftTransformer::performFFTOnChannels(buffer_collection const& signal_buffer
     {}    
 
   smoothResults();
+
 }
 
 void FftTransformer::setFFTBuffers(unsigned int num_buffers, unsigned int buffer_size, buffer_collection const& signal_buffers) {
@@ -263,31 +280,33 @@ void FftTransformer::setFFTInput( unsigned int offset, unsigned int channel_num 
 void FftTransformer::smoothResults() {
 
 
-  unsigned average_sample_num = 100;
+  unsigned average_sample_num = configurator().getUint("fft_smoothing_sample_num");;
 
   
   for(auto& frequency_slot : signal_results_per_frequency_) {
     for(auto& channel_results : frequency_slot.second) {
 
 
-      std::size_t last_sample_idx = channel_results.size() - 1;
+        std::size_t last_sample_idx = channel_results.size() - 1;
 
-      std::vector<double> average_result_vector(channel_results.size(), 0.0);
-      for(unsigned int sample_idx = 0; sample_idx <= last_sample_idx; ++sample_idx) {
+        std::vector<double> average_result_vector(channel_results.size(), 0.0);
+        for(unsigned int sample_idx = 0; sample_idx <= last_sample_idx; ++sample_idx) {
 
-        double average_frequency_sum = 0.0;
-        for(unsigned int average_sample_idx = sample_idx; average_sample_idx < sample_idx + average_sample_num; ++average_sample_idx) {
-          unsigned abs_idx_val = std::abs(average_sample_idx);
-          unsigned int mirror_edge_index =  abs_idx_val > last_sample_idx ? abs_idx_val - (abs_idx_val % last_sample_idx ) : abs_idx_val;
+          double average_frequency_sum = 0.0;
+          for(unsigned int average_sample_idx = sample_idx; average_sample_idx < sample_idx + average_sample_num; ++average_sample_idx) {
+            unsigned abs_idx_val = std::abs(average_sample_idx);
+            unsigned int mirror_edge_index =  abs_idx_val > last_sample_idx ? abs_idx_val - (abs_idx_val % last_sample_idx ) : abs_idx_val;
 
-          average_frequency_sum += channel_results[mirror_edge_index];
+            //std::cout << "Size of channel_resuls: " << channel_results.size() << ", idx: " << mirror_edge_index << "\n";
+            average_frequency_sum += channel_results[mirror_edge_index];
+          }
+
+          average_result_vector[sample_idx] = average_frequency_sum  / (float)(average_sample_num);
         }
-
-        average_result_vector[sample_idx] = average_frequency_sum  / (float)(average_sample_num);
+        channel_results = average_result_vector;
       }
-      channel_results = average_result_vector;
     }
-  }
+  
 
 };
 
