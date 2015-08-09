@@ -7,8 +7,8 @@
 #include <utility>
 
 SignalAnalyzer::
-SignalAnalyzer() : fft_window_size(256),
-                    fft_transformer{fft_window_size} {
+SignalAnalyzer() : fft_window_size( ({configurator().getUint("fft_window_size");  }) ),
+                    fft_transformer({fft_window_size}) {
     fft_transformer.initializeExecutionPlan();
 
 }
@@ -75,7 +75,8 @@ analyze(buffer_collection const& collector, unsigned signal_chunk){
 
             signal_detected_at_sample_per_frequency[frequency_entry.first] = {std::numeric_limits<unsigned>::max()};
 
-
+            double power = configurator().getFloat("peak_power");
+            double frequency_sum_detection_threshold = configurator().getFloat("frequency_sum_detection_threshold");
 
             for(unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
 
@@ -106,16 +107,19 @@ analyze(buffer_collection const& collector, unsigned signal_chunk){
               	processed_samples = 0;
 
 
+                double powered_min  = pow(min,power);
+                double powered_peak = pow(peak,power);
+
                 for(auto& sig : fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator]) {
                 	if( processed_samples >= (sample_vector_size - 1) ) {
                 		break;
                 	} else {
 
 
-                		double power = configurator().getFloat("peak_power");
-                        double frequency_sum_detection_threshold = configurator().getFloat("frequency_sum_detection_threshold");
+
+                        
                 		if(peak-min > frequency_sum_detection_threshold) {
-                			sig =  100.0 * (pow(sig,power) - pow(min,power)) / (pow(peak,power) - pow(min,power));
+                			sig =  100.0 * (pow(sig,power) - powered_min) / (powered_peak - powered_min);
 
              
                 		}
