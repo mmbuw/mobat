@@ -116,8 +116,10 @@ loadPeakSamples() const {
   unsigned num_chunks_to_analyze = configurator().getUint("num_analyzed_fourier_chunks");
 
   bool first_signal_available = false;
-  while (!shutdown_)
-  {
+  while (!shutdown_) {
+    std::chrono::high_resolution_clock::time_point start_loop = std::chrono::high_resolution_clock::now();
+
+
     for (unsigned frequency_to_analyze : frequencies_to_locate) {
       signal_analyzer_.startListeningTo(frequency_to_analyze);
     }
@@ -142,8 +144,15 @@ loadPeakSamples() const {
         continue;
     }
 
-    //std::cout << "@ chunk: " << current_signal_chunk_+1 << "/" << num_chunks_to_analyze << "\n";
-    signal_analyzer_.analyze(collector_, current_signal_chunk_);   
+    if (collector_.length == 0) {
+      continue;
+    }
+    // std::cout << "@ chunk: " << current_signal_chunk_+1 << "/" << num_chunks_to_analyze << "\n";
+
+    signal_analyzer_.analyze(collector_, current_signal_chunk_); 
+
+    std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
+
     bool found_positions = false;
 
     std::map<unsigned,glm::vec2> currently_located_positions;
@@ -174,6 +183,10 @@ loadPeakSamples() const {
       }
     }
     //cached_signal_vis_samples = signal_analyzer_.get_signal_samples_for(17000);
+    unsigned elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>
+              (std::chrono::high_resolution_clock::now() - start).count(); 
+    std::cout << "Time for TDOAtion: " << elapsed_time << std::endl;
+    start = std::chrono::high_resolution_clock::now();
 
     if (found_positions) {
       ++locator_frame_counter_;
@@ -237,7 +250,15 @@ loadPeakSamples() const {
     cached_peak_sample_indices_ = signal_analyzer_.getRawPeakIndicesFor(19000);
     peak_sample_indices_mutex.lock();
     peak_sample_indices_ = cached_peak_sample_indices_;
-    peak_sample_indices_mutex.unlock();    
+    peak_sample_indices_mutex.unlock();  
+
+    elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>
+              (std::chrono::high_resolution_clock::now() - start).count(); 
+    std::cout << "Time for rest: " << elapsed_time << std::endl;
+
+    elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>
+              (std::chrono::high_resolution_clock::now() - start_loop).count(); 
+    std::cout << "Time for Locator: " << elapsed_time << std::endl;
   }
 
   // stop recording loop

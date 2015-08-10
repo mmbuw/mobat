@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <functional>
 #include <utility>
+#include <chrono>
 
 SignalAnalyzer::
 SignalAnalyzer() : fft_window_size_( ({configurator().getUint("fft_window_size");  }) ),
@@ -26,28 +27,32 @@ loadAnalyzerParameters() {
 
 void SignalAnalyzer::
 analyze(buffer_collection const& collector, unsigned signal_chunk){
+    std::chrono::high_resolution_clock::time_point start1 = std::chrono::high_resolution_clock::now();
 
-	std::vector<unsigned> fft_result_frequencies;
-	for(auto const& frequency_to_transform_entry : frequency_toas_mapping_) {
-		/*
-		  filter frequencies that are below a reasonable 
-		  threshold in order to create some virtual space
-		  for special detections (like knock detecion)
-		*/
-		if(frequency_to_transform_entry.first < 50000.0f)
-		fft_result_frequencies.push_back(frequency_to_transform_entry.first);
+    std::vector<unsigned> fft_result_frequencies;
+    for(auto const& frequency_to_transform_entry : frequency_toas_mapping_) {
+        /*
+          filter frequencies that are below a reasonable 
+          threshold in order to create some virtual space
+          for special detections (like knock detecion)
+        */
+        if(frequency_to_transform_entry.first < 50000.0f)
+        fft_result_frequencies.push_back(frequency_to_transform_entry.first);
     }
 
-	/*
-	  forward the frequencies to the fft-transformer in order
-	  to prepare normalized buffers for these frequencies*/
-	fft_transformer_.setListenedFrequencies(fft_result_frequencies);
+    /*
+      forward the frequencies to the fft-transformer in order
+      to prepare normalized buffers for these frequencies*/
+    fft_transformer_.setListenedFrequencies(fft_result_frequencies);
     
     signal_detected_at_sample_per_frequency.clear();
     //std::cout << "before performing fft. " << "\n";  
-
+    std::chrono::high_resolution_clock::time_point  start = std::chrono::high_resolution_clock::now();
     fft_transformer_.performFFTOnChannels(collector, fft_window_size_, signal_chunk);
     //std::cout << "after performing fft. " << "\n";  
+    unsigned elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>
+                            (std::chrono::high_resolution_clock::now() - start).count(); 
+    std::cout << "Time for FFT: " << elapsed_time << std::endl; 
     double updated_times[4];
 
    // unsigned starting_sample_threshold =  50;
@@ -294,6 +299,10 @@ analyze(buffer_collection const& collector, unsigned signal_chunk){
         }
     }
 
+    unsigned elapsed_time1 = std::chrono::duration_cast<std::chrono::milliseconds>
+                            (std::chrono::high_resolution_clock::now() - start1).count(); 
+    elapsed_time1 -=elapsed_time;
+    std::cout << "Time for Analyzation: " << elapsed_time1 << std::endl; 
 
 }
 
