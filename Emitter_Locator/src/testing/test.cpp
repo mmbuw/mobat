@@ -27,6 +27,7 @@ void Test::closeFiles(){
   for(auto & i : files_){
     i.second.close();
   }
+  files_.clear();
 }
 
 
