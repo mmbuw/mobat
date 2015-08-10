@@ -36,7 +36,7 @@ analyze(buffer_collection const& collector, unsigned signal_chunk){
           threshold in order to create some virtual space
           for special detections (like knock detecion)
         */
-        if(frequency_to_transform_entry.first < 50000.0f)
+        if(frequency_to_transform_entry.first != 0)
         fft_result_frequencies.push_back(frequency_to_transform_entry.first);
     }
 
@@ -62,16 +62,16 @@ analyze(buffer_collection const& collector, unsigned signal_chunk){
 
     for(auto const& frequency_entry : frequency_toas_mapping_) {
 
-        if(frequency_entry.first >= 50000) {
-/*
+        if(0 == frequency_entry.first) {
             signal_detected_at_sample_per_frequency[frequency_entry.first] = {100000, 100000, 100000, 100000};
             
             for(unsigned int channel_it = 0; channel_it < collector.count; ++channel_it) {
+
                 for(unsigned int i = 0; i < collector.length; ++i ) {
                     if(collector[channel_it][i] > std::numeric_limits<int>::max()-1000) {
                         
                         // std::cout << "Channel " << channel_it << " detected at: " << i << "\n";
-                        signal_detected_at_sample_per_frequency[frequency_entry.first][channel_it] = i;
+                        signal_detected_at_sample_per_frequency[frequency_entry.first][channel_it] = 500;
                         break;
                         //std::cout << current_audio_buffer[channel_it][i] << "\n";
                         //std::cout << "max: " << std::numeric_limits<int>::max() << "\n";
@@ -79,7 +79,7 @@ analyze(buffer_collection const& collector, unsigned signal_chunk){
                 }
             }
             // std::cout << "\n";
-*/
+
         } else {
             double const & (*d_max) (double const &, double const &) = std::max<double>;
             double const & (*d_min) (double const &, double const &) = std::min<double>;
@@ -360,18 +360,11 @@ getTOAsFor(unsigned const frequency) {
 
 std::map<unsigned, std::array<unsigned, 4> > const SignalAnalyzer::
 getVisSamplePos() {
-/*
-    std::map<unsigned, std::array<double, 4> >::const_iterator frequency_iterator
-        = frequency_toas_mapping_.find(frequency);
-*/
-
-	//if( (frequency_toas_mapping.end() != frequency_iterator) && (is_frequency_toa_mapping_valid[frequency]) )  {
 		return vis_sample_pos_mapping_;
 }
 
 std::map<unsigned, std::array<std::vector<double>,4> >const SignalAnalyzer::
 getSignalSamples() {
-
     return fft_transformer_.signal_results_per_frequency_;
 }
 

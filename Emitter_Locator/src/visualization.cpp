@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
     glm::vec2 windowResolution{configurator().getVec("resolution")};
 
 
-    std::vector<unsigned> frequencies_to_record{configurator().getUint("player1"), configurator().getUint("player2") /*, 100000*/};
+    std::vector<unsigned> frequencies_to_record{configurator().getList("known_frequencies")};
 
 // testing
     TTT::Test test_logger;
@@ -49,7 +49,13 @@ int main(int argc, char** argv) {
     bool show_signalvis = configurator().getUint("show_signalvis") > 0;
     bool show_errorvis = configurator().getUint("show_errorvis") > 0;
 
-    sf::RenderWindow signal_plot_window_(sf::VideoMode(280, 400)
+    //std::vector<unsigned> const known_frequencies = configurator().getList("known_frequencies");
+
+    unsigned const num_audio_channels = 4;
+    unsigned const signal_vis_window_width  = configurator().getUint("svis_slot_width") * (frequencies_to_record.size() );
+    unsigned const signal_vis_window_height = configurator().getUint("svis_channel_height") * num_audio_channels;
+
+    sf::RenderWindow signal_plot_window_(sf::VideoMode(signal_vis_window_width, signal_vis_window_height)
                        , "Transformed_Frequencies");
 
     sf::ContextSettings settings;
@@ -243,36 +249,39 @@ void draw_signal_plot(sf::RenderWindow& window, Locator const& locator) {
 
     sf::RectangleShape data_point;
 
+    unsigned draw_iteration_counter = 0;
+    for(auto const& signal_of_frequency : signal_vis_samples) {
+        if(signal_vis_samples.find(signal_of_frequency.first) != signal_vis_samples.end()) {
+            for(unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
 
-    if(signal_vis_samples.find(19000) != signal_vis_samples.end()) {
-        for(unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
+                for(unsigned int sample_idx = 0; sample_idx < signal_vis_samples[signal_of_frequency.first][channel_iterator].size(); sample_idx+=1) {
+                    unsigned int sig = signal_vis_samples[signal_of_frequency.first][channel_iterator][sample_idx];
 
-            for(unsigned int sample_idx = 0; sample_idx < signal_vis_samples[19000][channel_iterator].size(); sample_idx+=1) {
-                unsigned int sig = signal_vis_samples[19000][channel_iterator][sample_idx];
+                    float draw_slot_width = 280.0f;
+                    float sample_width = 280.0f / signal_vis_samples[signal_of_frequency.first][channel_iterator].size();
 
+                    data_point.setSize(sf::Vector2f(1,sig) );
+                    data_point.setPosition( sf::Vector2f( draw_slot_width * draw_iteration_counter + sample_width * sample_idx, channel_iterator * 100.0 + (100.0-sig) ) );
 
-                float width = 280.0f / signal_vis_samples[19000][channel_iterator].size();
-
-                data_point.setSize(sf::Vector2f(1,sig) );
-                data_point.setPosition( sf::Vector2f( width * sample_idx, channel_iterator * 100.0 + (100.0-sig) ) );
-
-                if(sample_idx <  recognized_vis_sample_pos[19000][channel_iterator] ) {
-                    data_point.setFillColor(sf::Color(255, 0, 0) ) ;
-                } else {
-                    data_point.setFillColor(sf::Color(0, 255, 0) ) ;          
-                }
-
-                for(auto const& peak_samples_of_channel : peak_samples_per_frequency[19000][channel_iterator]) {
-                    if(sample_idx -2 <= peak_samples_of_channel && sample_idx + 2 >= peak_samples_of_channel) {
-                        data_point.setFillColor(sf::Color(255, 0, 255) ) ;
-                        break;   
+                    if(sample_idx <  recognized_vis_sample_pos[signal_of_frequency.first][channel_iterator] ) {
+                        data_point.setFillColor(sf::Color(255, 0, 0) ) ;
+                    } else {
+                        data_point.setFillColor(sf::Color(0, 255, 0) ) ;          
                     }
+
+                    for(auto const& peak_samples_of_channel : peak_samples_per_frequency[signal_of_frequency.first][channel_iterator]) {
+                        if(sample_idx -2 <= peak_samples_of_channel && sample_idx + 2 >= peak_samples_of_channel) {
+                            data_point.setFillColor(sf::Color(255, 0, 255) ) ;
+                            break;   
+                        }
+                    }
+
+                    window.draw(data_point);
                 }
 
-                window.draw(data_point);
             }
-
         }
+        ++draw_iteration_counter;
     }
     
     window.display();
