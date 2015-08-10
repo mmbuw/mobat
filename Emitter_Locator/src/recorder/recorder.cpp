@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include <cstring>
 
-Recorder::Recorder(unsigned chan, std::size_t frames, std::size_t recording_time)
+Recorder::Recorder(unsigned chan, unsigned frames, std::size_t recording_time)
   :config_{chan, frames, 0}
   ,device_{}
   ,recording_time_{recording_time}

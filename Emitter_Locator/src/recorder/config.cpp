@@ -10,7 +10,7 @@ Config::Config() :
   params_{nullptr}
 {}
 
-Config::Config(unsigned chan, std::size_t frames, std::size_t period_time) :
+Config::Config(unsigned chan, unsigned frames, unsigned period_time) :
   channels_{chan},
   framerate_{frames},
   period_time_{period_time},
@@ -81,14 +81,14 @@ bool Config::configure(snd_pcm_t* pcm_handle) {
     std::cerr << "cannot set sample format - " << snd_strerror(err) << std::endl;
     return false;
   }
-  unsigned new_framerate = framerate_;
-  err = snd_pcm_hw_params_set_rate_near(pcm_handle, params_, &new_framerate, 0);
+  unsigned old_framerate = framerate_;
+  err = snd_pcm_hw_params_set_rate_near(pcm_handle, params_, &framerate_, 0);
   if (err < 0) {
     std::cerr << "cannot set sample rate - " << snd_strerror(err) << std::endl;
     return false;
   }
-  else if (new_framerate != framerate_) {
-    std::cerr << "Adjusted sample rate from " << framerate_ << " to " << new_framerate << std::endl;
+  else if (old_framerate != framerate_) {
+    std::cerr << "Adjusted sample rate from " << old_framerate << " to " << framerate_ << std::endl;
   }
 
   err = snd_pcm_hw_params_set_channels(pcm_handle, params_, channels_);
@@ -96,11 +96,14 @@ bool Config::configure(snd_pcm_t* pcm_handle) {
     std::cerr << "cannot set channel count - " << snd_strerror(err) << std::endl;
     return false;
   }
-
-  err = snd_pcm_hw_params_set_period_time(pcm_handle, params_, period_time_, 0);
+  unsigned old_time = period_time_;
+  err = snd_pcm_hw_params_set_period_time_near(pcm_handle, params_, &period_time_, 0);
   if (err < 0) {
     std::cerr << "cannot set period time - " << snd_strerror(err) << std::endl;
     return false;
+  }
+  else if (old_time != period_time_) {
+    std::cerr << "Adjusted period time from " << old_time << " to " << period_time_ << std::endl;
   }
 
   return true;
@@ -145,7 +148,7 @@ bool Config::isSupported(snd_pcm_t* pcm_handle) const{
   return true;
 }
 
-void Config::setPeriodTime(std::size_t time) {
+void Config::setPeriodTime(unsigned time) {
   period_time_ = time;
 }
 
@@ -184,7 +187,7 @@ std::size_t Config::periodBytes() const {
   return periodFrames() * channels_ * sample_bytes;
 }
 
-std::size_t Config::periodTime() const {
+unsigned Config::periodTime() const {
   // how long a period takes in us
   unsigned period_time;
   snd_pcm_hw_params_get_period_time(params_, &period_time, 0);

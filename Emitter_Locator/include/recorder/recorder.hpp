@@ -9,7 +9,7 @@
 
 class Recorder {
  public:
-  Recorder(unsigned chan = 2, std::size_t frames = 44100, std::size_t recording_time = 2000000);
+  Recorder(unsigned chan = 2, unsigned frames = 44100, std::size_t recording_time = 2000000);
   ~Recorder();
 
   //block generated copy operations 
