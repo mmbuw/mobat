@@ -1,12 +1,23 @@
 #include "buffer_collection.hpp"
 #include <stdexcept>
+#include <cstring>
+
+buffer_collection::buffer_collection()
+ :count{0}
+ ,bytes{0}
+ ,max_bytes{0}
+ ,length{0}
+ ,max_length{0}
+ ,buffers{nullptr}
+{}
 
 buffer_collection::buffer_collection(std::size_t bufferbytes, std::size_t buffernum)
-:count{buffernum}
-,bytes{bufferbytes}
-,max_bytes{bytes}
-,length{bufferbytes / 4}
-,max_length{length}
+ :count{buffernum}
+ ,bytes{bufferbytes}
+ ,max_bytes{bufferbytes}
+ ,length{bufferbytes / 4}
+ ,max_length{bufferbytes / 4}
+ ,buffers{nullptr}
 {
   buffers = (int32_t**)malloc(buffernum * sizeof(int32_t*));
 
@@ -21,9 +32,29 @@ buffer_collection::buffer_collection(std::size_t bufferbytes, std::size_t buffer
   else throw std::logic_error("memory allocation failed");
 }
 
+buffer_collection::buffer_collection(buffer_collection const& coll)
+ :buffer_collection{coll.max_bytes, coll.count}
+{
+  bytes = coll.bytes;
+  length = coll.length;
+  // copy over data
+  for(std::size_t current_buffer = 0; current_buffer < count; ++current_buffer) {
+    std::memcpy(buffers[current_buffer], coll.buffers[current_buffer], max_bytes);
+  }
+}
+
+buffer_collection::buffer_collection(buffer_collection&& coll) {
+  swap(*this, coll);
+}
+
+buffer_collection& buffer_collection::operator=(buffer_collection coll) {
+  swap(*this, coll);
+  return *this;
+}
+
 buffer_collection::~buffer_collection() {
   for (std::size_t i = 0; i < count; ++i) {
-    if(buffers[i]) {
+    if (buffers[i]) {
       free(buffers[i]);
       buffers[i] = nullptr;
     }
@@ -68,4 +99,13 @@ int32_t* const& buffer_collection::operator[](std::size_t i) {
 
 int32_t* const& buffer_collection::operator[](std::size_t i) const {
   return buffers[i];
+}
+
+void swap(buffer_collection& c1, buffer_collection& c2) {
+  std::swap(c1.count, c2.count);
+  std::swap(c1.bytes, c2.bytes);
+  std::swap(c1.max_bytes, c2.max_bytes);
+  std::swap(c1.length, c2.length);
+  std::swap(c1.max_length, c2.max_length);
+  std::swap(c1.buffers, c2.buffers);
 }

@@ -83,8 +83,6 @@ FftTransformer::FftTransformer(unsigned int fft_window_size) : start_sample_{ st
   fft_threads_[2] = std::shared_ptr<std::thread>( new std::thread([&] { this->performFFTOnCertainChannel(2); } ) ); 
   fft_threads_[3] = std::shared_ptr<std::thread>( new std::thread([&] { this->performFFTOnCertainChannel(3); } ) ); 
 
-    audio_buffers_ = (int32_t**) malloc( 4 * sizeof(int32_t*));
-
   fft_window_size_ = fft_window_size;
 
 
@@ -230,47 +228,29 @@ void FftTransformer::performFFTOnChannels(buffer_collection const& signal_buffer
   signal_half_chunk_ = signal_half_chunk;
   window_size_ = window_size;
 
+  audio_buffers_ = signal_buffers;
 
-
-    setFFTBuffers(4, ints_per_channel_, signal_buffers);
-
-    for (int i = 0; i < 4; ++i) {
-      allow_fft_[i].store(true);
-    }
-
-
-    while( (ffts_performed_[0].load() == false) ||
-         (ffts_performed_[1].load() == false) ||
-         (ffts_performed_[2].load() == false) ||
-         (ffts_performed_[3].load() == false)  )
-    {}    
-
-  smoothResults();
-
-}
-
-void FftTransformer::setFFTBuffers(unsigned int num_buffers, unsigned int buffer_size, buffer_collection const& signal_buffers) {
-  num_audio_buffers_ = num_buffers;
-  audio_buffer_size_ = buffer_size;
-
-  for (int buffer_idx = 0; buffer_idx < 4; ++buffer_idx) {
-    audio_buffers_[buffer_idx] = signal_buffers[buffer_idx];  
+  for (int i = 0; i < 4; ++i) {
+    allow_fft_[i].store(true);
   }
 
-}
 
+  while( (ffts_performed_[0].load() == false) ||
+       (ffts_performed_[1].load() == false) ||
+       (ffts_performed_[2].load() == false) ||
+       (ffts_performed_[3].load() == false)  )
+  {}    
+
+  smoothResults();
+}
 
 void FftTransformer::setFFTInput( unsigned int offset, unsigned int channel_num ) {
   
-  if (audio_buffer_size_ >= fft_window_size_) {
-    if (num_audio_buffers_ > 0) {
-      for (unsigned int frame_idx = 0;
-        frame_idx < fft_window_size_;
-        ++frame_idx) {
-
-        //std::cout << "buffer content: " << audio_buffers_[0][(offset) + frame_idx] << "\n";
-        fft_in_[channel_num][frame_idx] = window_[frame_idx] * (audio_buffers_[channel_num][(offset) + frame_idx]) / float(INT32_MAX);
-      }
+  if (audio_buffers_.length >= fft_window_size_) {
+    for (unsigned int frame_idx = 0;
+      frame_idx < fft_window_size_;
+      ++frame_idx) {
+      fft_in_[channel_num][frame_idx] = window_[frame_idx] * (audio_buffers_[channel_num][(offset) + frame_idx]) / float(INT32_MAX);
     }
   } else {
     std::cout << "Not enough sample for FFT-Frame Size!\n";

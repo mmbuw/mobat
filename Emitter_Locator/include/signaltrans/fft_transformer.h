@@ -29,9 +29,7 @@ class FftTransformer {
 		std::array<unsigned int,4> start_sample_;
 		std::array<unsigned int,4> end_sample_;
 
-		unsigned int audio_buffer_size_;
-		unsigned int num_audio_buffers_;
-		int** audio_buffers_;
+		buffer_collection audio_buffers_;
 
 		unsigned int fft_frame_size_;
 		std::array<double*,4> fft_in_;
@@ -100,10 +98,6 @@ class FftTransformer {
 								   unsigned int end_sample,
 								   unsigned int channel_num);
 	
-		void setFFTBuffers( unsigned int num_buffers,
-							  unsigned int buffer_size,
-							  buffer_collection const& signal_buffers);
-
 		std::map<unsigned, std::array<std::vector<double>,4> > signal_results_per_frequency_;
 
 		//frequency, 4 channels, for each offset a value of fft sums
