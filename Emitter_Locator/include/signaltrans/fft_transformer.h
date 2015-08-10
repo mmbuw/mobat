@@ -40,6 +40,7 @@ class FftTransformer {
 
 		//double eighteen_khz_sum_;
 		std::array<std::map<unsigned, double>, 4> frequency_sums_;
+		std::array<std::vector<double>, 4> average_smoothing_result_vectors_;
 
 		std::array<std::shared_ptr<std::thread>, 4> fft_threads_;
 
@@ -63,7 +64,7 @@ class FftTransformer {
 
         void performFFTOnCertainChannel(unsigned channel_iterator);
 
-        void smoothResults();
+        void smoothResults(unsigned int channel_idx);
 
         // loads configurable parameters
 		void loadFFTParameters();
@@ -74,6 +75,7 @@ class FftTransformer {
 		unsigned ffts_per_frame_;
 		unsigned window_size_;
 		unsigned num_chunks_;
+		unsigned num_smooth_average_samples_;
 		float frequency_slice_halfsize_;
 
 		float audio_device_sampling_rate_;
