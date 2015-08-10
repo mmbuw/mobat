@@ -18,8 +18,8 @@ public:
 
     std::map<unsigned, std::pair<unsigned, glm::vec2> > loadPosition() const;
     glm::vec4 const loadTOAs() const;
-    std::array<std::vector<double>,4> const loadSignalVisSamples() const;
-    std::array<unsigned, 4> const loadRecognizedVisSamplePositions() const;
+    std::map<unsigned, std::array<std::vector<double>,4> > const loadSignalVisSamples() const;
+    std::map<unsigned, std::array<unsigned, 4> > const loadRecognizedVisSamplePositions() const;
     std::map<unsigned, std::array<std::vector<unsigned> ,4> > const loadPeakSamples() const;
 
     void setFrequenciesToRecord(std::vector<unsigned> const& frequencies_to_find);
@@ -27,6 +27,8 @@ public:
     void recordPosition();
 
     void shutdown();
+
+    void loadLocatorParameters();
 
      friend int main(int argc, char** argv);
 
@@ -43,11 +45,11 @@ private:
     std::map<unsigned, std::pair<unsigned, glm::vec2> > located_positions;
     std::map<unsigned, std::pair<unsigned, glm::vec2> > cached_located_positions;
 
-    std::array<unsigned, 4> recognized_vis_sample_pos;
-    std::array<unsigned, 4> cached_recognized_vis_sample_pos;
+    std::map<unsigned, std::array<unsigned, 4> > recognized_vis_sample_pos;
+    std::map<unsigned, std::array<unsigned, 4> > cached_recognized_vis_sample_pos;
 
-    std::array<std::vector<double>,4> signal_vis_samples;
-    std::array<std::vector<double>,4> cached_signal_vis_samples;
+    std::map<unsigned, std::array<std::vector<double>,4> > signal_vis_samples;
+    std::map<unsigned, std::array<std::vector<double>,4> > cached_signal_vis_samples;
 
     std::map<unsigned, std::array<std::vector<unsigned> ,4> > peak_sample_indices_;
     std::map<unsigned, std::array<std::vector<unsigned> ,4> > cached_peak_sample_indices_;
@@ -60,6 +62,7 @@ private:
     glm::vec4 cached_toas_;
 
     bool shutdown_;
+    bool request_vis_vectors_;
     Recorder recorder_;
     buffer_collection collector_;
     SignalAnalyzer signal_analyzer_;

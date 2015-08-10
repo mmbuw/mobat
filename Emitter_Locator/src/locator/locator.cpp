@@ -20,8 +20,14 @@ Locator::Locator(unsigned int num_mics)
                 configurator().getVec("microphone4_pos")}
  ,locator_frame_counter_(cached_positions[0].size())
  ,current_signal_chunk_(0)
-{}
+{
+  loadLocatorParameters();
+}
 
+void Locator::
+loadLocatorParameters() {
+  request_vis_vectors_ = configurator().getUint("show_signalvis") > 0;
+}
 
 std::map<unsigned, std::pair<unsigned, glm::vec2> > Locator::
 loadPosition() const {
@@ -50,17 +56,15 @@ glm::vec4 const Locator
   }
 } 
 
-std::array<std::vector<double>,4> const Locator::
+std::map<unsigned, std::array<std::vector<double>,4> > const Locator::
 loadSignalVisSamples() const {
   //try to access current signal vis samples
 
   if (signal_vis_samples_mutex.try_lock()) {
-    std::array<std::vector<double>,4> temp;
+    std::map<unsigned, std::array<std::vector<double>,4> >temp;
 
-    for(int i = 0; i < 4; ++i) {
-      temp[i] = signal_vis_samples[i]; 
-    }
-
+    temp = signal_vis_samples; 
+    
     signal_vis_samples_mutex.unlock();
     return temp;
   } else {
@@ -68,14 +72,13 @@ loadSignalVisSamples() const {
   }
 }
 
-std::array<unsigned, 4> const Locator::
+std::map<unsigned, std::array<unsigned, 4> > const Locator::
 loadRecognizedVisSamplePositions() const {
   if (recognized_vis_sample_pos_mutex.try_lock()) {
-    std::array<unsigned ,4> temp;
+    std::map<unsigned, std::array<unsigned ,4> > temp;
 
-    for(int i = 0; i < 4; ++i) {
-      temp[i] = recognized_vis_sample_pos[i]; 
-    }
+    temp = recognized_vis_sample_pos; 
+    
 
     recognized_vis_sample_pos_mutex.unlock();
     return temp;
@@ -235,30 +238,32 @@ loadPeakSamples() const {
       position_mutex.unlock();
     }
 
-    cached_signal_vis_samples = signal_analyzer_.getSignalSamplesFor(19000);
 
-    signal_vis_samples_mutex.lock();
-    signal_vis_samples = cached_signal_vis_samples;
-    signal_vis_samples_mutex.unlock();
+    if(request_vis_vectors_) {
+      cached_signal_vis_samples = signal_analyzer_.getSignalSamples();
 
-    cached_recognized_vis_sample_pos = signal_analyzer_.getVisSamplePosFor(19000);
+      signal_vis_samples_mutex.lock();
+      signal_vis_samples = cached_signal_vis_samples;
+      signal_vis_samples_mutex.unlock();
 
-    recognized_vis_sample_pos_mutex.lock();
-    recognized_vis_sample_pos = cached_recognized_vis_sample_pos;
-    recognized_vis_sample_pos_mutex.unlock();
+      cached_recognized_vis_sample_pos = signal_analyzer_.getVisSamplePos();
+      recognized_vis_sample_pos_mutex.lock();
+      recognized_vis_sample_pos = cached_recognized_vis_sample_pos;
+      recognized_vis_sample_pos_mutex.unlock();
 
-    cached_peak_sample_indices_ = signal_analyzer_.getRawPeakIndicesFor(19000);
-    peak_sample_indices_mutex.lock();
-    peak_sample_indices_ = cached_peak_sample_indices_;
-    peak_sample_indices_mutex.unlock();  
+      cached_peak_sample_indices_ = signal_analyzer_.getRawPeakIndices();
+      peak_sample_indices_mutex.lock();
+      peak_sample_indices_ = cached_peak_sample_indices_;
+      peak_sample_indices_mutex.unlock();
 
-    elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>
-              (std::chrono::high_resolution_clock::now() - start).count(); 
-    std::cout << "Time for rest: " << elapsed_time << std::endl;
+      elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>
+                (std::chrono::high_resolution_clock::now() - start).count(); 
+      std::cout << "Time for rest: " << elapsed_time << std::endl;
 
-    elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>
-              (std::chrono::high_resolution_clock::now() - start_loop).count(); 
-    std::cout << "Time for Locator: " << elapsed_time << std::endl;
+      elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>
+                (std::chrono::high_resolution_clock::now() - start_loop).count(); 
+      std::cout << "Time for Locator: " << elapsed_time << std::endl;
+    }
   }
 
   // stop recording loop

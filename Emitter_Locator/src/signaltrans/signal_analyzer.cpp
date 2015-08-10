@@ -358,23 +358,24 @@ getTOAsFor(unsigned const frequency) {
 
 }
 
-std::array<unsigned, 4> const SignalAnalyzer::
-getVisSamplePosFor(unsigned const frequency) {
-
+std::map<unsigned, std::array<unsigned, 4> > const SignalAnalyzer::
+getVisSamplePos() {
+/*
     std::map<unsigned, std::array<double, 4> >::const_iterator frequency_iterator
         = frequency_toas_mapping_.find(frequency);
+*/
 
 	//if( (frequency_toas_mapping.end() != frequency_iterator) && (is_frequency_toa_mapping_valid[frequency]) )  {
-		return vis_sample_pos_mapping_[frequency];
+		return vis_sample_pos_mapping_;
 }
 
-std::array<std::vector<double>,4> const SignalAnalyzer::
-getSignalSamplesFor(unsigned const frequency) {
+std::map<unsigned, std::array<std::vector<double>,4> >const SignalAnalyzer::
+getSignalSamples() {
 
-    return fft_transformer_.signal_results_per_frequency_[frequency];
+    return fft_transformer_.signal_results_per_frequency_;
 }
 
 std::map<unsigned, std::array<std::vector<unsigned> ,4> > const SignalAnalyzer::
-getRawPeakIndicesFor(unsigned const frequency) {
+getRawPeakIndices() {
     return peak_samples_per_frequency_;
 }

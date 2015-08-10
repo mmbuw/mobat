@@ -406,7 +406,6 @@ unsigned int FftTransformer::performFFT(unsigned channel_num) {
 
 }
 
-
 }
   return 0;
 }

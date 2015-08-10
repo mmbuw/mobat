@@ -230,44 +230,50 @@ int main(int argc, char** argv) {
 
 
 void draw_signal_plot(sf::RenderWindow& window, Locator const& locator) {
-    std::array< std::vector<double>, 4> signal_vis_samples =  locator.loadSignalVisSamples();
+    
+    std::map<unsigned, std::array< std::vector<double>, 4> > signal_vis_samples =  locator.loadSignalVisSamples();
         
     window.clear(sf::Color(255, 255, 255));
 
 
 
-    std::array<unsigned, 4> recognized_vis_sample_pos = locator.loadRecognizedVisSamplePositions();
+    std::map<unsigned, std::array<unsigned, 4> >recognized_vis_sample_pos = locator.loadRecognizedVisSamplePositions();
 
     std::map<unsigned, std::array<std::vector<unsigned> ,4> > peak_samples_per_frequency = locator.loadPeakSamples();
 
     sf::RectangleShape data_point;
-    for(unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
-
-        for(unsigned int sample_idx = 0; sample_idx < signal_vis_samples[channel_iterator].size(); sample_idx+=1) {
-            unsigned int sig = signal_vis_samples[channel_iterator][sample_idx];
 
 
-            float width = 280.0f / signal_vis_samples[channel_iterator].size();
+    if(signal_vis_samples.find(19000) != signal_vis_samples.end()) {
+        for(unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
 
-            data_point.setSize(sf::Vector2f(1,sig) );
-            data_point.setPosition( sf::Vector2f( width * sample_idx, channel_iterator * 100.0 + (100.0-sig) ) );
+            for(unsigned int sample_idx = 0; sample_idx < signal_vis_samples[19000][channel_iterator].size(); sample_idx+=1) {
+                unsigned int sig = signal_vis_samples[19000][channel_iterator][sample_idx];
 
-            if(sample_idx <  recognized_vis_sample_pos[channel_iterator] ) {
-                data_point.setFillColor(sf::Color(255, 0, 0) ) ;
-            } else {
-                data_point.setFillColor(sf::Color(0, 255, 0) ) ;          
-            }
 
-            for(auto const& peak_samples_of_channel : peak_samples_per_frequency[19000][channel_iterator]) {
-                if(sample_idx -2 <= peak_samples_of_channel && sample_idx + 2 >= peak_samples_of_channel) {
-                    data_point.setFillColor(sf::Color(255, 0, 255) ) ;
-                    break;   
+                float width = 280.0f / signal_vis_samples[19000][channel_iterator].size();
+
+                data_point.setSize(sf::Vector2f(1,sig) );
+                data_point.setPosition( sf::Vector2f( width * sample_idx, channel_iterator * 100.0 + (100.0-sig) ) );
+
+                if(sample_idx <  recognized_vis_sample_pos[19000][channel_iterator] ) {
+                    data_point.setFillColor(sf::Color(255, 0, 0) ) ;
+                } else {
+                    data_point.setFillColor(sf::Color(0, 255, 0) ) ;          
                 }
+
+                for(auto const& peak_samples_of_channel : peak_samples_per_frequency[19000][channel_iterator]) {
+                    if(sample_idx -2 <= peak_samples_of_channel && sample_idx + 2 >= peak_samples_of_channel) {
+                        data_point.setFillColor(sf::Color(255, 0, 255) ) ;
+                        break;   
+                    }
+                }
+
+                window.draw(data_point);
             }
 
-            window.draw(data_point);
         }
     }
-
+    
     window.display();
 }

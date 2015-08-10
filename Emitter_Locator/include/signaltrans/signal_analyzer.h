@@ -54,16 +54,16 @@ class SignalAnalyzer {
           returns the sample positions for the recognized start of the signal
           per channel
         */
-        std::array<unsigned, 4> const
-        getVisSamplePosFor(unsigned const frequency);
+        std::map<unsigned, std::array<unsigned, 4> >const
+        getVisSamplePos();
 
 
         /*
     	  returns the fourier transformed and accumulated samples for
     	  the specified frequency
     	*/
-    	std::array<std::vector<double>,4> const 
-    	getSignalSamplesFor(unsigned const frequency);
+    	std::map<unsigned, std::array<std::vector<double>,4> > const 
+    	getSignalSamples();
 
     	/*
     	  stores the fourier transformed and accumulated samples 
@@ -77,7 +77,7 @@ class SignalAnalyzer {
         peak_samples_per_frequency_;
 
         std::map<unsigned, std::array<std::vector<unsigned> ,4> > const
-        getRawPeakIndicesFor(unsigned const frequency);
+        getRawPeakIndices();
 };
 
 #endif
