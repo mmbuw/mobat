@@ -4,14 +4,11 @@
 namespace TTT{
 
 Test::Test()
-  : files_(),
-    file_(),
-    entry_()
+  : files_()
 {}
 
 
 void Test::update(unsigned const& freq, glm::vec2 const& pos){
-  entry_ += "Token " + std::to_string(freq) + " at: (" + std::to_string(pos.x) + ", " + std::to_string(pos.y) + "),";
   files_[std::to_string(freq)] << "(" + std::to_string(pos.x) + ", " + std::to_string(pos.y) + ")\n";
 }
 

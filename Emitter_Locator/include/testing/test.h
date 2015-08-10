@@ -14,8 +14,6 @@ namespace TTT{
 class Test{
   private:
     std::map<std::string, std::ofstream> files_;
-    std::string file_;
-    std::string entry_;
 
   public:
     Test();
