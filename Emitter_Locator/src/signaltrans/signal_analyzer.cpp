@@ -7,10 +7,11 @@
 #include <utility>
 
 SignalAnalyzer::
-SignalAnalyzer() : fft_window_size( ({configurator().getUint("fft_window_size");  }) ),
-                    fft_transformer({fft_window_size}) {
-    fft_transformer.initializeExecutionPlan();
-
+SignalAnalyzer() : fft_window_size_( ({configurator().getUint("fft_window_size");  }) ),
+                    fft_transformer_({fft_window_size_}),
+                    max_sample_distance_(0) {
+    fft_transformer_.initializeExecutionPlan();
+    loadAnalyzerParameters();
 }
 
 SignalAnalyzer::
@@ -19,10 +20,15 @@ SignalAnalyzer::
 }
 
 void SignalAnalyzer::
+loadAnalyzerParameters() {
+  max_sample_distance_ = configurator().getUint("max_sample_distance");
+}
+
+void SignalAnalyzer::
 analyze(buffer_collection const& collector, unsigned signal_chunk){
 
 	std::vector<unsigned> fft_result_frequencies;
-	for(auto const& frequency_to_transform_entry : frequency_toas_mapping) {
+	for(auto const& frequency_to_transform_entry : frequency_toas_mapping_) {
 		/*
 		  filter frequencies that are below a reasonable 
 		  threshold in order to create some virtual space
@@ -35,12 +41,13 @@ analyze(buffer_collection const& collector, unsigned signal_chunk){
 	/*
 	  forward the frequencies to the fft-transformer in order
 	  to prepare normalized buffers for these frequencies*/
-	fft_transformer.setListenedFrequencies(fft_result_frequencies);
+	fft_transformer_.setListenedFrequencies(fft_result_frequencies);
     
     signal_detected_at_sample_per_frequency.clear();
+    //std::cout << "before performing fft. " << "\n";  
 
-    fft_transformer.performFFTOnChannels(collector, fft_window_size, signal_chunk);
-
+    fft_transformer_.performFFTOnChannels(collector, fft_window_size_, signal_chunk);
+    //std::cout << "after performing fft. " << "\n";  
     double updated_times[4];
 
    // unsigned starting_sample_threshold =  50;
@@ -48,7 +55,7 @@ analyze(buffer_collection const& collector, unsigned signal_chunk){
     double signal_average[4];
 
 
-    for(auto const& frequency_entry : frequency_toas_mapping) {
+    for(auto const& frequency_entry : frequency_toas_mapping_) {
 
         if(frequency_entry.first >= 50000) {
 /*
@@ -69,7 +76,6 @@ analyze(buffer_collection const& collector, unsigned signal_chunk){
             // std::cout << "\n";
 */
         } else {
-
             double const & (*d_max) (double const &, double const &) = std::max<double>;
             double const & (*d_min) (double const &, double const &) = std::min<double>;
 
@@ -80,15 +86,15 @@ analyze(buffer_collection const& collector, unsigned signal_chunk){
 
             for(unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
 
-            unsigned sample_vector_size = fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].size();
+            unsigned sample_vector_size = fft_transformer_.signal_results_per_frequency_[frequency_entry.first][channel_iterator].size();
 			unsigned processed_samples = 0;
 
 
 
 
 
-                double sum = std::accumulate(fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].begin(), 
-                                               fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].end(), 0.0, d_max);
+                double sum = std::accumulate(fft_transformer_.signal_results_per_frequency_[frequency_entry.first][channel_iterator].begin(), 
+                                               fft_transformer_.signal_results_per_frequency_[frequency_entry.first][channel_iterator].end(), 0.0, d_max);
                 signal_average[channel_iterator] = sum ;/// fft_transformer.signal_results_[channel_iterator].size();
 
 
@@ -97,12 +103,12 @@ analyze(buffer_collection const& collector, unsigned signal_chunk){
                 double peak = signal_average[channel_iterator];
 
                
-                double min = std::accumulate(fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].begin(), 
-                                               fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].end(), std::numeric_limits<double>::max(), d_min);
+                double min = std::accumulate(fft_transformer_.signal_results_per_frequency_[frequency_entry.first][channel_iterator].begin(), 
+                                               fft_transformer_.signal_results_per_frequency_[frequency_entry.first][channel_iterator].end(), std::numeric_limits<double>::max(), d_min);
 
 				
 
-                sample_vector_size = fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator].size();
+                sample_vector_size = fft_transformer_.signal_results_per_frequency_[frequency_entry.first][channel_iterator].size();
               	
               	processed_samples = 0;
 
@@ -110,7 +116,7 @@ analyze(buffer_collection const& collector, unsigned signal_chunk){
                 double powered_min  = pow(min,power);
                 double powered_peak = pow(peak,power);
 
-                for(auto& sig : fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator]) {
+                for(auto& sig : fft_transformer_.signal_results_per_frequency_[frequency_entry.first][channel_iterator]) {
                 	if( processed_samples >= (sample_vector_size - 1) ) {
                 		break;
                 	} else {
@@ -139,7 +145,7 @@ analyze(buffer_collection const& collector, unsigned signal_chunk){
 
                	peak_samples_per_frequency_[frequency_entry.first][channel_iterator].clear();
 
-                for(auto const& sig : fft_transformer.signal_results_per_frequency_[frequency_entry.first][channel_iterator]) {
+                for(auto const& sig : fft_transformer_.signal_results_per_frequency_[frequency_entry.first][channel_iterator]) {
 
 
 
@@ -163,7 +169,6 @@ analyze(buffer_collection const& collector, unsigned signal_chunk){
 
 	                      		current_peak_to_push = 0.0;
 	                      		current_sample_to_push = 0;
-	              //        		sum_increasing = false;
 
                       }
 
@@ -205,7 +210,6 @@ analyze(buffer_collection const& collector, unsigned signal_chunk){
         		std::array<unsigned, 4> signal_one_to_four_pos;
         	  	for( unsigned channel_one_iterator = 0; channel_one_iterator < peak_samples_per_frequency_[frequency_entry.first][0].size(); ++channel_one_iterator) {
         			signal_one_to_four_pos[0] = peak_samples_per_frequency_[frequency_entry.first][0][channel_one_iterator];
-
         			for(unsigned channel_two_iterator = 0; channel_two_iterator < peak_samples_per_frequency_[frequency_entry.first][1].size(); ++channel_two_iterator) {
         				signal_one_to_four_pos[1]  = peak_samples_per_frequency_[frequency_entry.first][1][channel_two_iterator];
 	         			for(unsigned channel_three_iterator = 0; channel_three_iterator < peak_samples_per_frequency_[frequency_entry.first][2].size(); ++channel_three_iterator) {
@@ -224,12 +228,12 @@ analyze(buffer_collection const& collector, unsigned signal_chunk){
         															  max);
 
 
-         						if(max_sample - min_sample < 300) {
+         						if(max_sample - min_sample < max_sample_distance_) {
 						        	for(int i = 0; i < 4; ++i) {
 							        	if( peak_samples_per_frequency_[frequency_entry.first][i].size() > 0 ) {
 							        		//std::cout << peak_samples[i].size() << "\n";
 						                    signal_detected_at_sample_per_frequency[frequency_entry.first][i] = signal_one_to_four_pos[i];
-							        		vis_sample_pos_mapping[frequency_entry.first][i] =  signal_one_to_four_pos[i];
+							        		vis_sample_pos_mapping_[frequency_entry.first][i] =  signal_one_to_four_pos[i];
 
 							        		break_all_loops = true;
 
@@ -237,30 +241,24 @@ analyze(buffer_collection const& collector, unsigned signal_chunk){
 							        	}
 						        	}
          						}
-
 			        			if(break_all_loops) {
 			        				break;
 			        			}       	
-		        				
 		        			}
-
-		        			if(break_all_loops) {
+                            if(break_all_loops) {
 		        				break;
 		        			}       		       				
 	        			}       	
-	        					if(break_all_loops) {
-		        					break;
-		        				}     	
+	        			if(break_all_loops) {
+		        			break;
+		        		}     	
         			}
-	        						if(break_all_loops) {
-		        						break;
-		        					}     	
+	        		if(break_all_loops) {
+		        		break;
+		        	}     	
         	  	}
-
-        	  	
         	}
         }
-
         }
 
     }
@@ -270,7 +268,7 @@ analyze(buffer_collection const& collector, unsigned signal_chunk){
     unsigned int const & (*min) (unsigned int const &, unsigned int const &) = std::min<unsigned>;
     unsigned int const & (*max) (unsigned int const &, unsigned int const &) = std::max<unsigned>;
     
-    for(auto const& frequency_entry : frequency_toas_mapping) {
+    for(auto const& frequency_entry : frequency_toas_mapping_) {
 
         unsigned sample_min = std::accumulate(signal_detected_at_sample_per_frequency[frequency_entry.first].begin(),
                                               signal_detected_at_sample_per_frequency[frequency_entry.first].end(),
@@ -281,18 +279,18 @@ analyze(buffer_collection const& collector, unsigned signal_chunk){
                                                   0, max);
 
     
-        if(sample_max-sample_min > 0 && sample_max - sample_min < 500 && sample_max < 999999) {
+        if(sample_max-sample_min > 0 && sample_max - sample_min < max_sample_distance_ /*was 500*/ && sample_max < 999999) {
 
             for(unsigned int signal_idx = 0; signal_idx < 4; ++signal_idx) {
                 updated_times[signal_idx] = (signal_detected_at_sample_per_frequency[frequency_entry.first][signal_idx] - sample_min) / 44100.0;
-                frequency_toas_mapping[frequency_entry.first][signal_idx] = updated_times[signal_idx];
+                frequency_toas_mapping_[frequency_entry.first][signal_idx] = updated_times[signal_idx];
 
-                is_frequency_toa_mapping_valid[frequency_entry.first] = true;
+                is_frequency_toa_mapping_valid_[frequency_entry.first] = true;
                 
             }
         }
         else {
-            is_frequency_toa_mapping_valid[frequency_entry.first] = false;
+            is_frequency_toa_mapping_valid_[frequency_entry.first] = false;
         }
     }
 
@@ -304,13 +302,13 @@ void SignalAnalyzer::
 stopListeningTo(unsigned const frequency_to_stop_listening_to) {
 
     std::map<unsigned, std::array<double, 4> >::iterator frequency_iterator
-        = frequency_toas_mapping.find(frequency_to_stop_listening_to);
+        = frequency_toas_mapping_.find(frequency_to_stop_listening_to);
 
 
-    if( frequency_toas_mapping.end() != frequency_iterator ) {
+    if( frequency_toas_mapping_.end() != frequency_iterator ) {
         //delete the found entry:
         //we won't look for the corresponding toas anymore
-        frequency_toas_mapping.erase(frequency_iterator);
+        frequency_toas_mapping_.erase(frequency_iterator);
     }
 }
 
@@ -319,7 +317,7 @@ void SignalAnalyzer::
 startListeningTo(unsigned const frequency_to_start_listening_to) {
 	//just overwrite the slot, even if there's already an entry for
 	//the frequency
-	frequency_toas_mapping[frequency_to_start_listening_to]
+	frequency_toas_mapping_[frequency_to_start_listening_to]
 		= std::array<double,4>();
 }
 
@@ -328,9 +326,9 @@ getTOAsFor(unsigned const frequency) {
 
 
     std::map<unsigned, std::array<double, 4> >::const_iterator frequency_iterator
-        = frequency_toas_mapping.find(frequency);
+        = frequency_toas_mapping_.find(frequency);
 
-        if( (frequency_toas_mapping.end() != frequency_iterator) && (is_frequency_toa_mapping_valid[frequency]) ) {
+        if( (frequency_toas_mapping_.end() != frequency_iterator) && (is_frequency_toa_mapping_valid_[frequency]) ) {
 
             if(frequency_iterator->second[0] != 0.0 
             || frequency_iterator->second[1] != 0.0 
@@ -355,16 +353,16 @@ std::array<unsigned, 4> const SignalAnalyzer::
 getVisSamplePosFor(unsigned const frequency) {
 
     std::map<unsigned, std::array<double, 4> >::const_iterator frequency_iterator
-        = frequency_toas_mapping.find(frequency);
+        = frequency_toas_mapping_.find(frequency);
 
 	//if( (frequency_toas_mapping.end() != frequency_iterator) && (is_frequency_toa_mapping_valid[frequency]) )  {
-		return vis_sample_pos_mapping[frequency];
+		return vis_sample_pos_mapping_[frequency];
 }
 
 std::array<std::vector<double>,4> const SignalAnalyzer::
 getSignalSamplesFor(unsigned const frequency) {
 
-    return fft_transformer.signal_results_per_frequency_[frequency];
+    return fft_transformer_.signal_results_per_frequency_[frequency];
 }
 
 std::map<unsigned, std::array<std::vector<unsigned> ,4> > const SignalAnalyzer::

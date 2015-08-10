@@ -61,6 +61,10 @@ void FftTransformer::loadFFTParameters() {
   num_chunks_ = configurator().getFloat("num_splitted_fourier_chunks");
   normalization_range_lower_limit_ = configurator().getFloat("normalization_range_lower_limit");
   normalization_range_upper_limit_ = configurator().getFloat("normalization_range_upper_limit");
+
+  frequency_slice_halfsize_ = configurator().getUint("frequency_slice_size") / 2.0;
+
+  audio_device_sampling_rate_ = configurator().getFloat("audio_device_sampling_rate");
 }
 
 FftTransformer::FftTransformer(unsigned int fft_window_size) : start_sample_{ std::numeric_limits<unsigned int>::max() },
@@ -141,7 +145,6 @@ void FftTransformer::resetSampleCounters(unsigned channel_num) {
 
   for(unsigned iterated_frequency : listening_to_those_frequencies) {
     signal_results_per_frequency_[iterated_frequency][channel_num].clear();
-    signal_results_per_frequency_[iterated_frequency][channel_num].reserve(5000);
   }
 }
 
@@ -189,13 +192,13 @@ void FftTransformer::performFFTOnCertainChannel(unsigned channel_iterator) {
 
 			allow_fft_[channel_iterator].store(false);
 
-	        unsigned signal_chunk = 1.0 * signal_half_chunk_;
+	        unsigned signal_chunk =  signal_half_chunk_;
 	        resetSampleCounters(channel_iterator);
 	        clearCachedFFTResults(channel_iterator);
 	        for(unsigned int i = signal_chunk * (ints_per_channel_/num_chunks_); 
                            i < (signal_chunk+1)*(ints_per_channel_/num_chunks_) - ffts_per_frame_; 
                            ++i) {
-	            unsigned offset = 1 * i;
+	            unsigned offset = i;
 	            if(offset > (signal_chunk+1)*(ints_per_channel_/num_chunks_) - ffts_per_frame_)
 	                break;
 					
@@ -220,7 +223,6 @@ void FftTransformer::performFFTOnChannels(buffer_collection const& signal_buffer
   for(unsigned iterated_frequency : listening_to_those_frequencies) {
     for(int channel_idx = 0; channel_idx < 4; ++channel_idx) {
       signal_results_per_frequency_[iterated_frequency][channel_idx].reserve(ffts_per_frame_);
-
     }
   }
 
@@ -355,11 +357,12 @@ unsigned int FftTransformer::performFFT(unsigned channel_num) {
       for(unsigned int signal_it = 0;
         signal_it < (unsigned int) (fft_window_size_ / 2 - 1);
         ++signal_it) {
-        float current_frequency = (signal_it * 44100.0) / fft_window_size_;
+        float current_frequency = (signal_it * audio_device_sampling_rate_ ) / fft_window_size_;
 
 
 
-      if(current_frequency > 13000.0 && current_frequency < 20002.0 ) {
+      if(   current_frequency > normalization_range_lower_limit_ 
+         && current_frequency < normalization_range_upper_limit_ ) {
 
 								double tmp_normalization_value = std::sqrt(fft_result_[channel_num][signal_it][0]*fft_result_[channel_num][signal_it][0]) + 
 									  	(fft_result_[channel_num][signal_it][1]*fft_result_[channel_num][signal_it][1]) ;
@@ -367,7 +370,7 @@ unsigned int FftTransformer::performFFT(unsigned channel_num) {
 
 
         for(unsigned iterated_frequency : listening_to_those_frequencies) {
-          if(current_frequency > ((double)iterated_frequency-100.0) && current_frequency < ((double)iterated_frequency+100.0 ) ) {
+          if(current_frequency > ((double)iterated_frequency-frequency_slice_halfsize_) && current_frequency < ((double)iterated_frequency+frequency_slice_halfsize_ ) ) {
 
             temp_accum_results[iterated_frequency] += tmp_normalization_value;
 
@@ -408,10 +411,7 @@ unsigned int FftTransformer::performFFT(unsigned channel_num) {
 				//std::cout << "Get results: " << frequency_sums_[iterated_frequency] << "\n";
 			} else {
 
-    std::cout << "NaN detected!!!!";
-
-    std::cin.get();
-        //return 2;
+    std::cout << "Transformed random memory!!!!";
   }
 }
 

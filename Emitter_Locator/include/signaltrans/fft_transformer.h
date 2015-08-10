@@ -76,6 +76,9 @@ class FftTransformer {
 		unsigned ffts_per_frame_;
 		unsigned window_size_;
 		unsigned num_chunks_;
+		float frequency_slice_halfsize_;
+
+		float audio_device_sampling_rate_;
 
 	public:
 		FftTransformer(unsigned int fft_frame_size);

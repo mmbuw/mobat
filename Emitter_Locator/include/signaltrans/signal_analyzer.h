@@ -9,17 +9,24 @@
 class SignalAnalyzer {
 
 	private:
-		unsigned short fft_window_size;
-    	FftTransformer fft_transformer;
+		unsigned short fft_window_size_;
+    	FftTransformer fft_transformer_;
+        unsigned int max_sample_distance_;
 
-        std::map<unsigned, std::array<unsigned, 4> > vis_sample_pos_mapping;
-    	std::map<unsigned, std::array<double, 4> > frequency_toas_mapping;
-    	std::map<unsigned, bool>	is_frequency_toa_mapping_valid;
+        std::map<unsigned, std::array<unsigned, 4> > vis_sample_pos_mapping_;
+    	std::map<unsigned, std::array<double, 4> > frequency_toas_mapping_;
+    	std::map<unsigned, bool>	is_frequency_toa_mapping_valid_;
 
     public:
     	SignalAnalyzer();
     	~SignalAnalyzer();
 
+
+        /* 
+          loads analyzer specific parameters from the config file
+        */
+        void loadAnalyzerParameters();
+        
     	/*
           calls fast fourier transformation for the input channels.
     	  then analyzes the frequencies it listens to for toas

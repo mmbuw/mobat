@@ -142,8 +142,8 @@ loadPeakSamples() const {
         continue;
     }
 
-    signal_analyzer_.analyze(collector_, current_signal_chunk_); 
-    
+    //std::cout << "@ chunk: " << current_signal_chunk_+1 << "/" << num_chunks_to_analyze << "\n";
+    signal_analyzer_.analyze(collector_, current_signal_chunk_);   
     bool found_positions = false;
 
     std::map<unsigned,glm::vec2> currently_located_positions;
