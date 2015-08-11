@@ -27,33 +27,76 @@ void Test::closeFiles(){
   for(auto & i : files_){
     auto avg_pos = i.second.average_position_ / glm::vec2 {i.second.num_entries_, i.second.num_entries_};
     i.second.writer_ << "average position: (" << avg_pos.x << ", " << avg_pos.y << ")\n";
-    auto standard_deviation = calculateStandardDeviation(i.second.filepath_, avg_pos);
-    i.second.writer_ << "standard deviation: " << standard_deviation << "\n";
-    i.second.writer_ << "20th percentile: " << calculatePercentile(i.second.filepath_, avg_pos, standard_deviation) << "\n";
+    //must be closed before reading from it
     i.second.writer_.close();
+
+    auto standard_deviation = calculateStandardDeviation(i.second.filepath_, avg_pos, i.second.num_entries_);
+    auto percentile = calculatePercentile(i.second.filepath_, avg_pos, standard_deviation);
+    std::ofstream tmp(i.second.filepath_, std::ofstream::app);
+    tmp << "standard deviation: " << standard_deviation << "\n";
+    tmp << "percentile: " << percentile << "\n";
+    tmp.close();
   }
   files_.clear();
 }
 
-long Test::calculateStandardDeviation(std::string const& path, glm::vec2 const& avg_pos){
-/*  long std_drvtn;
+double Test::calculateStandardDeviation(std::string const& path, glm::vec2 const& avg_pos, int num_entries){
+  double std_drvtn = 0.0;
   std::ifstream file(path);
   std::string line;
   while(std::getline(file, line)){
     std::stringstream ss(line);
     std::string s;
     ss >> s;
-    if(s.first == '('){
-      std::cout << "WUHUWUHUWUHUWUHUWUHU\n";
-    }
-  }*/
+    if('(' == s.at(0)){
+      boost::erase_all(s, "(");
+      boost::erase_all(s, ")");
+      boost::erase_all(s, ",");
+      double x = std::stod (s);
+      ss >> s;
+      double y = std::stod (s);
+      std_drvtn += sqrt( pow ((x - avg_pos.x) * 100.0, 2)
+                       + pow((y - avg_pos.y) * 100.0, 2));
 
-  return 0;
+    }
+  }
+  return std_drvtn / num_entries;
 }
 
 int Test::calculatePercentile(std::string const& path, glm::vec2 const& avg_pos, long){
+  int perc = 0;
+  std::vector<double> deviations;
+  std::ifstream file(path);
+  std::string line;
+  double max_dev = 0;
+  while(std::getline(file, line)){
+    std::stringstream ss(line);
+    std::string s;
+    ss >> s;
+    if('(' == s.at(0)){
+      boost::erase_all(s, "(");
+      boost::erase_all(s, ")");
+      boost::erase_all(s, ",");
+      double x = std::stod (s);
+      ss >> s;
+      double y = std::stod (s);
+      double tmp = sqrt( pow ((x - avg_pos.x) * 100.0, 2)
+                       + pow((y - avg_pos.y) * 100.0, 2));
+      deviations.push_back( tmp );
+      if(tmp > max_dev){
+        max_dev = tmp;
+      }
+    }
+  }
+  double tmp2 = 0.25 * max_dev;
+  for(auto const& i : deviations){
+    if(i >= tmp2){
+      ++perc;
+    }
+  }
 
-  return 0;
+
+  return perc;
 }
 
 };

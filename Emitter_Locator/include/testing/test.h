@@ -8,7 +8,10 @@
 #include <map>
 #include <vector>
 
-#include <testMapEntry.hpp>
+#include <boost/algorithm/string.hpp>
+#include <cmath>
+
+#include "testMapEntry.hpp"
 
 namespace TTT{
 
@@ -22,7 +25,7 @@ class Test{
     void update(unsigned const& freq, glm::vec2 const& pos);
     void openFiles(std::vector<std::pair<std::string, std::string>> const& names);
     void closeFiles();
-    long calculateStandardDeviation(std::string const& path, glm::vec2 const& avg_pos);
+    double calculateStandardDeviation(std::string const& path, glm::vec2 const& avg_pos, int num_entries);
     int calculatePercentile(std::string const& path, glm::vec2 const& avg_pos, long standard_deviation);
 };
 
