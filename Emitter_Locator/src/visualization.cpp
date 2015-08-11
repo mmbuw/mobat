@@ -113,27 +113,31 @@ int main(int argc, char** argv) {
 
     while (window.isOpen()) {
         //turn testing on and off
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::T)) {
+        if(window.pollEvent(event)) {
+            if(event.type == sf::Event::KeyReleased){
+               if(event.key.code == sf::Keyboard::T){
             // std::cout<<"turned on\n";
-            //get timestamp
-            time_t t = time(0);   // get time now
-            struct tm * now = localtime( & t );
+                    //get timestamp
+                    time_t t = time(0);   // get time now
+                    struct tm * now = localtime( & t );
 
-            std::string timestamp = 
-                std::to_string(now->tm_year + 1900) + "-" + std::to_string(now->tm_mon + 1) + "-" + std::to_string(now->tm_mday) + "_" + 
-                std::to_string((now->tm_hour)%24) + ":" + std::to_string((now->tm_min)%60) + ":" + std::to_string((now->tm_sec)%60);
-            if(testing){
-                testing = false;
-                test_logger.closeFiles();
-            } else{
-                testing = true;
-                std::vector<std::pair<std::string, std::string>> filenames;
-                for(auto const& freq : frequencies_to_record){
-                    filenames.push_back({std::to_string(freq), timestamp});
+                    std::string timestamp = 
+                        std::to_string(now->tm_year + 1900) + "-" + std::to_string(now->tm_mon + 1) + "-" + std::to_string(now->tm_mday) + "_" + 
+                        std::to_string((now->tm_hour)%24) + ":" + std::to_string((now->tm_min)%60) + ":" + std::to_string((now->tm_sec)%60);
+                    if(testing){
+                        testing = false;
+                        test_logger.closeFiles();
+                    } else{
+                        testing = true;
+                        std::vector<std::pair<std::string, std::string>> filenames;
+                        for(auto const& freq : frequencies_to_record){
+                            filenames.push_back({std::to_string(freq), timestamp});
 
-                    
+                            
+                        }
+                        test_logger.openFiles(filenames);
+                    }
                 }
-                test_logger.openFiles(filenames);
             }
         }
 
