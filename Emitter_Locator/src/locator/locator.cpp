@@ -9,6 +9,7 @@
 #include <numeric>
 #include <thread>
 
+#define SHOW_TIMES
 
 Locator::Locator(unsigned int num_mics)
  :shutdown_{false}
@@ -113,6 +114,10 @@ loadPeakSamples() const {
  }
 
  void Locator::recordPosition() {
+  bool show_times = configurator().getUint("show_times") > 0;
+  std::chrono::high_resolution_clock::time_point start_loop, start;
+  unsigned elapsed_time;
+
   // start recording loop
   auto recording_thread = std::thread{&Recorder::recordingLoop, &recorder_};
 
@@ -120,8 +125,10 @@ loadPeakSamples() const {
 
   bool first_signal_available = false;
   while (!shutdown_) {
-    std::chrono::high_resolution_clock::time_point start_loop = std::chrono::high_resolution_clock::now();
 
+    if(show_times) {
+      start_loop = std::chrono::high_resolution_clock::now();
+    }
 
     for (unsigned frequency_to_analyze : frequencies_to_locate) {
       signal_analyzer_.startListeningTo(frequency_to_analyze);
@@ -154,7 +161,9 @@ loadPeakSamples() const {
 
     signal_analyzer_.analyze(collector_, current_signal_chunk_); 
 
-    std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
+    if(show_times) {
+      start = std::chrono::high_resolution_clock::now();
+    }
 
     bool found_positions = false;
 
@@ -186,10 +195,12 @@ loadPeakSamples() const {
       }
     }
     //cached_signal_vis_samples = signal_analyzer_.get_signal_samples_for(17000);
-    unsigned elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>
-              (std::chrono::high_resolution_clock::now() - start).count(); 
-    std::cout << "Time for TDOAtion: " << elapsed_time << std::endl;
-    start = std::chrono::high_resolution_clock::now();
+    if(show_times) {
+      unsigned elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>
+                (std::chrono::high_resolution_clock::now() - start).count(); 
+      std::cout << "Time for TDOAtion: " << elapsed_time << std::endl;
+      start = std::chrono::high_resolution_clock::now();
+    }
 
     if (found_positions) {
       ++locator_frame_counter_;
@@ -256,13 +267,15 @@ loadPeakSamples() const {
       peak_sample_indices_ = cached_peak_sample_indices_;
       peak_sample_indices_mutex.unlock();
 
-      elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>
-                (std::chrono::high_resolution_clock::now() - start).count(); 
-      std::cout << "Time for rest: " << elapsed_time << std::endl;
+      if(show_times) {
+        elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>
+                  (std::chrono::high_resolution_clock::now() - start).count(); 
+        std::cout << "Time for rest: " << elapsed_time << std::endl;
 
-      elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>
-                (std::chrono::high_resolution_clock::now() - start_loop).count(); 
-      std::cout << "Time for Locator: " << elapsed_time << std::endl;
+        elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>
+                  (std::chrono::high_resolution_clock::now() - start_loop).count(); 
+        std::cout << "Time for Locator: " << elapsed_time << std::endl;
+      }
     }
   }
 

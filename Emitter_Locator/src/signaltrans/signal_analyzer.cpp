@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <functional>
 #include <utility>
+
 #include <chrono>
 
 SignalAnalyzer::
@@ -27,7 +28,14 @@ loadAnalyzerParameters() {
 
 void SignalAnalyzer::
 analyze(buffer_collection const& collector, unsigned signal_chunk){
-    std::chrono::high_resolution_clock::time_point start1 = std::chrono::high_resolution_clock::now();
+    static bool show_times = configurator().getUint("show_times") > 0;
+
+    static std::chrono::high_resolution_clock::time_point start1, start;
+    static unsigned elapsed_time = 0;
+    static unsigned elapsed_time1 = 0;
+    if(show_times) {
+        start1 = std::chrono::high_resolution_clock::now();
+    }
 
     std::vector<unsigned> fft_result_frequencies;
     for(auto const& frequency_to_transform_entry : frequency_toas_mapping_) {
@@ -46,13 +54,18 @@ analyze(buffer_collection const& collector, unsigned signal_chunk){
     fft_transformer_.setListenedFrequencies(fft_result_frequencies);
     
     signal_detected_at_sample_per_frequency.clear();
-    //std::cout << "before performing fft. " << "\n";  
-    std::chrono::high_resolution_clock::time_point  start = std::chrono::high_resolution_clock::now();
+
+    if(show_times) {
+        start = std::chrono::high_resolution_clock::now();
+    }
+
     fft_transformer_.performFFTOnChannels(collector, fft_window_size_, signal_chunk);
-    //std::cout << "after performing fft. " << "\n";  
-    unsigned elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>
-                            (std::chrono::high_resolution_clock::now() - start).count(); 
-    std::cout << "Time for FFT: " << elapsed_time << std::endl; 
+    
+    if(show_times) {
+        elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>
+                                (std::chrono::high_resolution_clock::now() - start).count(); 
+        std::cout << "Time for FFT: " << elapsed_time << std::endl; 
+    }
     double updated_times[4];
 
    // unsigned starting_sample_threshold =  50;
@@ -299,10 +312,12 @@ analyze(buffer_collection const& collector, unsigned signal_chunk){
         }
     }
 
-    unsigned elapsed_time1 = std::chrono::duration_cast<std::chrono::milliseconds>
-                            (std::chrono::high_resolution_clock::now() - start1).count(); 
-    elapsed_time1 -=elapsed_time;
-    std::cout << "Time for Analyzation: " << elapsed_time1 << std::endl; 
+    if(show_times) {
+        elapsed_time1 = std::chrono::duration_cast<std::chrono::milliseconds>
+                                (std::chrono::high_resolution_clock::now() - start1).count(); 
+        elapsed_time1 -=elapsed_time;
+        std::cout << "Time for Analyzation: " << elapsed_time1 << std::endl; 
+    }
 
 }
 
