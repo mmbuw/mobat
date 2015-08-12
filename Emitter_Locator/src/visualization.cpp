@@ -48,12 +48,17 @@ int main(int argc, char** argv) {
 
     bool show_signalvis = configurator().getUint("show_signalvis") > 0;
     bool show_errorvis = configurator().getUint("show_errorvis") > 0;
+    bool show_tablevis = configurator().getUint("show_tablevis") > 0;
 
     //std::vector<unsigned> const known_frequencies = configurator().getList("known_frequencies");
 
     unsigned const num_audio_channels = 4;
-    unsigned const signal_vis_window_width  = configurator().getUint("svis_slot_width") * (frequencies_to_record.size() );
-    unsigned const signal_vis_window_height = configurator().getUint("svis_channel_height") * num_audio_channels;
+    unsigned signal_vis_window_width  = configurator().getUint("svis_slot_width") * (frequencies_to_record.size() );
+    unsigned signal_vis_window_height = configurator().getUint("svis_channel_height") * num_audio_channels;
+    if(!show_signalvis) {
+        signal_vis_window_height = 1;
+        signal_vis_window_width = 1;
+    }
 
     sf::RenderWindow signal_plot_window_(sf::VideoMode(signal_vis_window_width, signal_vis_window_height)
                        , "Transformed_Frequencies");
@@ -115,10 +120,10 @@ int main(int argc, char** argv) {
     time_t endtime = starttime +60;
 
     while (window.isOpen()) {
-        //turn testing on and off
         if(window.pollEvent(event)) {
-            if(event.type == sf::Event::KeyReleased){
-               if(event.key.code == sf::Keyboard::T){
+            //turn testing on and off
+           if(event.key.code == sf::Keyboard::T){
+                if(event.type == sf::Event::KeyReleased){
                     //get timestamp
                     starttime = time(NULL);
                     endtime = starttime +60;
@@ -138,11 +143,15 @@ int main(int argc, char** argv) {
                         std::vector<std::pair<std::string, std::string>> filenames;
                         for(auto const& freq : frequencies_to_record){
                             filenames.push_back({std::to_string(freq), timestamp});
-
-                            
                         }
                         test_logger.openFiles(filenames);
                     }
+                }
+            }
+            // toggle game
+            else if(event.key.code == sf::Keyboard::Space){
+                if (event.type == sf::Event::KeyPressed){
+                    tisualizer.toggleGame();
                 }
             }
         }
@@ -151,34 +160,24 @@ int main(int argc, char** argv) {
             testing = false;
             test_logger.closeFiles(); 
             std::cout<<"ended logging of " << test_logger.getTimestamp() <<" after one minute\n";
-
-        }
-
-
-        if(window.pollEvent(event)) {
-            if(event.type == sf::Event::KeyPressed){
-               if(event.key.code == sf::Keyboard::Space){
-                    tisualizer.toggleGame();
-
-                }
-            }
         }
 
         if(!tisualizer.gameOver().first){
-            window.clear();
+            if(show_tablevis) {
+                window.clear();
 
-            tisualizer.handleKeyboardInput();
+                tisualizer.handleKeyboardInput();
 
-            tisualizer.recalculateGeometry();
-            
-            if(show_errorvis) {
-                tisualizer.table_.setErrorDistribution(locator.tdoator_.getErrorDistribution());
+                tisualizer.recalculateGeometry();
+                
+                if(show_errorvis) {
+                    tisualizer.table_.setErrorDistribution(locator.tdoator_.getErrorDistribution());
+                }
+
+                tisualizer.draw(window);
             }
-
-            tisualizer.draw(window);
-
-            std::map<unsigned, std::pair<unsigned, glm::vec2> > positions = locator.loadPosition();
             
+            std::map<unsigned, std::pair<unsigned, glm::vec2> > positions = locator.loadPosition();
             
             if(positions.size() != 0) {
 
@@ -210,37 +209,41 @@ int main(int argc, char** argv) {
                 //}
             }
 
-            tisualizer.updateTokens();
-            
+            if(show_signalvis) {
+                tisualizer.updateTokens();
+            }
+
             if(show_signalvis) {
                 draw_signal_plot(signal_plot_window_, locator);
             }
             
         }
         else {
+            if(show_signalvis) {
+                if(draw_endscreen_){
 
-            if(draw_endscreen_){
+                    winner = tisualizer.gameOver().second;
 
-                winner = tisualizer.gameOver().second;
+                   if(winner == "Red"){
+                        window.draw(rect_red);
+                    }
+                    else{
+                        window.draw(rect_blue);
+                    }
 
-               if(winner == "Red"){
-                    window.draw(rect_red);
+                    draw_endscreen_ = false;
                 }
-                else{
-                    window.draw(rect_blue);
+
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Return) || !tisualizer.gameActive()) {
+                    draw_endscreen_ = true;
+                    tisualizer.restart();
                 }
-
-                draw_endscreen_ = false;
-            }
-
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Return) || !tisualizer.gameActive()) {
-                draw_endscreen_ = true;
-                tisualizer.restart();
-            }
+            }   
         }
-
         
-        window.display();  
+        if(show_signalvis) {
+            window.display();  
+        }
     }
 
     locator.shutdown();
