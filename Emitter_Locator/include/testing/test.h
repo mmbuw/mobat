@@ -19,6 +19,7 @@ namespace TTT{
 class Test{
   private:
     std::map<std::string, TTT::TestMapEntry> files_;
+    std::string timestamp_;
 
   public:
     Test();
@@ -27,6 +28,7 @@ class Test{
     void closeFiles();
     double calculateStandardDeviation(std::string const& path, glm::vec2 const& avg_pos, int num_entries);
     double calculatePercentile(std::string const& path, glm::vec2 const& avg_pos, long standard_deviation);
+    std::string getTimestamp();
 };
 
 };

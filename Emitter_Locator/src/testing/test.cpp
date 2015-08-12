@@ -5,6 +5,7 @@ namespace TTT{
 
 Test::Test()
   : files_()
+  , timestamp_()
 {}
 
 
@@ -17,6 +18,7 @@ void Test::update(unsigned const& freq, glm::vec2 const& pos){
 
 void Test::openFiles(std::vector<std::pair<std::string, std::string>> const& names){
   for(auto const& name : names){
+    timestamp_ = name.second;
     TTT::TestMapEntry tmp{name.first +"/" + name.second};
     files_[name.first] = tmp;
   }
@@ -35,6 +37,7 @@ void Test::closeFiles(){
     std::ofstream tmp(i.second.filepath_, std::ofstream::app);
     tmp << "standard deviation: " << standard_deviation << "\n";
     tmp << "90 percentile: " << percentile << "\n";
+    tmp << "positions per second: " << i.second.num_entries_/60.0 << "\n";
     tmp.close();
   }
   files_.clear();
@@ -97,6 +100,10 @@ double Test::calculatePercentile(std::string const& path, glm::vec2 const& avg_p
   }
 
   return perc;
+}
+
+std::string Test::getTimestamp(){
+  return timestamp_;
 }
 
 };
