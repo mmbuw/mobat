@@ -209,7 +209,7 @@ int main(int argc, char** argv) {
                 //}
             }
 
-            if(show_signalvis) {
+            if(show_tablevis) {
                 tisualizer.updateTokens();
             }
 
@@ -241,7 +241,7 @@ int main(int argc, char** argv) {
             }   
         }
         
-        if(show_signalvis) {
+        if(show_tablevis) {
             window.display();  
         }
     }

@@ -13,7 +13,9 @@ void Configurator::read(std::string const& filename) {
     std::istringstream line_stream{line};
     std::string name;
     std::getline(line_stream, name, ':');
-    
+    // skip empty lines
+    if (name.size() < 2) continue;
+    // skip comments
     if (name.at(0) == '#') continue;
 
     std::size_t count = std::count(line.begin(), line.end(), ',');
