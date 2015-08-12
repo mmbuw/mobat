@@ -23,6 +23,9 @@ Locator::Locator(unsigned int num_mics)
  ,current_signal_chunk_(0)
 {
   loadLocatorParameters();
+  for (auto freq : configurator().getList("known_frequencies")) {
+    cached_positions[freq] = std::vector<std::pair<unsigned, glm::vec2>>(std::size_t{configurator().getUint("num_median_samples")});
+  }
 }
 
 void Locator::

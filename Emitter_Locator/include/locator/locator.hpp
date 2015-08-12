@@ -56,7 +56,7 @@ private:
     
     std::vector<unsigned> frequencies_to_locate;
 
-    std::map<unsigned, std::array<std::pair<unsigned, glm::vec2>, 10> > cached_positions;
+    std::map<unsigned, std::vector<std::pair<unsigned, glm::vec2>> > cached_positions;
 
     glm::vec4 toas_;
     glm::vec4 cached_toas_;
