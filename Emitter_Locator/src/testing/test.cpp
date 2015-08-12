@@ -34,7 +34,7 @@ void Test::closeFiles(){
     auto percentile = calculatePercentile(i.second.filepath_, avg_pos, standard_deviation);
     std::ofstream tmp(i.second.filepath_, std::ofstream::app);
     tmp << "standard deviation: " << standard_deviation << "\n";
-    tmp << "percentile: " << percentile << "\n";
+    tmp << "90 percentile: " << percentile << "\n";
     tmp.close();
   }
   files_.clear();
@@ -63,12 +63,11 @@ double Test::calculateStandardDeviation(std::string const& path, glm::vec2 const
   return std_drvtn / num_entries;
 }
 
-int Test::calculatePercentile(std::string const& path, glm::vec2 const& avg_pos, long){
-  int perc = 0;
+double Test::calculatePercentile(std::string const& path, glm::vec2 const& avg_pos, long){
+  double perc = 0;
   std::vector<double> deviations;
   std::ifstream file(path);
   std::string line;
-  double max_dev = 0;
   while(std::getline(file, line)){
     std::stringstream ss(line);
     std::string s;
@@ -83,18 +82,19 @@ int Test::calculatePercentile(std::string const& path, glm::vec2 const& avg_pos,
       double tmp = sqrt( pow ((x - avg_pos.x) * 100.0, 2)
                        + pow((y - avg_pos.y) * 100.0, 2));
       deviations.push_back( tmp );
-      if(tmp > max_dev){
-        max_dev = tmp;
-      }
-    }
-  }
-  double tmp2 = 0.25 * max_dev;
-  for(auto const& i : deviations){
-    if(i >= tmp2){
-      ++perc;
     }
   }
 
+  std::sort(deviations.begin(), deviations.end());
+
+  unsigned stop_after_element_num = deviations.size() * 0.9;
+
+  unsigned element_idx = 0;
+  for(auto const& deviation : deviations) {
+    if(++element_idx == stop_after_element_num) {
+      perc = deviation;
+    }
+  }
 
   return perc;
 }

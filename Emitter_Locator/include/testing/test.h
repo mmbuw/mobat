@@ -26,7 +26,7 @@ class Test{
     void openFiles(std::vector<std::pair<std::string, std::string>> const& names);
     void closeFiles();
     double calculateStandardDeviation(std::string const& path, glm::vec2 const& avg_pos, int num_entries);
-    int calculatePercentile(std::string const& path, glm::vec2 const& avg_pos, long standard_deviation);
+    double calculatePercentile(std::string const& path, glm::vec2 const& avg_pos, long standard_deviation);
 };
 
 };

@@ -12,7 +12,7 @@
 
 Locator::Locator(unsigned int num_mics)
  :shutdown_{false}
- ,recorder_{num_mics, 44100, configurator().getUint("max_recording_time")}
+ ,recorder_{num_mics, (unsigned)(configurator().getFloat("audio_device_sampling_rate")), configurator().getUint("max_recording_time")}
  ,collector_{recorder_.bufferBytes() / num_mics, num_mics}
  ,tdoator_{330.0f, configurator().getVec("microphone1_pos"),
                 configurator().getVec("microphone2_pos"),
