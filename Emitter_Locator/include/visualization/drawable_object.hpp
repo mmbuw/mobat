@@ -3,6 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
 
 namespace TTT{
 
@@ -40,6 +41,7 @@ class DrawableObject {
 };
 
 sf::Vector2f toSf(glm::vec2 const& vec);
+sf::Color toSf(glm::vec3 const& vec);
 glm::vec2 toGlm(sf::Vector2f const& vec);
 
 }; //namespace TTT

@@ -23,6 +23,8 @@ class Table : DrawableObject {
     // number of cells in error grid
     glm::vec2 grid_dimensions_;
 
+    sf::RectangleShape legend_;
+    sf::Texture legend_texture_;
     // builds the vertex array for error visualisation
     void generateErrorGrid();
     bool show_errorvis_;
@@ -33,7 +35,6 @@ class Table : DrawableObject {
     void setErrorDistribution(std::vector<std::vector<float>>);
 
     virtual void draw(sf::RenderWindow& canvas) const;
-    void draw(sf::RenderWindow& canvas, std::vector<Microphone> const& microphones, glm::vec4 const& toas) const;
     virtual void recalculateGeometry();
     void setFillColor(sf::Color const& in_fill_color);
 };

@@ -82,7 +82,7 @@ class TableVisualizer : DrawableObject {
 						 sf::Color const& in_table_fill_color 
 						 	= sf::Color::White,
 						 sf::Color const& in_microphone_fill_color 
-						 	= sf::Color(0,255,0, 125),
+						 	= sf::Color::Black,
 						 sf::Color const& in_token_fill_color 
 						 	= sf::Color(255,0,0),
 						 double ball_size = 25

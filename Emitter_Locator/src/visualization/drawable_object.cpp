@@ -98,6 +98,10 @@ sf::Vector2f toSf(glm::vec2 const& vec) {
     return sf::Vector2f{vec.x, vec.y};
 }
 
+sf::Color toSf(glm::vec3 const& vec) {
+    return sf::Color{sf::Uint8(vec.x * 255), sf::Uint8(vec.y * 255), sf::Uint8(vec.z * 255)};
+}
+
 glm::vec2 toGlm(sf::Vector2f const& vec) {
     return glm::vec2{vec.x, vec.y};
 }

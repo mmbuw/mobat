@@ -4,9 +4,47 @@
 
 namespace TTT {
 
+
+static sf::Color heatmap(float norm_val) {
+  glm::vec3 color{0.0f};
+  float third = 1 / 3.0f;
+  if(norm_val <= third) {
+    color.g = 1.0f;
+    color.r =std::max(0.0f, (third - norm_val) * 3.0f);
+  }
+  else if(norm_val <= third * 2.0f) { 
+    norm_val -= third;
+    color.b =std::max(0.0f, norm_val * 3.0f);
+    color.g =std::max(0.0f, (third - norm_val) * 3.0f);
+  }
+  else {
+    norm_val -= 2.0f * third;
+    color.r =std::max(0.0f, norm_val * 3.0f);
+    color.b =std::max(0.0f, (third - norm_val) * 3.0f);
+  }
+
+  return toSf(color);
+}
+
 Table::Table()
- :show_errorvis_{configurator().getUint("show_errorvis") > 0}
-{}
+ :legend_texture_{}
+ ,show_errorvis_{configurator().getUint("show_errorvis") > 0}
+{
+  if (show_errorvis_) {
+    std::size_t samples = 255;
+    std::vector<sf::Uint8> pixels(255 * 4);
+    for(std::size_t i = 0; i < samples; ++i) {
+      sf::Color color{heatmap(i / float(samples))};
+      pixels[i * 4] = color.r;
+      pixels[i * 4 + 1] = color.g;
+      pixels[i * 4 + 2] = color.b;
+      pixels[i * 4 + 3] = 255;
+    }
+    sf::Image legend_image;
+    legend_image.create(samples,1, &pixels[0]);
+    legend_texture_.loadFromImage(legend_image);
+  }
+}
 
 void Table::
 draw(sf::RenderWindow& canvas) const {
@@ -21,33 +59,8 @@ draw(sf::RenderWindow& canvas) const {
 
   if(show_errorvis_) {
     canvas.draw(error_vis_);
+    canvas.draw(legend_);
   }
-}
-
-void Table::
-draw(sf::RenderWindow& canvas, std::vector<Microphone> const& microphones, glm::vec4 const& toas) const {
-
-  //sf::Shader error_vis_shader;
-/*
-  if(!error_vis_shader.loadFromFile("../shaders/vertex_shader.vert", "../shaders/fragment_shader.frag")) {
-  //  std::cout << "Did not load shaders succesfully.\n";
-  } else {
-  //  std::cout << "=)\n";
-  }
-*/
-  // error_vis_shader.setParameter("mic1_pos", microphones[0].physical_position_ );
-  // error_vis_shader.setParameter("mic2_pos", microphones[1].physical_position_ );
-  // error_vis_shader.setParameter("mic3_pos", microphones[2].physical_position_ );
-  // error_vis_shader.setParameter("mic4_pos", microphones[3].physical_position_ );
-
-  //std::cout << "toas in draw call: " << toas[0] << ", " << toas[1] << ", " << toas[2] << ", " << toas[3] << "\n";
-
-  //error_vis_shader.setParameter("toas", toas[0], toas[1], toas[2], toas[3]);
-
-  //sf::Shader::bind(&error_vis_shader);
-  canvas.draw(table_rectangle_shape_);
-
-  //sf::Shader::bind(NULL);
 }
 
 void Table::generateErrorGrid() {
@@ -110,26 +123,8 @@ void Table::setErrorDistribution(std::vector<std::vector<float>> dist) {
     
       float normalized_error =  (dist[x][y] - min_error) / (max_error - min_error);
 
-      sf::Color color{sf::Color::Black};
-      float third = 1 / 3.0f;
-      if(normalized_error <= third) {
-        color.g = 255;
-        color.r = sf::Uint8(std::max(0.0f, (third - normalized_error) * 3.0f * 255));
-      }
-      else if(normalized_error <= third * 2.0f) { 
-        normalized_error -= third;
-        color.b = sf::Uint8(std::max(0.0f, (normalized_error * 3.0f) * 255));
-        color.g = sf::Uint8(std::max(0.0f, (third - normalized_error) * 3.0f * 255));        
-      }
-      else {
-        normalized_error -= 2.0f * third;
-        color.r = sf::Uint8(std::max(0.0f, (normalized_error * 3.0f) * 255));
-        color.b = sf::Uint8(std::max(0.0f, (third - normalized_error) * 3.0f * 255));        
-      }
-      // color.r = sf::Uint8(std::max(0.0f, (normalized_error - 1.0f) * 255));
-      // color.g = sf::Uint8(std::max(0.0f, (1.0f - normalized_error) * 255));
-      // color.b = 255 - color.g - color.r;
-      // sf::Uint8(std::max(0, normalized_error * 255)), sf::Uint8((1.0f -normalized_error) * 255),0}; 
+      sf::Color color{heatmap(normalized_error)};
+      // set color of all three corner vertices
       error_vis_[base_index].color = color;
       error_vis_[base_index + 1].color = color;
       error_vis_[base_index + 2].color = color;
@@ -143,7 +138,11 @@ recalculateGeometry() {
 
   table_rectangle_shape_.setSize(toProjectionSize(physical_table_size_));
   table_rectangle_shape_.setPosition(toProjectionSpace(glm::vec2{0.0f}));
+
   if(show_errorvis_) {
+    legend_.setSize(toProjectionSize(glm::vec2{0.05, 0.4}));
+    legend_.setPosition(toProjectionSpace(glm::vec2{-0.1f, 0.2f}));
+    legend_.setTexture(&legend_texture_);
     generateErrorGrid();
   }
 
