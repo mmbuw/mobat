@@ -50,10 +50,10 @@ Table::Table()
     legend_min_.setFont(legend_font_);
     legend_min_.setColor(sf::Color::White);
     legend_min_.setCharacterSize(16);
-    legend_min_.setString("minimal");
+    legend_min_.setString("Minimum");
     // apply attributes to other texts
     legend_max_ = legend_min_;
-    legend_max_.setString("maximal");
+    legend_max_.setString("Maximum");
     legend_name_ = legend_min_;
     legend_name_.setString("Position error");
     legend_name_.setStyle(sf::Text::Bold);
@@ -162,8 +162,8 @@ recalculateGeometry() {
     legend_.setTexture(&legend_texture_);
     generateErrorGrid();
     sf::FloatRect bounds = legend_min_.getGlobalBounds();
-    legend_min_.setPosition(legend_.getPosition() + legend_.getSize() + sf::Vector2f{-bounds.width - 10.0f, 0.0f});
-    legend_max_.setPosition(legend_.getPosition() + sf::Vector2f{10.0f, legend_.getSize().y});
+    legend_min_.setPosition(legend_.getPosition() + legend_.getSize() + sf::Vector2f{-bounds.width - 10.0f, bounds.height * 0.5f});
+    legend_max_.setPosition(legend_.getPosition() + sf::Vector2f{10.0f, legend_.getSize().y + bounds.height * 0.5f});
     legend_name_.setPosition(legend_.getPosition() + sf::Vector2f{legend_.getSize().x, legend_.getSize().y * 1.75f});
   }
 
