@@ -33,7 +33,7 @@ Table::Table()
   if (show_errorvis_) {
     std::size_t samples = 255;
     std::vector<sf::Uint8> pixels(255 * 4);
-    for(std::size_t i = 0; i < samples; ++i) {
+    for (std::size_t i = 0; i < samples; ++i) {
       sf::Color color{heatmap(i / float(samples))};
       pixels[i * 4] = color.r;
       pixels[i * 4 + 1] = color.g;
@@ -43,6 +43,20 @@ Table::Table()
     sf::Image legend_image;
     legend_image.create(samples,1, &pixels[0]);
     legend_texture_.loadFromImage(legend_image);
+
+    if (!legend_font_.loadFromFile("../fonts/OpenSans-Light.ttf")) {
+      throw std::logic_error("could not load font");
+    }
+    legend_min_.setFont(legend_font_);
+    legend_min_.setColor(sf::Color::White);
+    legend_min_.setCharacterSize(16);
+    legend_min_.setString("minimal");
+    // apply attributes to other texts
+    legend_max_ = legend_min_;
+    legend_max_.setString("maximal");
+    legend_name_ = legend_min_;
+    legend_name_.setString("Position error");
+    legend_name_.setStyle(sf::Text::Bold);
   }
 }
 
@@ -60,6 +74,9 @@ draw(sf::RenderWindow& canvas) const {
   if(show_errorvis_) {
     canvas.draw(error_vis_);
     canvas.draw(legend_);
+    canvas.draw(legend_min_);
+    canvas.draw(legend_max_);
+    canvas.draw(legend_name_);
   }
 }
 
@@ -144,6 +161,10 @@ recalculateGeometry() {
     legend_.setPosition(toProjectionSpace(glm::vec2{-0.1f, 0.2f}));
     legend_.setTexture(&legend_texture_);
     generateErrorGrid();
+    sf::FloatRect bounds = legend_min_.getGlobalBounds();
+    legend_min_.setPosition(legend_.getPosition() + legend_.getSize() + sf::Vector2f{-bounds.width - 10.0f, 0.0f});
+    legend_max_.setPosition(legend_.getPosition() + sf::Vector2f{10.0f, legend_.getSize().y});
+    legend_name_.setPosition(legend_.getPosition() + sf::Vector2f{legend_.getSize().x, legend_.getSize().y * 1.75f});
   }
 
   middle_.setRadius(pixel_per_projection_ * 0.1f);

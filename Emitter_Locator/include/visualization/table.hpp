@@ -25,6 +25,10 @@ class Table : DrawableObject {
 
     sf::RectangleShape legend_;
     sf::Texture legend_texture_;
+    sf::Font legend_font_;
+    sf::Text legend_min_;
+    sf::Text legend_max_;
+    sf::Text legend_name_;
     // builds the vertex array for error visualisation
     void generateErrorGrid();
     bool show_errorvis_;
