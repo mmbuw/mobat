@@ -349,6 +349,7 @@ unsigned int FftTransformer::performFFT(unsigned channel_num) {
 
 
       unsigned first_frequency_listened_to = *listening_to_those_frequencies.begin();
+      // is the result already cached because we touched it in the previous STFT? No: compute it and cache...
       if ( fft_cached_results_per_frequency_[first_frequency_listened_to][channel_num].find(offset) 
         == fft_cached_results_per_frequency_[first_frequency_listened_to][channel_num].end() ) {
 
@@ -359,34 +360,43 @@ unsigned int FftTransformer::performFFT(unsigned channel_num) {
 
         double normalization_range_value = 0.0;
 
+        float sampling_rate_by_window_size = audio_device_sampling_rate_ / fft_window_size_;
+
         for (unsigned int signal_it = 0; signal_it < (unsigned int) (fft_window_size_ / 2 - 1); ++signal_it) {
-          float current_frequency = (signal_it * audio_device_sampling_rate_ ) / fft_window_size_;
+          float current_frequency = signal_it * sampling_rate_by_window_size;
 
-          if (current_frequency > normalization_range_lower_limit_ 
-           && current_frequency < normalization_range_upper_limit_ ) {
+          double frequency_sum_chunk = std::sqrt(fft_result_[channel_num][signal_it][0]*fft_result_[channel_num][signal_it][0]) + 
+                                                (fft_result_[channel_num][signal_it][1]*fft_result_[channel_num][signal_it][1]) ;
 
-                  double tmp_normalization_value = std::sqrt(fft_result_[channel_num][signal_it][0]*fft_result_[channel_num][signal_it][0]) + 
-                        (fft_result_[channel_num][signal_it][1]*fft_result_[channel_num][signal_it][1]) ;
-                  normalization_range_value +=  tmp_normalization_value;
+          bool is_already_in_frequency_bucket = false;
+          for (unsigned iterated_frequency : listening_to_those_frequencies) {
 
 
-            for (unsigned iterated_frequency : listening_to_those_frequencies) {
-              if (current_frequency > ((double)iterated_frequency-frequency_slice_halfsize_) && current_frequency < ((double)iterated_frequency+frequency_slice_halfsize_ ) ) {
-
-                temp_accum_results[iterated_frequency] += tmp_normalization_value;
-
-              }
+            if (current_frequency > ((double)iterated_frequency-frequency_slice_halfsize_) && current_frequency < ((double)iterated_frequency+frequency_slice_halfsize_ ) ) {
+                temp_accum_results[iterated_frequency] += frequency_sum_chunk;
+                is_already_in_frequency_bucket = true;
+                //step to the next frequency chunk
+                break;
             }
           }
+
+          //does not belong into frequency bucket, therefore we use it for the normalization
+          if(!is_already_in_frequency_bucket ) {
+            if (current_frequency > normalization_range_lower_limit_ 
+             && current_frequency < normalization_range_upper_limit_ ) {
+                    normalization_range_value +=  frequency_sum_chunk;
+            }
+          }
+
         }
 
       for (unsigned iterated_frequency : listening_to_those_frequencies) {
 
-        double current_iteration_frequency_khz_sum = temp_accum_results[iterated_frequency] / normalization_range_value;
+        double current_iteration_frequency_khz_sum = temp_accum_results[iterated_frequency] / (normalization_range_value+temp_accum_results[iterated_frequency]);
         fft_cached_results_per_frequency_[iterated_frequency][channel_num][offset] = current_iteration_frequency_khz_sum;
         frequency_sums_[channel_num][iterated_frequency] += current_iteration_frequency_khz_sum;
       }
-    } else {
+    } else { //... Yes: just get the cached result
       for (unsigned iterated_frequency : listening_to_those_frequencies) {
         frequency_sums_[channel_num][iterated_frequency] += fft_cached_results_per_frequency_[iterated_frequency][channel_num][offset];
       }
