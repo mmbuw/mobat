@@ -14,7 +14,6 @@ target_include_directories(testing PUBLIC include/testing)
 # requires boostlib
 target_link_libraries(testing -lboost_filesystem -lboost_system visualization)
 
-
 # recorder
 file(GLOB RECORDER_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/recorder/*.cpp)
 add_library(recorder STATIC ${RECORDER_SOURCES})
@@ -53,6 +52,13 @@ target_link_libraries(ttt recorder signaltrans locator visualization testing -lp
 if(ODROID_BUILD)
   target_link_libraries(ttt -lX11 -lX11-xcb)
 endif()
+
+# output executables
+add_executable(table_plot src/table_plot/svg_plot_generator.cpp)
+#target_link_libraries(ttt recorder signaltrans locator visualization testing -lpthread)
+#if(ODROID_BUILD)
+#  target_link_libraries(ttt -lX11 -lX11-xcb)
+#endif()
 
 #request C++11 if on unix, stop at all warnings but ignore specific warning in glm headers
 set(CMAKE_CXX_FLAGS_RELEASE "-O2")
