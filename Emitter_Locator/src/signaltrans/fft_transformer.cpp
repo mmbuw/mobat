@@ -71,10 +71,14 @@ void FftTransformer::loadFFTParameters() {
  // average_smoothing_result_vectors_.reserve(window_size_);
 }
 
-FftTransformer::FftTransformer(unsigned int fft_window_size) : start_sample_{ std::numeric_limits<unsigned int>::max() },
-                                  end_sample_{ std::numeric_limits<unsigned int>::max() }
-
-                                    {
+FftTransformer::FftTransformer(unsigned int fft_window_size)
+ :start_sample_{std::numeric_limits<unsigned int>::max()}
+ ,end_sample_{std::numeric_limits<unsigned int>::max()}
+ ,average_smoothing_result_vectors_{std::vector<double>{},
+                                    std::vector<double>{},
+                                    std::vector<double>{},
+                                    std::vector<double>{}}
+{
 
 
   loadFFTParameters();
@@ -214,9 +218,9 @@ void FftTransformer::performFFTOnCertainChannel(unsigned channel_iterator) {
 }
 
 void FftTransformer::performFFTOnChannels(buffer_collection const& signal_buffers, unsigned window_size, unsigned signal_half_chunk) {
-    for (int i = 0; i < 4; ++i) {
-      ffts_performed_[i].store(false);
-    }
+  for (int i = 0; i < 4; ++i) {
+    ffts_performed_[i].store(false);
+  }
 
   for (unsigned iterated_frequency : listening_to_those_frequencies) {
     for (int channel_idx = 0; channel_idx < 4; ++channel_idx) {
@@ -230,7 +234,7 @@ void FftTransformer::performFFTOnChannels(buffer_collection const& signal_buffer
 
   audio_buffers_ = signal_buffers;
 
-  unsigned int elements_per_result_channel = (ints_per_channel_/num_chunks_) - ffts_per_frame_;
+  std::size_t elements_per_result_channel = (ints_per_channel_ / num_chunks_) - ffts_per_frame_;
   for(auto& channel_results : average_smoothing_result_vectors_) {
     channel_results.reserve(elements_per_result_channel);
 
@@ -245,13 +249,11 @@ void FftTransformer::performFFTOnChannels(buffer_collection const& signal_buffer
     allow_fft_[i].store(true);
   }
 
-
   while( (ffts_performed_[0].load() == false) ||
        (ffts_performed_[1].load() == false) ||
        (ffts_performed_[2].load() == false) ||
        (ffts_performed_[3].load() == false)  )
   {}    
-
 }
 
 void FftTransformer::setFFTInput( unsigned int offset, unsigned int channel_num ) {
@@ -281,16 +283,16 @@ void FftTransformer::smoothResults(unsigned channel_idx) {
     auto& channel_results = frequency_slot.second[channel_idx];
     //for(auto& channel_results : frequency_slot.second) {
 
-        std::size_t last_sample_idx = channel_results.size() - 1;
+        long last_sample_idx = channel_results.size() - 1;
 
         //std::vector<double> average_result_vector(channel_results.size(), 0.0);
         double average_frequency_sum = 0.0;
 
         //in this loop the forward average of the FFT'd signal is computed
-        for(unsigned int sample_idx = 0; sample_idx <= last_sample_idx; ++sample_idx) {
+        for(long sample_idx = 0; sample_idx <= last_sample_idx; ++sample_idx) {
 
           //use cached results for the "safe" area in the signal (where there are no accesses out of bounds)
-          if(sample_idx > 0 && sample_idx < last_sample_idx - num_smooth_average_samples_) {
+          if(sample_idx > 0 && sample_idx < last_sample_idx - long(num_smooth_average_samples_)) {
             //de-normalize the result
             average_frequency_sum *= average_sample_as_float; 
             //throw out the first sample of the last average
@@ -410,7 +412,7 @@ unsigned int FftTransformer::performFFT(unsigned channel_num) {
       signal_results_per_frequency_[iterated_frequency][channel_num].push_back(frequency_sums_[channel_num][iterated_frequency]);
       //std::cout << "Get results: " << frequency_sums_[iterated_frequency] << "\n";
     } else {
-      throw std::length_error("Transformed out of bounds memory!");
+      //throw std::length_error("Transformed out of bounds memory!");
     }
   }
 
