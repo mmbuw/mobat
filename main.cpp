@@ -96,7 +96,7 @@ struct socket_t {
     #endif
   }
 
-  void send_packet(sockaddr_in const& address, uint8_t* packet_data, int packet_size) {
+  void send(sockaddr_in const& address, uint8_t* packet_data, int packet_size) {
     int sent_bytes = sendto(handle_, (const char*)packet_data, packet_size, 0, 
         (sockaddr*)&address, 
         sizeof(sockaddr_in));
@@ -109,6 +109,20 @@ struct socket_t {
     }
   }
 
+  std::size_t recieve(sockaddr_in const& source_address, std::uint8_t* packet_data, std::size_t packet_size) {
+    socklen_t from_length = sizeof(source_address);
+    ssize_t bytes = recvfrom(handle_, 
+                     packet_data, 
+                     packet_size,
+                     0, 
+                     (sockaddr*)&source_address, 
+                     &from_length);
+    if(bytes > 0) {
+      return bytes;
+    }
+    return 0;
+  }
+
   unsigned short port_;
   int handle_;
   bool blocking_;
@@ -117,78 +131,6 @@ struct socket_t {
 };
 
 std::size_t socket_t::num_sockets = 0;
-
-bool initialize_sockets() {
-  #ifdef PLATFORM_WINDOWS
-    WSADATA WsaData;
-    return WSAStartup(MAKEWORD(2,2), &WsaData) == NO_ERROR;
-  #else
-    return true;
-  #endif
-}
-
-void shutdown_sockets() {
-  #ifdef PLATFORM_WINDOWS
-    WSACleanup();
-  #endif
-}
-
-void close_socket(int handle) {
-  #ifdef PLATFORM_UNIX
-    close(handle);
-  #elif PLATFORM_WINDOWS
-    closehandle(socket);
-  #endif
-}
-
-int create_socket(unsigned short port) {
-  int handle = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-  if (handle <= 0) {
-    printf( "failed to create socket\n" );
-    return -1;
-  }
-  sockaddr_in address;
-  address.sin_family = AF_INET;
-  address.sin_addr.s_addr = INADDR_ANY;
-  address.sin_port = htons((unsigned short)port);
-
-  if (bind(handle, (const sockaddr*) &address, sizeof(sockaddr_in) ) < 0) {
-    printf( "failed to bind socket\n" );
-    return -1;
-  }
-  return handle;
-}
-
-bool make_nonblocking(int handle) {
-  #ifdef PLATFORM_UNIX
-    int nonBlocking = 1;
-    if (fcntl(handle, F_SETFL, O_NONBLOCK, nonBlocking) == -1) {
-      printf("failed to set non-blocking\n");
-      return false;
-    }
-  #elif PLATFORM_WINDOWS
-    DWORD nonBlocking = 1;
-    if (ioctlsocket(handle, FIONBIO, &nonBlocking) != 0) {
-      printf("failed to set non-blocking\n");
-      return false;
-    }
-  #endif
-  return true;
-}
-
-bool send_packet(int handle, sockaddr_in const& address, uint8_t* packet_data, int packet_size) {
-  int sent_bytes = sendto(handle, (const char*)packet_data, packet_size, 0, 
-      (sockaddr*)&address, 
-      sizeof(sockaddr_in));
-
-  if (sent_bytes != packet_size) {
-    printf("failed to send packet\n");
-    std::cout << "sent " << sent_bytes << " instead of " << packet_size << " bytes" << std::endl;
-    return false;
-  }
-
-  return true;
-}
 
 sockaddr_in make_address(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint16_t port) {
   unsigned int address = ( a << 24 ) | 
@@ -218,49 +160,30 @@ int main(int argc, char *argv[]) {
     data[3] = 4;
 
     int i = 3;
-    while(i > 0) {
-      socket.send_packet(address, &data[0], data.size());
+    while (i > 0) {
+      socket.send(address, &data[0], data.size());
       --i;
     }
   }
   else {
-    bool success = initialize_sockets();
-    if (!success) {
-      return 1;
-    }
-    int handle = 0;
-
-    make_nonblocking(handle);
     std::cout << "reciever" << std::endl;
+    socket_t socket{30000};
+   
     while (true){
-      handle = create_socket(30000);
-      std::cout << handle << std::endl;
-      // unsigned char packet_data[256];
-      // unsigned int max_packet_size = sizeof(packet_data);
-
       sockaddr_in source_address = make_address(127, 0, 0, 1, 6666);
-      // sockaddr_in from;
-      socklen_t from_length = sizeof(source_address);
 
-      int max_packet_size = 4;
+      size_t max_packet_size = 4;
       // uint8_t* packet_data;
       std::vector<uint8_t> packet_data(max_packet_size);
+      size_t packet_size = max_packet_size;
 
-      ssize_t bytes = recvfrom(handle, 
-                           packet_data.data(), 
-                           max_packet_size,
-                           0, 
-                           (sockaddr*)&source_address, 
-                           &from_length);
+      std::size_t bytes = socket.recieve(source_address, packet_data.data(), packet_size);
 
-      if (bytes <= 0) {
-        // break;
-      }
-      else {
+      if (bytes > 0) {
         unsigned int from_address = ntohl(source_address.sin_addr.s_addr);
         unsigned int from_port = ntohs(source_address.sin_port);
 
-        std::cout << "recieved from " << from_address << " port" << from_port << std::endl;
+        std::cout << "recieved from " << from_address << " port " << from_port << std::endl;
 
         // process received packet
         for (auto const& a : packet_data) {
@@ -270,9 +193,7 @@ int main(int argc, char *argv[]) {
         return 0;
       }
     }
-    close_socket(handle);
 
-    shutdown_sockets();
   }
   return 0;
 }
