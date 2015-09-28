@@ -127,7 +127,7 @@ std::size_t Socket::recieve(address const& source_address, std::uint8_t* buffer_
   ssize_t recieved_bytes = recvfrom(handle_, 
                    buffer_ptr, 
                    buffer_bytes,
-                   0, 
+                   MSG_TRUNC,     //return untruncated packet length
                    &base_address, 
                    &address_bytes);
 

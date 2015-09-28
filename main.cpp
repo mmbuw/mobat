@@ -31,11 +31,10 @@ int main(int argc, char *argv[]) {
     while (true){
       address_ip4 source_address {127, 0, 0, 1, 6666};
 
-      size_t max_packet_size = 4;
+      ssize_t max_packet_size = 4;
       std::vector<std::uint8_t> packet_data(max_packet_size);
-      size_t packet_size = max_packet_size;
 
-      std::size_t bytes = socket.recieve(source_address, packet_data.data(), packet_size);
+      std::size_t bytes = socket.recieve(source_address, packet_data.data(), max_packet_size);
 
       if (bytes > 0) {
         // process received packet
