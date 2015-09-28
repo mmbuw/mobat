@@ -4,6 +4,12 @@
 
 std::size_t Socket::num_sockets = 0;
 
+Socket::Socket()
+ :port_{0}
+ ,handle_{-1}
+ ,blocking_{true}
+ {}
+
 Socket::Socket(unsigned short port, bool non_blocking)
  :port_{port}
  ,handle_{-1}
@@ -43,6 +49,12 @@ Socket::Socket(unsigned short port, bool non_blocking)
   }
 }
 
+Socket::Socket(Socket&& socket)
+ :Socket{}
+{
+  swap(*this, socket);
+}
+
 Socket::~Socket() {
   #ifdef PLATFORM_UNIX
     close(handle_);
@@ -58,6 +70,12 @@ Socket::~Socket() {
     }
   #endif
 }
+
+Socket& Socket::operator=(Socket&& socket) {
+  swap(*this, socket);
+  return *this;
+}
+
 
 void Socket::make_nonblocking() {
   #ifdef PLATFORM_UNIX
@@ -98,4 +116,11 @@ std::size_t Socket::recieve(sockaddr_in const& source_address, std::uint8_t* pac
     return bytes;
   }
   return 0;
+}
+
+void swap(Socket& a, Socket& b) {
+  std::swap(a.port_, b.port_);
+  std::swap(a.handle_, b.handle_);
+  std::swap(a.handle_, b.handle_);
+  std::swap(a.blocking_, b.blocking_);
 }

@@ -28,9 +28,14 @@
 
 class Socket {
  public:
+  Socket();
   Socket(unsigned short port, bool non_blocking = true);
-
+  Socket(Socket const&) = delete;
+  Socket(Socket&&);
   ~Socket();
+
+  Socket& operator=(Socket const&) = delete;
+  Socket& operator=(Socket&&);
 
   void send(sockaddr_in const& address, uint8_t* packet_data, int packet_size);
 
@@ -44,6 +49,9 @@ class Socket {
   bool blocking_;
 
   static std::size_t num_sockets;
+
+  friend void swap(Socket&, Socket&);
 };
+
 
 #endif
