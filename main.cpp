@@ -1,39 +1,125 @@
 #include <iostream>
 #include <cstdint>
 #include <vector>
-
-// platform detection
-#define PLATFORM_WINDOWS  1
-#define PLATFORM_MAC      2
-#define PLATFORM_UNIX     3
+#include <stdexcept>
 
 #if defined(_WIN32)
-  #define PLATFORM PLATFORM_WINDOWS
-#elif defined(__APPLE__)
-  #define PLATFORM PLATFORM_MAC
+  #define PLATFORM_WINDOWS
 #else
-  #define PLATFORM PLATFORM_UNIX
+  #define PLATFORM_UNIX
 #endif
 
-#if PLATFORM == PLATFORM_WINDOWS
+#ifdef PLATFORM_WINDOWS
   #include <winsock2.h>
-#elif PLATFORM == PLATFORM_MAC || PLATFORM == PLATFORM_UNIX
+#else
   #include <sys/socket.h>
   #include <netinet/in.h>
   #include <fcntl.h>
   #include <unistd.h>
 #endif
 
-#if PLATFORM == PLATFORM_WINDOWS
+#ifdef PLATFORM_WINDOWS
   #pragma comment( lib, "wsock32.lib" )
 #endif
 
-#if PLATFORM == PLATFORM_WINDOWS
+#ifdef PLATFORM_WINDOWS
   typedef int socklen_t;
 #endif
 
+struct socket_t {
+  socket_t(unsigned short port, bool non_blocking = true)
+   :port_{port}
+   ,handle_{-1}
+   ,blocking_{!non_blocking}
+  {
+    #ifdef PLATFORM_WINDOWS
+      if(num_sockets == 0) {
+        WSADATA WsaData;
+        std::errc error = WSAStartup(MAKEWORD(2,2), &WsaData);
+        if (error != NO_ERROR) {
+          throw std::runtime_error("Could not start socket control");
+        }      
+      }
+    #endif
+
+    handle_ = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if (handle_ <= 0) {
+      throw std::runtime_error("Failed to create socket");
+    }
+    
+    #ifdef PLATFORM_WINDOWS
+    ++num_sockets;
+    #endif
+    // create address at port
+    sockaddr_in address;
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons(port);
+    // bind socket to port
+    int error = bind(handle_, (const sockaddr*)&address, sizeof(sockaddr_in));
+    if (error < 0) {
+      throw std::runtime_error("Failed to bind socket to port " + std::to_string(port));
+    }
+
+    if (!blocking_) {
+      make_nonblocking();
+    }
+  }
+
+  ~socket_t() {
+    #ifdef PLATFORM_UNIX
+      close(handle_);
+    #elif PLATFORM_WINDOWS
+      closehandle(handle_);
+    #endif
+
+    #ifdef PLATFORM_WINDOWS
+      --num_sockets;
+      // on windows do cleanup
+      if(num_sockets == 0) {
+          WSACleanup();
+      }
+    #endif
+  }
+
+  void make_nonblocking() {
+    #ifdef PLATFORM_UNIX
+      int nonBlocking = 1;
+      if (fcntl(handle_, F_SETFL, O_NONBLOCK, nonBlocking) == -1) {
+        throw std::runtime_error("failed to set non-blocking\n");
+      }
+    #elif PLATFORM_WINDOWS
+      DWORD nonBlocking = 1;
+      if (ioctlsocket(handle_, FIONBIO, &nonBlocking) != 0) {
+        throw std::runtime_error("failed to set non-blocking\n");
+      }
+    #endif
+  }
+
+  void send_packet(sockaddr_in const& address, uint8_t* packet_data, int packet_size) {
+    int sent_bytes = sendto(handle_, (const char*)packet_data, packet_size, 0, 
+        (sockaddr*)&address, 
+        sizeof(sockaddr_in));
+
+    if (sent_bytes != packet_size) {
+      printf("failed to send packet\n");
+      throw std::runtime_error("Could only send " 
+        + std::to_string(sent_bytes) + " instead of "
+        + std::to_string(packet_size) + " bytes");
+    }
+  }
+
+  unsigned short port_;
+  int handle_;
+  bool blocking_;
+
+  static std::size_t num_sockets;
+};
+
+std::size_t socket_t::num_sockets = 0;
+
 bool initialize_sockets() {
-  #if PLATFORM == PLATFORM_WINDOWS
+  #ifdef PLATFORM_WINDOWS
     WSADATA WsaData;
     return WSAStartup(MAKEWORD(2,2), &WsaData) == NO_ERROR;
   #else
@@ -42,15 +128,15 @@ bool initialize_sockets() {
 }
 
 void shutdown_sockets() {
-  #if PLATFORM == PLATFORM_WINDOWS
+  #ifdef PLATFORM_WINDOWS
     WSACleanup();
   #endif
 }
 
 void close_socket(int handle) {
-  #if PLATFORM == PLATFORM_MAC || PLATFORM == PLATFORM_UNIX
+  #ifdef PLATFORM_UNIX
     close(handle);
-  #elif PLATFORM == PLATFORM_WINDOWS
+  #elif PLATFORM_WINDOWS
     closehandle(socket);
   #endif
 }
@@ -74,13 +160,13 @@ int create_socket(unsigned short port) {
 }
 
 bool make_nonblocking(int handle) {
-  #if PLATFORM == PLATFORM_MAC || PLATFORM == PLATFORM_UNIX
+  #ifdef PLATFORM_UNIX
     int nonBlocking = 1;
     if (fcntl(handle, F_SETFL, O_NONBLOCK, nonBlocking) == -1) {
       printf("failed to set non-blocking\n");
       return false;
     }
-  #elif PLATFORM == PLATFORM_WINDOWS
+  #elif PLATFORM_WINDOWS
     DWORD nonBlocking = 1;
     if (ioctlsocket(handle, FIONBIO, &nonBlocking) != 0) {
       printf("failed to set non-blocking\n");
@@ -118,21 +204,11 @@ sockaddr_in make_address(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint16_t po
 }
 
 int main(int argc, char *argv[]) {
-    
-  std::cout << "hello" << std::endl;
-
-  bool success = initialize_sockets();
-  if (!success) {
-    return 1;
-  }
-  int handle = 0;
-
-  make_nonblocking(handle);
 
   if(argc > 1) {
-    handle = create_socket(6666);
-    std::cout << handle << std::endl;
     std::cout << "sender" << std::endl;
+    socket_t socket{6666};
+    
     sockaddr_in address = make_address(127, 0, 0, 1, 30000);
 
     std::vector<uint8_t> data(4);
@@ -143,11 +219,18 @@ int main(int argc, char *argv[]) {
 
     int i = 3;
     while(i > 0) {
-      send_packet(handle, address, &data[0], data.size());
+      socket.send_packet(address, &data[0], data.size());
       --i;
     }
   }
   else {
+    bool success = initialize_sockets();
+    if (!success) {
+      return 1;
+    }
+    int handle = 0;
+
+    make_nonblocking(handle);
     std::cout << "reciever" << std::endl;
     while (true){
       handle = create_socket(30000);
@@ -168,7 +251,7 @@ int main(int argc, char *argv[]) {
                            max_packet_size,
                            0, 
                            (sockaddr*)&source_address, 
-                           (socklen_t*)&from_length);
+                           &from_length);
 
       if (bytes <= 0) {
         // break;
@@ -187,9 +270,9 @@ int main(int argc, char *argv[]) {
         return 0;
       }
     }
-  }
-  close_socket(handle);
+    close_socket(handle);
 
-  shutdown_sockets();
+    shutdown_sockets();
+  }
   return 0;
 }
