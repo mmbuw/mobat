@@ -1,6 +1,18 @@
 #include "socket.hpp"
 
+#include "address.hpp"
+
 #include <stdexcept>
+
+#ifdef PLATFORM_UNIX
+  #include <netinet/in.h>
+  #include <fcntl.h>
+  #include <unistd.h>
+#endif
+
+#ifdef PLATFORM_WINDOWS
+  #pragma comment( lib, "wsock32.lib" )
+#endif
 
 std::size_t Socket::num_sockets = 0;
 
@@ -91,10 +103,8 @@ void Socket::make_nonblocking() {
   #endif
 }
 
-void Socket::send(sockaddr_in const& address, uint8_t* packet_data, int packet_size) {
-  int sent_bytes = sendto(handle_, (const char*)packet_data, packet_size, 0, 
-      (sockaddr*)&address, 
-      sizeof(sockaddr_in));
+void Socket::send(address const& target_address, std::uint8_t* packet_data, ssize_t packet_size) {
+  ssize_t sent_bytes = sendto(handle_, packet_data, packet_size, 0, target_address.base_address(), target_address.bytes());
 
   if (sent_bytes != packet_size) {
     printf("failed to send packet\n");
@@ -104,15 +114,21 @@ void Socket::send(sockaddr_in const& address, uint8_t* packet_data, int packet_s
   }
 }
 
-std::size_t Socket::recieve(sockaddr_in const& source_address, std::uint8_t* packet_data, std::size_t packet_size) {
-  socklen_t from_length = sizeof(source_address);
+std::size_t Socket::recieve(address const& source_address, std::uint8_t* packet_data, ssize_t packet_size) {
+  sockaddr base_address = *source_address.base_address(); 
+  socklen_t address_bytes = source_address.bytes();
   ssize_t bytes = recvfrom(handle_, 
                    packet_data, 
                    packet_size,
                    0, 
-                   (sockaddr*)&source_address, 
-                   &from_length);
-  if(bytes > 0) {
+                   &base_address, 
+                   &address_bytes);
+  if (bytes > 0) {
+    // if the expected address type is smaller than the recieved one
+    if (address_bytes > source_address.bytes()) {
+      throw std::overflow_error("Address type of " + std::to_string(source_address.bytes()) 
+      + " bytes does not match source address of " + std::to_string(address_bytes));
+    }
     return bytes;
   }
   return 0;

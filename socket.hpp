@@ -2,29 +2,15 @@
 #define SOCKET_HPP
 
 #include <cstdint>
-
 #if defined(_WIN32)
   #define PLATFORM_WINDOWS
-#else
-  #define PLATFORM_UNIX
-#endif
-
-#ifdef PLATFORM_WINDOWS
   #include <winsock2.h>
 #else
+  #define PLATFORM_UNIX
   #include <sys/socket.h>
-  #include <netinet/in.h>
-  #include <fcntl.h>
-  #include <unistd.h>
 #endif
 
-#ifdef PLATFORM_WINDOWS
-  #pragma comment( lib, "wsock32.lib" )
-#endif
-
-#ifdef PLATFORM_WINDOWS
-  typedef int socklen_t;
-#endif
+struct address;
 
 class Socket {
  public:
@@ -37,9 +23,9 @@ class Socket {
   Socket& operator=(Socket const&) = delete;
   Socket& operator=(Socket&&);
 
-  void send(sockaddr_in const& address, uint8_t* packet_data, int packet_size);
+  void send(address const&, std::uint8_t* packet_data, ssize_t packet_size);
 
-  std::size_t recieve(sockaddr_in const& source_address, std::uint8_t* packet_data, std::size_t packet_size);
+  std::size_t recieve(address const&, std::uint8_t* packet_data, ssize_t packet_size);
  
  private:
   void make_nonblocking();
