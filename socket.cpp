@@ -88,48 +88,61 @@ Socket& Socket::operator=(Socket&& socket) {
   return *this;
 }
 
-
 void Socket::make_nonblocking() {
   #ifdef PLATFORM_UNIX
     int nonBlocking = 1;
-    if (fcntl(handle_, F_SETFL, O_NONBLOCK, nonBlocking) == -1) {
-      throw std::runtime_error("failed to set non-blocking\n");
+    int error = fcntl(handle_, F_SETFL, O_NONBLOCK, nonBlocking);
+    if (error == -1) {
+      throw std::runtime_error("Failed to set socket non-blocking");
     }
   #elif PLATFORM_WINDOWS
     DWORD nonBlocking = 1;
-    if (ioctlsocket(handle_, FIONBIO, &nonBlocking) != 0) {
-      throw std::runtime_error("failed to set non-blocking\n");
+    int error = ioctlsocket(handle_, FIONBIO, &nonBlocking);
+    if (error != 0) {
+      throw std::runtime_error("Failed to set socket non-blocking");
     }
   #endif
 }
 
-void Socket::send(address const& target_address, std::uint8_t* packet_data, ssize_t packet_size) {
-  ssize_t sent_bytes = sendto(handle_, packet_data, packet_size, 0, target_address.base_address(), target_address.bytes());
+void Socket::send(address const& target_address, std::uint8_t* packet_data, ssize_t packet_bytes) {
+  ssize_t sent_bytes = sendto(handle_,
+                              packet_data,
+                              packet_bytes,
+                              0,
+                              target_address.base_address(),
+                              target_address.bytes());
 
-  if (sent_bytes != packet_size) {
+  if (sent_bytes != packet_bytes) {
     printf("failed to send packet\n");
     throw std::runtime_error("Could only send " 
       + std::to_string(sent_bytes) + " instead of "
-      + std::to_string(packet_size) + " bytes");
+      + std::to_string(packet_bytes) + " bytes");
   }
 }
 
-std::size_t Socket::recieve(address const& source_address, std::uint8_t* packet_data, ssize_t packet_size) {
+std::size_t Socket::recieve(address const& source_address, std::uint8_t* buffer_ptr, ssize_t buffer_bytes) {
   sockaddr base_address = *source_address.base_address(); 
   socklen_t address_bytes = source_address.bytes();
-  ssize_t bytes = recvfrom(handle_, 
-                   packet_data, 
-                   packet_size,
+
+  ssize_t recieved_bytes = recvfrom(handle_, 
+                   buffer_ptr, 
+                   buffer_bytes,
                    0, 
                    &base_address, 
                    &address_bytes);
-  if (bytes > 0) {
+
+  if (recieved_bytes > 0) {
     // if the expected address type is smaller than the recieved one
     if (address_bytes > source_address.bytes()) {
       throw std::overflow_error("Address type of " + std::to_string(source_address.bytes()) 
       + " bytes does not match source address of " + std::to_string(address_bytes));
     }
-    return bytes;
+    // recieved packet bigger than buffer
+    if (recieved_bytes > buffer_bytes) {
+      throw std::overflow_error("Packet of " + std::to_string(recieved_bytes) 
+      + " bytes larger than buffer of " + std::to_string(buffer_bytes) + " bytes");
+    }
+    return recieved_bytes;
   }
   return 0;
 }

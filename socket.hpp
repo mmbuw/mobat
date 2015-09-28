@@ -23,9 +23,9 @@ class Socket {
   Socket& operator=(Socket const&) = delete;
   Socket& operator=(Socket&&);
 
-  void send(address const&, std::uint8_t* packet_data, ssize_t packet_size);
+  void send(address const& target_address, std::uint8_t* packet_data, ssize_t packet_bytes);
 
-  std::size_t recieve(address const&, std::uint8_t* packet_data, ssize_t packet_size);
+  std::size_t recieve(address const& source_address, std::uint8_t* buffer_data, ssize_t buffer_size);
  
  private:
   void make_nonblocking();
