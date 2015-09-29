@@ -25,7 +25,7 @@ class Socket {
 
   void send(Address const& target_address, std::uint8_t* packet_data, ssize_t packet_bytes);
 
-  std::size_t recieve(Address* source_address, std::uint8_t* buffer_data, ssize_t buffer_size);
+  std::size_t receive(Address* source_address, std::uint8_t* buffer_data, ssize_t buffer_size);
  
  private:
   void make_nonblocking();
