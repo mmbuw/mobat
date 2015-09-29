@@ -13,36 +13,60 @@
 #endif
 
 // abstract address interface to make socket independet of types lie ip4/6
-struct address {
+class Address {
+ public:
   virtual sockaddr const* base_address() const = 0;
+  virtual sockaddr* base_address() = 0;
   virtual socklen_t bytes() const = 0;
 };
 
-struct address_ip4 : public address {
-  address_ip4(std::uint32_t ip, std::uint16_t p)
-   :ip4{ip}
-   ,port{p}
+class Address_ip4 : public Address {
+ public:
+  Address_ip4()
+   :address_{}
+  {}
+
+  Address_ip4(std::uint32_t ip, std::uint16_t p)
+   :address_{}
   {
-    address.sin_family = AF_INET;
-    address.sin_addr.s_addr = htonl(ip4);
-    address.sin_port = htons(port);
+    address_.sin_family = AF_INET;
+    set_address(ip);
+    set_port(p);
   }
 
-  address_ip4(std::uint8_t a, std::uint8_t b, std::uint8_t c, std::uint8_t d, std::uint16_t p)
-   :address_ip4((std::uint32_t)((a << 24  | (b << 16) | (c << 8) | d)), p)
+  Address_ip4(std::uint8_t a, std::uint8_t b, std::uint8_t c, std::uint8_t d, std::uint16_t p)
+   :Address_ip4((std::uint32_t)((a << 24  | (b << 16) | (c << 8) | d)), p)
   {};
 
+  std::uint32_t address() const {
+    return ntohl(address_.sin_addr.s_addr);
+  }
+
+  void set_address(std::uint32_t ip4) {
+    address_.sin_addr.s_addr = htonl(ip4);
+  }
+
+  std::uint16_t port() const {
+    return ntohs(address_.sin_port);
+  }
+
+  void set_port(std::uint16_t port) {
+    address_.sin_port = htons(port);
+  }
+
   sockaddr const* base_address() const {
-    return (sockaddr*)&address;
+    return (sockaddr*)&address_;
+  }
+  sockaddr* base_address() {
+    return (sockaddr*)&address_;
   }
 
   socklen_t bytes() const {
-    return sizeof(address);
+    return sizeof(address_);
   }
 
-  sockaddr_in address;
-  std::uint32_t ip4;
-  std::uint16_t port;
+ private:
+  sockaddr_in address_;
 };
 
 #endif

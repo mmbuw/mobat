@@ -10,7 +10,7 @@
   #include <sys/socket.h>
 #endif
 
-struct address;
+class Address;
 
 class Socket {
  public:
@@ -23,9 +23,9 @@ class Socket {
   Socket& operator=(Socket const&) = delete;
   Socket& operator=(Socket&&);
 
-  void send(address const& target_address, std::uint8_t* packet_data, ssize_t packet_bytes);
+  void send(Address const& target_address, std::uint8_t* packet_data, ssize_t packet_bytes);
 
-  std::size_t recieve(address const& source_address, std::uint8_t* buffer_data, ssize_t buffer_size);
+  std::size_t recieve(Address* source_address, std::uint8_t* buffer_data, ssize_t buffer_size);
  
  private:
   void make_nonblocking();
