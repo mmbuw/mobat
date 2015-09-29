@@ -104,7 +104,7 @@ void Socket::make_nonblocking() {
   #endif
 }
 
-void Socket::send(Address const& target_address, std::uint8_t* packet_data, ssize_t packet_bytes) {
+void Socket::send(Address const& target_address, std::uint8_t* packet_data, ssize_t packet_bytes) const {
   ssize_t sent_bytes = sendto(handle_,
                               packet_data,
                               packet_bytes,
@@ -120,7 +120,7 @@ void Socket::send(Address const& target_address, std::uint8_t* packet_data, ssiz
   }
 }
 
-std::size_t Socket::receive(Address* source_address, std::uint8_t* buffer_ptr, ssize_t buffer_bytes) {
+ssize_t Socket::receive(Address* source_address, std::uint8_t* buffer_ptr, ssize_t buffer_bytes) const {
   socklen_t address_bytes = source_address->bytes();
 
   ssize_t received_bytes = recvfrom(handle_, 
