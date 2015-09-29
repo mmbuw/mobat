@@ -9,7 +9,6 @@ int main(int argc, char *argv[]) {
   if(argc > 1) {
     std::cout << "sender" << std::endl;
     Socket socket{6666};
-    
     Address_ip4 target_address{127, 0, 0, 1, 30000};
 
     std::vector<std::uint8_t> data(4);
@@ -29,26 +28,22 @@ int main(int argc, char *argv[]) {
     Socket socket{30000};
    
     while (true){
-
       ssize_t max_packet_size = 4;
       std::vector<std::uint8_t> packet_data(max_packet_size);
       
       Address_ip4 source_address{};
-      std::size_t bytes = socket.receive(&source_address, packet_data.data(), max_packet_size);
+      std::size_t received_bytes = socket.receive(&source_address, packet_data.data(), max_packet_size);
 
-      if (bytes > 0) {
-        std::uint32_t source_ip = source_address.address();
-        std::uint16_t source_port = source_address.port();
-        std::cout << "received from " << source_ip << " from port " << source_port << std::endl;
+      if (received_bytes > 0) {
+        std::cout << "received from " << source_address.address() << " from port " << source_address.port() << std::endl;
         // process received packet
         for (auto const& a : packet_data) {
           std::cout << a << ", ";
         }
         std::cout << std::endl;
-        return 0;
+        // return 0;
       }
     }
-
   }
   return 0;
 }
