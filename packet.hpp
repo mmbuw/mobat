@@ -3,24 +3,7 @@
 
 #include "socket.hpp"
 #include <stdexcept>
-
-struct position_t {
-  position_t()
-   :id{0}
-   ,x{0}
-   ,y{0}
-  {}
-
-  position_t(std::uint8_t i, float xx, float yy)
-   :id{i}
-   ,x{xx}
-   ,y{yy}
-  {}
-
-  std::uint8_t id;
-  float x;
-  float y;
-};
+#include <typeinfo>
 
 template<typename T>
 struct packet {
@@ -32,7 +15,6 @@ struct packet {
    :value(val)
   {}
 
-
   const std::uint32_t header = correct_header;
   T value;
   const std::uint8_t footer = correct_footer; 
@@ -40,11 +22,11 @@ struct packet {
   static const std::uint32_t correct_header;
   static const std::uint8_t correct_footer;
 };
-
+// make header depending on hash of contained struct
 template<typename T>
-const std::uint32_t packet<T>::correct_header = 1631743821; // MoBa in ASCII
+const std::uint32_t packet<T>::correct_header = std::uint32_t(typeid(T).hash_code());
 template<typename T>
-const std::uint8_t packet<T>::correct_footer = 116; // t in ASCII
+const std::uint8_t packet<T>::correct_footer = 116;
 
 template<typename T>
 void send(Socket const& socket, Address const& address, T const& value) {
@@ -54,23 +36,23 @@ void send(Socket const& socket, Address const& address, T const& value) {
 
 template<typename T>
 bool receive(Socket const& socket, Address* received_address, T* received_pos) {
-  packet<T> packet{};
-  ssize_t received_bytes = socket.receive(received_address, (uint8_t*)&packet, sizeof(packet));
+  packet<T> received_packet{};
+  ssize_t received_bytes = socket.receive(received_address, (uint8_t*)&received_packet, sizeof(received_packet));
 
-  if (received_bytes != sizeof(packet)) {
+  if (received_bytes != sizeof(received_packet)) {
     return false;
   }
 
-  if (packet.header != packet<T>::correct_header) {
+  if (received_packet.header != packet<T>::correct_header) {
     return false;
   }
 
-  if (packet.footer != packet<T>::correct_footer) {
+  if (received_packet.footer != packet<T>::correct_footer) {
     throw std::runtime_error("MoBat packet corrupted");
     return false;
   }
 
-  *received_pos = packet.value;
+  *received_pos = received_packet.value;
   return true;
 }
 #endif

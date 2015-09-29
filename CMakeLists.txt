@@ -14,7 +14,7 @@ add_executable(udp_test ${SOURCES})
 #request C++11 if on unix, stop at all warnings but ignore specific warning in glm headers
 set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 if(UNIX)
-  add_definitions( -std=c++11 -Wall -Wno-strict-aliasing)
+  add_definitions( -std=c++11 -Wall -Wconversion)
 endif(UNIX)
 
 #set the build type if its not set
