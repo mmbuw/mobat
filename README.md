@@ -7,11 +7,11 @@ It has an average positional accuracy and precision of about 3 cm on a table of 
 The prototype set-up consists of the following:
 
 ## Software
-* **TTT Sine Emitter** Android app  which lets a smartphone emit a modified sine signal
+* **TTT Sine Emitter** Android applicaton  which lets a smartphone emit a modified sine signal
 * **Emitter Locator** Linux application using the **ALSA** sound library which locates the emitted signals
 
-## Hardware
+## Used Hardware
 * 4 **t.bone EM700** microphones
 *  **Behringer U-PHORIA UMC404** sound-card 
 * notebook with an **Intel Core i7-2630QM  2Ghz** CPU. 
-* **Nexus 4** devices as soud emitters.
+* **Nexus 4** devices as sound emitters.
