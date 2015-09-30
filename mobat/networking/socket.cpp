@@ -121,20 +121,28 @@ void Socket::send(Address const& target_address, std::uint8_t* packet_data, ssiz
 }
 
 ssize_t Socket::receive(Address* source_address, std::uint8_t* buffer_ptr, ssize_t buffer_bytes) const {
-  socklen_t address_bytes = source_address->bytes();
+  // dont crash if source address is nullpter
+  socklen_t address_bytes = 0;
+  sockaddr* base_address = NULL;
+  if (source_address != nullptr) {
+   address_bytes = source_address->bytes();
+   base_address = source_address->base_address();
+  }
 
   ssize_t received_bytes = recvfrom(handle_, 
                    buffer_ptr, 
                    buffer_bytes,
                    MSG_TRUNC,     //return untruncated packet length
-                   source_address->base_address(), 
+                   base_address, 
                    &address_bytes);
 
   if (received_bytes > 0) {
     // if the expected address type is smaller than the received one
-    if (address_bytes > source_address->bytes()) {
-      throw std::overflow_error("Address type of " + std::to_string(source_address->bytes()) 
-      + " bytes does not match source address of " + std::to_string(address_bytes));
+    if (source_address != nullptr) {
+      if (address_bytes > source_address->bytes()) {
+        throw std::overflow_error("Address type of " + std::to_string(source_address->bytes()) 
+        + " bytes does not match source address of " + std::to_string(address_bytes));
+      }
     }
     // received packet bigger than buffer
     if (received_bytes > buffer_bytes) {

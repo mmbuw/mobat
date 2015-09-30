@@ -4,6 +4,7 @@
 #include "packet.hpp"
 
 #include <functional>
+#include <thread>
 
 template<typename T>
 class Receiver {
@@ -11,35 +12,47 @@ class Receiver {
   Receiver(std::uint16_t port) 
    :socket_{port}
    ,listen_{false}
+   ,listen_thread_{}
   {}
 
-  void set_receive_callback(std::function<void(T)> const& func) {
-    callback_ = func;
+  ~Receiver() {
+  	stop_listening();
   }
 
-  void listen() {
-    std::cout << "receiver" << std::endl;
-    listen_ = true;
+  void set_receive_callback(std::function<void(T const&)> const& func) {
+    callback_ = func;
+  }
+  
+  template<typename S>
+  void set_receive_callback(void (S::*func)(T const&), S& object) {
+    callback_ = std::bind(func, &object);
+  }
 
-    while (listen_){
-      Address_ip4 source_address{};
-      
+  void start_listening() {
+    listen_ = true;
+  	listen_thread_ = std::thread{&Receiver::listen, this};
+  }
+
+  void stop_listening() {
+    listen_ = false;
+    listen_thread_.join();
+  }
+
+ private:
+  void listen() {
+    while (listen_) {      
       T received_data{};
-      bool got_package = packet::receive<T>(socket_, &source_address, &received_data);
+      bool got_package = packet::receive<T>(socket_, nullptr, &received_data);
       if (got_package) {
         callback_(received_data);
       }
     }
   }
 
-  void stop_listening() {
-    listen = false;
-  }
-
- private:
   Socket socket_;
   bool listen_;
-  std::function<void(T)> callback_;
+  std::function<void(T const&)> callback_;
+  std::thread listen_thread_;
 };
 
 #endif
