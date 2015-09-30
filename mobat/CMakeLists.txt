@@ -54,6 +54,15 @@ if(ODROID_BUILD)
 endif()
 
 
+#game
+file(GLOB GAME_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/airhockey/*.cpp)
+add_library(game STATIC ${GAME_SOURCES})
+target_include_directories(game PUBLIC include/airhockey)
+# requires libsfml-dev
+target_link_libraries(game -lm -lsfml-graphics -lsfml-window -lsfml-system visualization)
+
+
+
 
 # output executables
 add_executable(ttt src/visualization.cpp)
@@ -63,7 +72,7 @@ if(ODROID_BUILD)
 endif()
 
 add_executable(airhockey src/airhockey.cpp)
-target_link_libraries(airhockey udp_receiver -lpthread)
+target_link_libraries(airhockey game udp_receiver -lpthread)
 
 
 

@@ -1,5 +1,5 @@
 
-#include "table_visualizer.hpp"
+#include "game.hpp"
 #include "drawable_object.hpp"
 #include "score.hpp"
 #include "configurator.hpp"
@@ -91,11 +91,11 @@ int main(int argc, char** argv) {
     TTT::DrawableObject::setPhysTableSize(configurator().getVec("table_size"));
     TTT::DrawableObject::setProjection(configurator().getVec("projection_offset"), configurator().getVec("projection_size"));
 
-    TTT::TableVisualizer tisualizer(microphone_positions_);
-    tisualizer.setTokenRecognitionTimeout(configurator().getUint("recognition_timeout"));
+    TTT::Game game(microphone_positions_);
+    game.setTokenRecognitionTimeout(configurator().getUint("recognition_timeout"));
 
-    tisualizer.setTokenFillColor(configurator().getUint("player1"), sf::Color(0,0,255) );
-    tisualizer.setTokenFillColor(configurator().getUint("player2"), sf::Color(255, 0, 0) );
+    game.setTokenFillColor(configurator().getUint("player1"), sf::Color(0,0,255) );
+    game.setTokenFillColor(configurator().getUint("player2"), sf::Color(255, 0, 0) );
         
 // game
     std::string winner;
@@ -126,24 +126,24 @@ int main(int argc, char** argv) {
             // toggle game
             if(event.key.code == sf::Keyboard::Space){
                 if (event.type == sf::Event::KeyPressed){
-                    tisualizer.toggleGame();
+                    game.toggleGame();
                 }
             }
         }
 
 
 
-        if(!tisualizer.gameOver().first){
+        if(!game.gameOver().first){
             if(show_tablevis) {
                 window.clear();
 
-                tisualizer.handleKeyboardInput();
+                game.handleKeyboardInput();
 
-                tisualizer.recalculateGeometry();
+                game.recalculateGeometry();
                 
                 
 
-                tisualizer.draw(window);
+                game.draw(window);
             }
             // #############################RECEIVING##################################################################
             receiver.draw(window);
@@ -167,7 +167,7 @@ int main(int argc, char** argv) {
             
                 if(draw_endscreen_){
 
-                    winner = tisualizer.gameOver().second;
+                    winner = game.gameOver().second;
 
                    if(winner == "Red"){
                         window.draw(rect_red);
@@ -179,9 +179,9 @@ int main(int argc, char** argv) {
                     draw_endscreen_ = false;
                 }
 
-                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Return) || !tisualizer.gameActive()) {
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Return) || !game.gameActive()) {
                     draw_endscreen_ = true;
-                    tisualizer.restart();
+                    game.restart();
                 }
             
         }
