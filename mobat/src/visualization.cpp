@@ -4,6 +4,8 @@
 #include "score.hpp"
 #include "configurator.hpp"
 #include "test.h"
+#include "../udp_receiver/udp_receiver.hpp"
+
 
 #include <SFML/Graphics.hpp>
 
@@ -14,10 +16,29 @@
 #include <time.h>
 #include <boost/filesystem.hpp>
 
+
 void draw_signal_plot(sf::RenderWindow& window, Locator const& locator);
 
 int main(int argc, char** argv) {
+//######################################RECEVER##########################################
+    TTT::UdpReceiver receiver;
+    glm::vec2 rcv_test_pos{0.23, 0.45};
+    std::pair<unsigned, glm::vec2> rcv_test_entry{123, rcv_test_pos};
+    receiver.receive(rcv_test_entry);
 
+    glm::vec2 rcv_test_pos2{0.0, 0.5};
+    std::pair<unsigned, glm::vec2> rcv_test_entry2{13, rcv_test_pos2};
+    receiver.receive(rcv_test_entry2);
+
+    receiver.printAll();
+    receiver.print(123);
+    auto asdf = receiver.positionOf(123);
+    std::cout << asdf.x << ", " << asdf.y << "\n";
+    
+    auto rcv_test_dir = receiver.directionFromTo(123, 13);
+    std::cout<< rcv_test_dir.x <<", " << rcv_test_dir.y <<"\n";
+
+//########################################################################################
     std::string file_name{"default.conf"};
     if(argc > 1) {
         file_name = argv[1];
@@ -176,7 +197,9 @@ int main(int argc, char** argv) {
 
                 tisualizer.draw(window);
             }
-            
+            // #############################RECEIVING##################################################################
+            receiver.draw(window);
+//          ################################END RECEIVING##############################################################
             std::map<unsigned, std::pair<unsigned, glm::vec2> > positions = locator.loadPosition();
             
             if(positions.size() != 0) {
@@ -211,6 +234,10 @@ int main(int argc, char** argv) {
 
             if(show_tablevis) {
                 tisualizer.updateTokens();
+//##############################################################################################
+                receiver.receive(rcv_test_entry2);
+                receiver.updateTokens();
+//##############################################################################################
             }
 
             if(show_signalvis) {

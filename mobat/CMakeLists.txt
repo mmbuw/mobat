@@ -14,6 +14,14 @@ target_include_directories(testing PUBLIC include/testing)
 # requires boostlib
 target_link_libraries(testing -lboost_filesystem -lboost_system visualization)
 
+# udp_reciever
+file(GLOB UDP_RECEIVER_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/udp_receiver/*.cpp)
+add_library(udp_receiver STATIC ${UDP_RECEIVER_SOURCES})
+# populate both includedir and interfaceincludedir (include with targets linked with this)
+target_include_directories(udp_receiver PUBLIC include/udp_receiver)
+# requires boostlib
+target_link_libraries(udp_receiver visualization)
+
 # recorder
 file(GLOB RECORDER_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/recorder/*.cpp)
 add_library(recorder STATIC ${RECORDER_SOURCES})
@@ -46,9 +54,10 @@ if(ODROID_BUILD)
 endif()
 
 
+
 # output executables
 add_executable(ttt src/visualization.cpp)
-target_link_libraries(ttt recorder signaltrans locator visualization testing -lpthread)
+target_link_libraries(ttt recorder signaltrans locator visualization testing udp_receiver -lpthread)
 if(ODROID_BUILD)
   target_link_libraries(ttt -lX11 -lX11-xcb)
 endif()
