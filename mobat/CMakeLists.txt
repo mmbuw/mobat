@@ -59,6 +59,15 @@ if(ODROID_BUILD)
   target_link_libraries(visualization -lxcb -lxcb-randr -lxcb-icccm -lxcb-image -ludev)
 endif()
 
+# mobat_server
+file(GLOB MOBAT_SERVER_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/mobat_server/*.cpp)
+add_library(mobat_server STATIC ${MOBAT_SERVER_SOURCES})
+target_include_directories(mobat_server PUBLIC include/mobat_server)
+target_link_libraries(mobat_server locator testing networking -lm -lsfml-graphics -lsfml-window -lsfml-system)
+if(ODROID_BUILD)
+  target_link_libraries(mobat_server -lxcb -lxcb-randr -lxcb-icccm -lxcb-image -ludev)
+endif()
+
 # output executables
 add_executable(ttt src/visualization.cpp)
 target_link_libraries(ttt recorder signaltrans locator visualization testing udp_receiver networking -lpthread)
@@ -67,7 +76,7 @@ if(ODROID_BUILD)
 endif()
 
 add_executable(mobat_localizer src/mobat_localizer.cpp)
-target_link_libraries(mobat_localizer recorder signaltrans locator visualization testing networking -lpthread)
+target_link_libraries(mobat_localizer mobat_server recorder signaltrans locator visualization testing networking -lpthread)
 if(ODROID_BUILD)
   target_link_libraries(mobat_localizer -lX11 -lX11-xcb)
 endif()

@@ -1,5 +1,5 @@
-#ifndef TableVisualizer_H
-#define TableVisualizer_H
+#ifndef TABLE_VISUALIZER_H
+#define TABLE_VISUALIZER_H
 
 #include "table.hpp"
 #include "microphone.hpp"

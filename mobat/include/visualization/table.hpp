@@ -1,5 +1,5 @@
-#ifndef TTT_Table_H
-#define TTT_Table_H
+#ifndef TABLE_H
+#define TABLE_H
 
 #include "drawable_object.hpp"
 #include "microphone.hpp"

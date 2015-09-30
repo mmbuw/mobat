@@ -1,5 +1,5 @@
-#ifndef TTT_Token_H
-#define TTT_Token_H
+#ifndef TOKEN_H
+#define TOKEN_H
 
 #include "drawable_object.hpp"
 
