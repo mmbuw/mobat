@@ -53,6 +53,12 @@ if(ODROID_BUILD)
   target_link_libraries(ttt -lX11 -lX11-xcb)
 endif()
 
+add_executable(mobat_localizer src/mobat_localizer.cpp)
+target_link_libraries(mobat_localizer recorder signaltrans locator visualization testing -lpthread)
+if(ODROID_BUILD)
+  target_link_libraries(mobat_localizer -lX11 -lX11-xcb)
+endif()
+
 # output executables
 add_executable(table_plot src/table_plot/svg_plot_generator.cpp)
 #target_link_libraries(ttt recorder signaltrans locator visualization testing -lpthread)

@@ -390,20 +390,20 @@ unsigned int FftTransformer::performFFT(unsigned channel_num) {
     }
   }
 
-  copyChannelFFTResults( listening_to_those_frequencies );
+  copyChannelFFTResults( channel_num, listening_to_those_frequencies );
 
-}
+} else {
 
 }
   return 0;
 }
 
-void copyChannelFFTResults( std::vector<unsigned> const& observed_frequencies ) {
+void FftTransformer::copyChannelFFTResults( unsigned const channel_idx, std::vector<unsigned> const& observed_frequencies ) {
   //push back final results for this sample
   for (unsigned iterated_frequency : listening_to_those_frequencies) {
-    if (!std::isnan(frequency_sums_[channel_num][iterated_frequency])) {
+    if (!std::isnan(frequency_sums_[channel_idx][iterated_frequency])) {
 
-      signal_results_per_frequency_[iterated_frequency][channel_num].push_back(frequency_sums_[channel_num][iterated_frequency]);
+      signal_results_per_frequency_[iterated_frequency][channel_idx].push_back(frequency_sums_[channel_idx][iterated_frequency]);
       //std::cout << "Get results: " << frequency_sums_[iterated_frequency] << "\n";
     } else {
       //throw std::length_error("Transformed out of bounds memory!");

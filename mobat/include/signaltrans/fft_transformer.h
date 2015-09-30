@@ -72,6 +72,8 @@ class FftTransformer {
         // loads configurable parameters
 		void loadFFTParameters();
 
+		void copyChannelFFTResults( unsigned const channel_idx, std::vector<unsigned> const& observed_frequencies );
+
 		//configurable parameters
 		float normalization_range_lower_limit_;
 		float normalization_range_upper_limit_;
