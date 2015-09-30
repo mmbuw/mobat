@@ -62,6 +62,11 @@ if(ODROID_BUILD)
   target_link_libraries(ttt -lX11 -lX11-xcb)
 endif()
 
+add_executable(airhockey src/airhockey.cpp)
+target_link_libraries(airhockey udp_receiver -lpthread)
+
+
+
 add_executable(mobat_localizer src/mobat_localizer.cpp)
 target_link_libraries(mobat_localizer recorder signaltrans locator visualization testing -lpthread)
 if(ODROID_BUILD)
