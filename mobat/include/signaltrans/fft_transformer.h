@@ -19,11 +19,14 @@
 class FftTransformer {
 	private:
 
-		float normalization_value;
-		bool found_freq_;
+
+		unsigned int fft_window_size_;
+
+		float normalization_value_;
+		bool found_frequency_;
 
 		std::array<fftw_plan, 4>  fftw_execution_plans_;
-		unsigned int fft_window_size_;
+
 		int* input_stream_;
 
 		std::array<unsigned int,4> start_sample_;
@@ -38,7 +41,6 @@ class FftTransformer {
 
 		double* window_;
 
-		//double eighteen_khz_sum_;
 		std::array<std::map<unsigned, double>, 4> frequency_sums_;
 		std::array<std::vector<double>, 4> average_smoothing_result_vectors_;
 
@@ -62,6 +64,7 @@ class FftTransformer {
 		void createHannWindow();
 		void createBlackmannHarrisWindow();
 
+		void initializeFFTThreads();
         void performFFTOnCertainChannel(unsigned channel_iterator);
 
         void smoothResults(unsigned int channel_idx);

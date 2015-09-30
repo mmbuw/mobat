@@ -7,16 +7,17 @@
 
 #define MATH_PI 3.14159265359 
 
+
 //helper function
 void FftTransformer::createHammingWindow() {
 
   for (unsigned int i = 0; i < fft_window_size_; ++i) {
     window_[i] = 0.54f - (0.46f * std::cos( 2 * MATH_PI * (i / ((fft_window_size_ - 1) * 1.0))));
     
-    normalization_value += window_[i];
+    normalization_value_ += window_[i];
   }
 
-  normalization_value /= (fft_window_size_/2);
+  normalization_value_ /= (fft_window_size_/2);
 }
 
 void FftTransformer::createHannWindow() {
@@ -31,18 +32,18 @@ void FftTransformer::createBlackmannHarrisWindow() {
   float a2 = 0.14128f;
   float a3 = 0.01168f;
 
-  normalization_value = 1.0;
+  normalization_value_ = 1.0;
   for (unsigned int i = 0; i < fft_window_size_; ++i) {
-   //window_[i] = 0.54f - (0.46f * std::cos( 2 * MATH_PI * (i / ((fft_window_size_ - 1) * 1.0))));
+
     window_[i] =   a0 
     - a1 * std::cos( 2 * MATH_PI * i / (fft_window_size_ - 1))
     + a2 * std::cos( 4 * MATH_PI * i / (fft_window_size_ - 1))
     - a3 * std::cos( 6 * MATH_PI * i / (fft_window_size_ - 1));
 
 
-    normalization_value += window_[i]*window_[i];
+    normalization_value_ += window_[i]*window_[i];
   } 
-  normalization_value = std::sqrt(normalization_value);
+  normalization_value_ = std::sqrt(normalization_value_);
 }
 
 
@@ -56,7 +57,6 @@ void FftTransformer::resetThreadPerformedSignals() {
 }
 
 void FftTransformer::loadFFTParameters() {
-
   ffts_per_frame_ = configurator().getUint("ffts_per_frame");
   num_chunks_ = configurator().getFloat("num_splitted_fourier_chunks");
   normalization_range_lower_limit_ = configurator().getFloat("normalization_range_lower_limit");
@@ -67,34 +67,34 @@ void FftTransformer::loadFFTParameters() {
   audio_device_sampling_rate_ = configurator().getFloat("audio_device_sampling_rate");
 
   num_smooth_average_samples_ = configurator().getUint("fft_smoothing_sample_num");
+}
 
- // average_smoothing_result_vectors_.reserve(window_size_);
+// creates a thread for each channel to perform a FFT on provided input
+void FftTransformer::initializeFFTThreads() {
+  fft_threads_[0] = std::shared_ptr<std::thread>( new std::thread([&] { this->performFFTOnCertainChannel(0); } ) ); 
+  fft_threads_[1] = std::shared_ptr<std::thread>( new std::thread([&] { this->performFFTOnCertainChannel(1); } ) ); 
+  fft_threads_[2] = std::shared_ptr<std::thread>( new std::thread([&] { this->performFFTOnCertainChannel(2); } ) ); 
+  fft_threads_[3] = std::shared_ptr<std::thread>( new std::thread([&] { this->performFFTOnCertainChannel(3); } ) ); 
 }
 
 FftTransformer::FftTransformer(unsigned int fft_window_size)
- :start_sample_{std::numeric_limits<unsigned int>::max()}
- ,end_sample_{std::numeric_limits<unsigned int>::max()}
- ,average_smoothing_result_vectors_{std::vector<double>{},
+ :fft_window_size_(fft_window_size),
+  found_frequency_(false),
+  start_sample_{std::numeric_limits<unsigned int>::max()},
+  end_sample_{std::numeric_limits<unsigned int>::max()},
+  average_smoothing_result_vectors_{std::vector<double>{},
                                     std::vector<double>{},
                                     std::vector<double>{},
                                     std::vector<double>{}}
-{
-
+                                     {
 
   loadFFTParameters();
 
   resetThreadPerformedSignals();
 
-
-  fft_threads_[0] = std::shared_ptr<std::thread>( new std::thread([&] { this->performFFTOnCertainChannel(0); } ) ); 
-  fft_threads_[1] = std::shared_ptr<std::thread>( new std::thread([&] { this->performFFTOnCertainChannel(1); } ) ); 
-  fft_threads_[2] = std::shared_ptr<std::thread>( new std::thread([&] { this->performFFTOnCertainChannel(2); } ) ); 
-  fft_threads_[3] = std::shared_ptr<std::thread>( new std::thread([&] { this->performFFTOnCertainChannel(3); } ) ); 
+  initializeFFTThreads();
 
   fft_window_size_ = fft_window_size;
-
-
-  found_freq_ = false;
 
 
   for (int i = 0; i < 4; ++i) {
@@ -275,8 +275,6 @@ void FftTransformer::smoothResults(unsigned channel_idx) {
   
   float average_sample_as_float = (float)(num_smooth_average_samples_);
 
-  //std::vecto<double> average_result_vector()
-
 
   for(auto& frequency_slot : signal_results_per_frequency_) {
 
@@ -323,26 +321,13 @@ void FftTransformer::smoothResults(unsigned channel_idx) {
 }
   
 
-
-
 unsigned int FftTransformer::performFFT(unsigned channel_num) {
-  //dummy insertion
-  //listening_to_those_frequencies.clear();
-  //listening_to_those_frequencies.push_back(18000);
-  //listening_to_those_frequencies.push_back(19000);
-  //only perform an fft, if we listen to at least 1 frequency
-  if ( 0 != listening_to_those_frequencies.size() ) {
-    frequency_sums_[channel_num].clear();
-    //eighteen_khz_sum_ = 0.0;
-    if (start_sample_[channel_num] > end_sample_[channel_num] - (fft_window_size_ + 1) ) {
-      return 0;
-    }
 
-	//only perform an fft, if we listen to at least 1 frequency
+	//only perform an FFT, if we listen to at least 1 frequency-slice
 	if(0 != listening_to_those_frequencies.size() ) {
-		frequency_sums_[channel_num].clear();
-		//eighteen_khz_sum_ = 0.0;
 
+    //clear old results
+		frequency_sums_[channel_num].clear();
 
 		if(start_sample_[channel_num] > end_sample_[channel_num] - (fft_window_size_ + 1) )
 			return 0;
@@ -405,6 +390,15 @@ unsigned int FftTransformer::performFFT(unsigned channel_num) {
     }
   }
 
+  copyChannelFFTResults( listening_to_those_frequencies );
+
+}
+
+}
+  return 0;
+}
+
+void copyChannelFFTResults( std::vector<unsigned> const& observed_frequencies ) {
   //push back final results for this sample
   for (unsigned iterated_frequency : listening_to_those_frequencies) {
     if (!std::isnan(frequency_sums_[channel_num][iterated_frequency])) {
@@ -415,9 +409,4 @@ unsigned int FftTransformer::performFFT(unsigned channel_num) {
       //throw std::length_error("Transformed out of bounds memory!");
     }
   }
-
-}
-
-}
-  return 0;
 }
