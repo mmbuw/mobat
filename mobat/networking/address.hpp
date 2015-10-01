@@ -20,12 +20,13 @@ class Address {
   virtual socklen_t bytes() const = 0;
 };
 
+// IP4 address struct for UDP data transfer
 class Address_ip4 : public Address {
  public:
   Address_ip4()
    :address_{}
   {}
-
+  // construct address from ip int and port
   Address_ip4(std::uint32_t ip, std::uint16_t p)
    :address_{}
   {
@@ -33,7 +34,7 @@ class Address_ip4 : public Address {
     set_address(ip);
     set_port(p);
   }
-
+  // construct address from ip components and port
   Address_ip4(std::uint8_t a, std::uint8_t b, std::uint8_t c, std::uint8_t d, std::uint16_t p)
    :Address_ip4((std::uint32_t)((a << 24  | (b << 16) | (c << 8) | d)), p)
   {};
