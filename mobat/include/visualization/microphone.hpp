@@ -1,5 +1,5 @@
-#ifndef TTT_Microphone_H
-#define TTT_Microphone_H
+#ifndef MICROPHONE_H
+#define MICROPHONE_H
 
 #include "drawable_object.hpp"
 

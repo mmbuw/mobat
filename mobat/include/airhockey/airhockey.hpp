@@ -6,11 +6,11 @@
 #include "drawable_object.hpp"
 #include "score.hpp"
 #include "configurator.hpp"
-#include "token_position.hpp"
+#include "token_packet.hpp"
 
 
-#include "../udp_receiver/udp_receiver.hpp"
-
+#include "receiver.hpp"
+#include "socket.hpp"
 
 #include <SFML/Graphics.hpp>
 
@@ -26,12 +26,14 @@
 
 class Airhockey{
   private:
-  	TTT::UdpReceiver receiver_;
+
 
   public:
   	Airhockey();
-  	void forwardToken(token_position const& in);
+  	Airhockey(std::uint16_t port);
+  	void forwardToken(token_packet const& in);
   	
+  	Receiver<token_packet> receiver_;
   	TTT::Game game_;
 
 

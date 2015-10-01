@@ -1,5 +1,5 @@
-#ifndef BUFFERCOLLECTION_HPP
-#define BUFFERCOLLECTION_HPP
+#ifndef BUFFER_COLLECTION_HPP
+#define BUFFER_COLLECTION_HPP
 
 #include <cstdlib>
 #include <cstdint>

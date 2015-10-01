@@ -1,5 +1,5 @@
-#ifndef TTT_DrawableObject_H
-#define TTT_DrawableObject_H
+#ifndef DRAWABLE_OBJECT_H
+#define DRAWABLE_OBJECT_H
 
 #include <SFML/Graphics.hpp>
 #include <glm/vec2.hpp>
