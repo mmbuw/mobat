@@ -22,9 +22,13 @@ class Score : DrawableObject{
     Score(){};
     ~Score(){};
     Score(int max_points);
+    //draws
     void draw(sf::RenderWindow& canvas) const;
-    void update(int r_goals, int l_goals); //changes colors according to given scores
-    void reset(); //sets colors back to the startcondition (like a tie)
+    //changes colors according to given scores
+    void update(int r_goals, int l_goals);
+    //sets colors back to the startcondition (like a tie)
+    void reset();
+    //returns maximum points
     int getMaxPoints();
 };
 

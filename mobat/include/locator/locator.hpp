@@ -27,7 +27,7 @@ public:
     void recordPosition();
 
     void shutdown();
-
+    //sets request_vis_vectors depending on the config file
     void loadLocatorParameters();
 
      friend int main(int argc, char** argv);
