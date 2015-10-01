@@ -93,7 +93,7 @@ class Game : DrawableObject {
 
 		void resetMicrophones(std::vector<Microphone> const& in_microphones);
 
-		void recalculateGeometry(std::map<unsigned, Token> const recognized_tokens_);
+		void recalculateGeometry();
 
 		void setCanvasResolution(glm::vec2 const& in_resolution );
 

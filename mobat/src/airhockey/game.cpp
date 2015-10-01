@@ -86,7 +86,7 @@ draw(sf::RenderWindow& canvas) const {
         mic_obj.draw(canvas);
     }
 
-    for( auto& id_token_pair : recognized_tokens ) {
+    for( auto& id_token_pair : recognized_tokens_ ) {
         id_token_pair.second.draw(canvas);
     }
 
@@ -105,7 +105,7 @@ resetMicrophones(std::vector<Microphone> const& microphones) {
 }
 
 void Game::
-recalculateGeometry(std::map<unsigned, Token> const recognized_tokens) {
+recalculateGeometry() {
 
     if(gamemode_ == true){
         // ensures pause after goal
@@ -114,7 +114,7 @@ recalculateGeometry(std::map<unsigned, Token> const recognized_tokens) {
             bool already_moved_out = false;
             Token last_token;
             // check for intersections with all tokens
-            for(auto const& i : recognized_tokens){
+            for(auto const& i : recognized_tokens_){
 
                 auto intersection = ballIntersect(i.second);
                 if(intersection.first){
@@ -247,14 +247,14 @@ setTokenFillColor(unsigned frequency, sf::Color const& in_token_fill_color ) {
 
     token_color_mapping_[frequency] = in_token_fill_color;
 
-    for( auto& id_token_pair : recognized_tokens ) {
+    for( auto& id_token_pair : recognized_tokens_ ) {
         id_token_pair.second.setFillColor(in_token_fill_color);
     }
 }
 
 void Game::
 setTokenRecognitionTimeout( unsigned in_timeout_in_ms ) {
-    for( auto& id_token_pair : recognized_tokens ) {
+    for( auto& id_token_pair : recognized_tokens_ ) {
         id_token_pair.second.setLifeTime(in_timeout_in_ms);
     }
 }
@@ -262,17 +262,17 @@ setTokenRecognitionTimeout( unsigned in_timeout_in_ms ) {
 void Game::
 signalToken(unsigned int in_id, glm::vec2 const& in_position) {
 
-    if( recognized_tokens.end() != recognized_tokens.find(in_id) ) {
+    if( recognized_tokens_.end() != recognized_tokens_.find(in_id) ) {
         tokens_to_refresh_.insert(in_id);
     }
 
     //std::cout << "Inserting new token with id: " << in_id << "\n";
-    recognized_tokens[in_id] = Token(in_id, in_position); 
+    recognized_tokens_[in_id] = Token(in_id, in_position); 
 
     std::map<unsigned, sf::Color>::iterator token_color_mapping_iterator = 
         token_color_mapping_.find(in_id);
     if(token_color_mapping_.end() != token_color_mapping_.find(in_id) ) {
-        recognized_tokens[in_id]
+        recognized_tokens_[in_id]
             .setFillColor(token_color_mapping_iterator->second);
     }
 }
@@ -284,7 +284,7 @@ updateTokens() {
     
     std::set<unsigned> tokens_to_remove;
 
-    for( auto& id_token_pair : recognized_tokens ) {
+    for( auto& id_token_pair : recognized_tokens_ ) {
 
         bool refresh_token = false;
         if(tokens_to_refresh_.end() != 
@@ -304,7 +304,7 @@ updateTokens() {
     }
 
     for(auto const& token_id : tokens_to_remove ) {
-        recognized_tokens.erase(token_id);
+        recognized_tokens_.erase(token_id);
     }
 
     tokens_to_refresh_.clear();
@@ -461,7 +461,7 @@ void Game::handleKeyboardInput() {
 
 
 void Game::writeTokens() {
-    for(auto const& i : recognized_tokens){
+    for(auto const& i : recognized_tokens_){
         std::cout<<"Token " << i.first <<" at: (" << i.second.physical_position_.x << ", " << i.second.physical_position_.y << "), ";
     }
     std::cout<<"\n";

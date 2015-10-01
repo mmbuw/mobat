@@ -1,43 +1,26 @@
-
-#include "game.hpp"
-#include "drawable_object.hpp"
-#include "score.hpp"
-#include "configurator.hpp"
-
-#include "../udp_receiver/udp_receiver.hpp"
-
-
-#include <SFML/Graphics.hpp>
-
-#include <iostream>
-#include <thread>
-#include <X11/Xlib.h>
+#include "airhockey.hpp"
 
 
 
+Airhockey::Airhockey()
+    :   receiver_()
+    ,   game_()
+{}
 
+
+void Airhockey::forwardToken(token_position const& in){
+    game_.signalToken(in.id, glm::vec2{in.x, in.y});
+}
 
 
 int main(int argc, char** argv) {
-//######################################RECEVER##########################################
-    TTT::UdpReceiver receiver;
-    glm::vec2 rcv_test_pos{0.23, 0.45};
-    std::pair<unsigned, glm::vec2> rcv_test_entry{123, rcv_test_pos};
-    receiver.receive(rcv_test_entry);
+// std::cout<<"TEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEESSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSTTTTTTTTTTTTTTTTTTTTTTT";
+    // instance.receiver_.set_receive_callback(forwardToken);
 
-    glm::vec2 rcv_test_pos2{0.5, 1.0};
-    std::pair<unsigned, glm::vec2> rcv_test_entry2{13, rcv_test_pos2};
-    receiver.receive(rcv_test_entry2);
 
-    receiver.printAll();
-    receiver.print(123);
-    auto asdf = receiver.positionOf(123);
-    std::cout << asdf.x << ", " << asdf.y << "\n";
-    
-    auto rcv_test_dir = receiver.directionFromTo(123, 13);
-    std::cout<< rcv_test_dir.x <<", " << rcv_test_dir.y <<"\n";
 
-//########################################################################################
+
+
     std::string file_name{"default.conf"};
     if(argc > 1) {
         file_name = argv[1];
@@ -90,12 +73,13 @@ int main(int argc, char** argv) {
     TTT::DrawableObject::setResolution(windowResolution);
     TTT::DrawableObject::setPhysTableSize(configurator().getVec("table_size"));
     TTT::DrawableObject::setProjection(configurator().getVec("projection_offset"), configurator().getVec("projection_size"));
+    Airhockey instance;
 
     TTT::Game game(microphone_positions_);
-    game.setTokenRecognitionTimeout(configurator().getUint("recognition_timeout"));
+    instance.game_.setTokenRecognitionTimeout(configurator().getUint("recognition_timeout"));
 
-    game.setTokenFillColor(configurator().getUint("player1"), sf::Color(0,0,255) );
-    game.setTokenFillColor(configurator().getUint("player2"), sf::Color(255, 0, 0) );
+    instance.game_.setTokenFillColor(configurator().getUint("player1"), sf::Color(0,0,255) );
+    instance.game_.setTokenFillColor(configurator().getUint("player2"), sf::Color(255, 0, 0) );
         
 // game
     std::string winner;
@@ -126,38 +110,42 @@ int main(int argc, char** argv) {
             // toggle game
             if(event.key.code == sf::Keyboard::Space){
                 if (event.type == sf::Event::KeyPressed){
-                    game.toggleGame();
+                    instance.game_.toggleGame();
                 }
             }
         }
 
 
 
-        if(!game.gameOver().first){
+        if(!instance.game_.gameOver().first){
             if(show_tablevis) {
                 window.clear();
 
-                game.handleKeyboardInput();
+                instance.game_.handleKeyboardInput();
+                
+//TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING 
+                token_position test_tp{19000, 0.5, 0.5};
+                instance.forwardToken(test_tp);
+//TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING 
 
-                game.recalculateGeometry();
+                instance.game_.recalculateGeometry();
                 
                 
 
-                game.draw(window);
+                instance.game_.draw(window);
             }
-            // #############################RECEIVING##################################################################
-            receiver.draw(window);
-//          ################################END RECEIVING##############################################################
-         
+
+            instance.game_.draw(window);
+
+            instance.game_.writeTokens();
             
             
 
             if(show_tablevis) {
             
-//##############################################################################################
-                receiver.receive(rcv_test_entry2);
-                receiver.updateTokens();
-//##############################################################################################
+                instance.game_.updateTokens();
+
+
             }
 
 
@@ -167,7 +155,7 @@ int main(int argc, char** argv) {
             
                 if(draw_endscreen_){
 
-                    winner = game.gameOver().second;
+                    winner = instance.game_.gameOver().second;
 
                    if(winner == "Red"){
                         window.draw(rect_red);
@@ -179,9 +167,9 @@ int main(int argc, char** argv) {
                     draw_endscreen_ = false;
                 }
 
-                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Return) || !game.gameActive()) {
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Return) || !instance.game_.gameActive()) {
                     draw_endscreen_ = true;
-                    game.restart();
+                    instance.game_.restart();
                 }
             
         }
@@ -192,11 +180,7 @@ int main(int argc, char** argv) {
     }
 
    
-    
-
     return 0;
+
+
 }
-
-
-
-
