@@ -22,6 +22,7 @@ draw(sf::RenderWindow& canvas) const {
 	//std::cout << token_circle_shape_.getPosition().x << " ";
 	//std::cout << token_circle_shape_.getPosition().y << "\n";
 	canvas.draw(token_circle_shape_);
+	// std::cout<<"getting drawed\n";
 }
 
 void Token::

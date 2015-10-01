@@ -88,6 +88,7 @@ draw(sf::RenderWindow& canvas) const {
 
     for( auto& id_token_pair : recognized_tokens_ ) {
         id_token_pair.second.draw(canvas);
+        // std::cout<<"draw this shit\n";
     }
 
 
@@ -106,6 +107,7 @@ resetMicrophones(std::vector<Microphone> const& microphones) {
 
 void Game::
 recalculateGeometry() {
+
 
     if(gamemode_ == true){
         // ensures pause after goal
@@ -220,6 +222,10 @@ recalculateGeometry() {
                 moved_out_ = false;
             }
         }
+    }
+
+    for(auto & token : recognized_tokens_){
+        token.second.recalculateGeometry();
     }
 }
 

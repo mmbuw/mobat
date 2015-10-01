@@ -21,7 +21,7 @@ Airhockey::Airhockey(std::uint16_t port)
 
 void Airhockey::forwardToken(token_packet const& in){
     game_.signalToken(in.id, glm::vec2{in.x, in.y});
-    std::cout<<"Empfangen\n";
+
 }
 
 
