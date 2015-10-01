@@ -19,6 +19,7 @@ file(GLOB NETWORKING_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} networking/*.c
 add_library(networking STATIC ${NETWORKING_SOURCES})
 # populate both includedir and interfaceincludedir (include with targets linked with this)
 target_include_directories(networking PUBLIC networking)
+target_link_libraries(networking -lpthread)
 
 # udp_reciever
 file(GLOB UDP_RECEIVER_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/udp_receiver/*.cpp)
@@ -68,6 +69,9 @@ if(ODROID_BUILD)
   target_link_libraries(mobat_server -lxcb -lxcb-randr -lxcb-icccm -lxcb-image -ludev)
 endif()
 
+# output executables
+add_executable(networking_example src/networking_example.cpp)
+target_link_libraries(networking_example networking)
 # output executables
 add_executable(ttt src/visualization.cpp)
 target_link_libraries(ttt recorder signaltrans locator visualization testing udp_receiver networking -lpthread)

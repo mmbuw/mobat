@@ -16,28 +16,31 @@ class Receiver {
   {}
 
   ~Receiver() {
-  	stop_listening();
+  	if(listen_) {
+  		stopListening();
+  	}
   }
 
-  void set_receive_callback(std::function<void(T const&)> const& func) {
+  void setReceiveCallback(std::function<void(T const&)> const& func) {
     callback_ = func;
   }
   
   template<typename S>
-  void set_receive_callback(void (S::*func)(T const&), S& object) {
+  void setReceiveCallback(void (S::*func)(T const&), S& object) {
     callback_ = std::bind(func, &object);
   }
 
-  void start_listening() {
+  void startListening() {
     listen_ = true;
   	listen_thread_ = std::thread{&Receiver::listen, this};
   }
 
-  void stop_listening() {
+  void stopListening() {
     listen_ = false;
     listen_thread_.join();
   }
 
+  std::function<void(T const&)> callback_;
  private:
   void listen() {
     while (listen_) {      
@@ -51,7 +54,6 @@ class Receiver {
 
   Socket socket_;
   bool listen_;
-  std::function<void(T const&)> callback_;
   std::thread listen_thread_;
 };
 
