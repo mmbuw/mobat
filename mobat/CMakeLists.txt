@@ -14,6 +14,12 @@ target_include_directories(testing PUBLIC include/testing)
 # requires boostlib
 target_link_libraries(testing -lboost_filesystem -lboost_system visualization)
 
+# networking
+file(GLOB NETWORKING_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} networking/*.cpp)
+add_library(networking STATIC ${NETWORKING_SOURCES})
+# populate both includedir and interfaceincludedir (include with targets linked with this)
+target_include_directories(networking PUBLIC networking)
+
 # udp_reciever
 file(GLOB UDP_RECEIVER_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/udp_receiver/*.cpp)
 add_library(udp_receiver STATIC ${UDP_RECEIVER_SOURCES})
@@ -54,30 +60,38 @@ if(ODROID_BUILD)
 endif()
 
 
+
 #game
 file(GLOB GAME_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/airhockey/*.cpp)
 add_library(game STATIC ${GAME_SOURCES})
 target_include_directories(game PUBLIC include/airhockey)
 # requires libsfml-dev
-target_link_libraries(game -lm -lsfml-graphics -lsfml-window -lsfml-system visualization)
+target_link_libraries(game -lm -lsfml-graphics -lsfml-window -lsfml-system visualization networking)
 
+
+#airhockey
+file(GLOB AIRHOCKEY_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/airhockey/*.cpp)
+add_library(airhockey STATIC ${AIRHOCKEY_SOURCES})
+target_include_directories(airhockey PUBLIC include/airhockey)
+# requires libsfml-dev
+target_link_libraries(airhockey -lm -lsfml-graphics -lsfml-window -lsfml-system visualization game)
 
 
 
 # output executables
 add_executable(ttt src/visualization.cpp)
-target_link_libraries(ttt recorder signaltrans locator visualization testing udp_receiver -lpthread)
+target_link_libraries(ttt recorder signaltrans locator visualization testing udp_receiver networking -lpthread)
 if(ODROID_BUILD)
   target_link_libraries(ttt -lX11 -lX11-xcb)
 endif()
 
-add_executable(airhockey src/airhockey.cpp)
-target_link_libraries(airhockey game udp_receiver -lpthread)
+add_executable(airhockey_demo src/airhockey/airhockey.cpp)
+target_link_libraries(airhockey_demo airhockey game udp_receiver -lpthread)
 
 
 
 add_executable(mobat_localizer src/mobat_localizer.cpp)
-target_link_libraries(mobat_localizer recorder signaltrans locator visualization testing -lpthread)
+target_link_libraries(mobat_localizer recorder signaltrans locator visualization testing networking -lpthread)
 if(ODROID_BUILD)
   target_link_libraries(mobat_localizer -lX11 -lX11-xcb)
 endif()
@@ -92,7 +106,7 @@ add_executable(table_plot src/table_plot/svg_plot_generator.cpp)
 #request C++11 if on unix, stop at all warnings but ignore specific warning in glm headers
 set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 if(UNIX)
-  add_definitions( -std=c++11 -Wall -Werror  -Wno-strict-aliasing)
+  add_definitions( -std=c++11 -Wall -Werror -Wno-strict-aliasing)
 endif(UNIX)
 
 
