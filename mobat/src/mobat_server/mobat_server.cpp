@@ -12,7 +12,8 @@ MobatServer::MobatServer ( std::array<std::uint8_t, 4> receiver_address, std::ui
 	  is_logging_{false},
 	  frontier_timestamp_{0},
 	  starttime_{0},
-	  endtime_{starttime_+60} {
+	  endtime_{starttime_+60},
+    is_verbose_(false) {
 
 }
 
@@ -31,6 +32,7 @@ void MobatServer::run() {
   // visualisation
   bool show_signalvis = configurator().getUint("show_signalvis") > 0;
 
+  is_verbose_ = configurator().getUint("make_server_verbose") > 0;
   //logging auxiliary
   for(auto const& i : frequencies_to_record){
     if(boost::filesystem::create_directory(std::to_string(i))){}
@@ -76,7 +78,7 @@ void MobatServer::run() {
 
     std::map<unsigned, std::pair<unsigned, glm::vec2> > positions = locator_.loadPosition();
         
-    if(positions.size() != 0) {
+    if (!positions.empty()) {
 
       unsigned current_iteration_timestamp_peak = 0;
       //
@@ -134,103 +136,103 @@ void MobatServer::nonblock( int state ) {
 void MobatServer::sendPositions( std::map<unsigned, std::pair<unsigned, glm::vec2> > const& located_positions, 
                     			 unsigned int& frontier_timestamp) {
 
-    for(auto const& frequency_position_entry : located_positions ) {     
+  for(auto const& frequency_position_entry : located_positions ) {     
 
-        if(frontier_timestamp_ < frequency_position_entry.second.first) {
-           frontier_timestamp = frequency_position_entry.second.first;
+    if(frontier_timestamp_ < frequency_position_entry.second.first) {
+      frontier_timestamp = frequency_position_entry.second.first;
+
+      token_packet t_packet{frequency_position_entry.first, 
+                  frequency_position_entry.second.second[0] , 
+                  frequency_position_entry.second.second[1], 
+                  frontier_timestamp};
+
+      // send packet per UDP to receiver
+      packet::send<token_packet>(sender_socket_, target_address_, t_packet);
+
+      if( is_verbose_ ) {
+        std::cout << t_packet;
+      }
 
 
-            std::cout << "Frequency: " << frequency_position_entry.first 
-                      << "("  << frequency_position_entry.second.second[0] 
-                      << ", " << frequency_position_entry.second.second[1]
-                      << ")\n";
-			
 
-			token_position token_packet{frequency_position_entry.first, 
-								        frequency_position_entry.second.second[0] , 
-								        frequency_position_entry.second.second[1], 
-								        frontier_timestamp};
-			
-			packet::send<token_position>(sender_socket_, target_address_, token_packet);
-
-            if(is_logging_){
-                position_logger_.update(frequency_position_entry.first, frequency_position_entry.second.second);
-            }
-        }
+      if(is_logging_){
+        position_logger_.update(frequency_position_entry.first, frequency_position_entry.second.second);
+      }
     }
+  }
 }
 
 void MobatServer::toggleLogging( std::vector<unsigned> const& frequencies_to_log ) {
 	//get timestamp
-    starttime_ = time(NULL);
-    endtime_ = starttime_ + 60;
-    time_t t = time(0);   // get time now
-    struct tm * now = localtime( & t );
+  starttime_ = time(NULL);
+  endtime_ = starttime_ + 60;
+  time_t t = time(0);   // get time now
+  struct tm * now = localtime( & t );
 
-    std::string timestamp = 
-        std::to_string(now->tm_year + 1900) + "-" + std::to_string(now->tm_mon + 1) + "-" + std::to_string(now->tm_mday) + "_" + 
-        std::to_string((now->tm_hour)%24) + ":" + std::to_string((now->tm_min)%60) + ":" + std::to_string((now->tm_sec)%60);
-    if(is_logging_){
-        std::cout<<"ended logging of " << timestamp << " by pressing 'l'\n";
-        is_logging_ = false;
-        position_logger_.closeFiles();
-    } else{
-        std::cout<<"started logging of " << timestamp << "\n";
-        is_logging_ = true;
-        std::vector<std::pair<std::string, std::string>> filenames;
+  std::string timestamp = 
+    std::to_string(now->tm_year + 1900) + "-" + std::to_string(now->tm_mon + 1) + "-" + std::to_string(now->tm_mday) + "_" + 
+    std::to_string((now->tm_hour)%24) + ":" + std::to_string((now->tm_min)%60) + ":" + std::to_string((now->tm_sec)%60);
+  if(is_logging_){
+    std::cout<<"ended logging of " << timestamp << " by pressing 'l'\n";
+    is_logging_ = false;
+    position_logger_.closeFiles();
+  } else{
+    std::cout<<"started logging of " << timestamp << "\n";
+    is_logging_ = true;
+    std::vector<std::pair<std::string, std::string>> filenames;
         
-        for(auto const& freq : frequencies_to_log ){
-          filenames.push_back({std::to_string(freq), timestamp});
-        }
-        position_logger_.openFiles(filenames);
+    for(auto const& freq : frequencies_to_log ){
+      filenames.push_back({std::to_string(freq), timestamp});
     }
+      position_logger_.openFiles(filenames);
+  }
 }
 
 void MobatServer::drawSignalPlot( sf::RenderWindow& window, Locator const& locator) {
 
-    std::map<unsigned, std::array< std::vector<double>, 4> > signal_vis_samples =  locator.loadSignalVisSamples();
+  std::map<unsigned, std::array< std::vector<double>, 4> > signal_vis_samples =  locator.loadSignalVisSamples();
         
-    window.clear(sf::Color(255, 255, 255));
+  window.clear(sf::Color(255, 255, 255));
 
-    std::map<unsigned, std::array<unsigned, 4> >recognized_vis_sample_pos = locator.loadRecognizedVisSamplePositions();
-    std::map<unsigned, std::array<std::vector<unsigned> ,4> > peak_samples_per_frequency = locator.loadPeakSamples();
+  std::map<unsigned, std::array<unsigned, 4> >recognized_vis_sample_pos = locator.loadRecognizedVisSamplePositions();
+  std::map<unsigned, std::array<std::vector<unsigned> ,4> > peak_samples_per_frequency = locator.loadPeakSamples();
 
-    sf::RectangleShape data_point;
+  sf::RectangleShape data_point;
 
-    unsigned draw_iteration_counter = 0;
-    for(auto const& signal_of_frequency : signal_vis_samples) {
-        if(signal_vis_samples.find(signal_of_frequency.first) != signal_vis_samples.end()) {
-            for(unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
+  unsigned draw_iteration_counter = 0;
+  for(auto const& signal_of_frequency : signal_vis_samples) {
+    if(signal_vis_samples.find(signal_of_frequency.first) != signal_vis_samples.end()) {
+      for(unsigned int channel_iterator = 0; channel_iterator < 4; ++channel_iterator) {
 
-                for(unsigned int sample_idx = 0; sample_idx < signal_vis_samples[signal_of_frequency.first][channel_iterator].size(); sample_idx+=1) {
-                    unsigned int sig = signal_vis_samples[signal_of_frequency.first][channel_iterator][sample_idx];
+        for(unsigned int sample_idx = 0; sample_idx < signal_vis_samples[signal_of_frequency.first][channel_iterator].size(); sample_idx+=1) {
+            unsigned int sig = signal_vis_samples[signal_of_frequency.first][channel_iterator][sample_idx];
 
-                    float draw_slot_width = 280.0f;
-                    float sample_width = 280.0f / signal_vis_samples[signal_of_frequency.first][channel_iterator].size();
+          float draw_slot_width = 280.0f;
+          float sample_width = 280.0f / signal_vis_samples[signal_of_frequency.first][channel_iterator].size();
 
-                    data_point.setSize(sf::Vector2f(1,sig) );
-                    data_point.setPosition( sf::Vector2f( draw_slot_width * draw_iteration_counter + sample_width * sample_idx, channel_iterator * 100.0 + (100.0-sig) ) );
+          data_point.setSize(sf::Vector2f(1,sig) );
+          data_point.setPosition( sf::Vector2f( draw_slot_width * draw_iteration_counter + sample_width * sample_idx, channel_iterator * 100.0 + (100.0-sig) ) );
 
-                    if(sample_idx <  recognized_vis_sample_pos[signal_of_frequency.first][channel_iterator] ) {
-                        data_point.setFillColor(sf::Color(255, 0, 0) ) ;
-                    } else {
-                        data_point.setFillColor(sf::Color(0, 255, 0) ) ;          
-                    }
+          if(sample_idx <  recognized_vis_sample_pos[signal_of_frequency.first][channel_iterator] ) {
+            data_point.setFillColor(sf::Color(255, 0, 0) ) ;
+          } else {
+            data_point.setFillColor(sf::Color(0, 255, 0) ) ;          
+          }
 
-                    for(auto const& peak_samples_of_channel : peak_samples_per_frequency[signal_of_frequency.first][channel_iterator]) {
-                        if(sample_idx -2 <= peak_samples_of_channel && sample_idx + 2 >= peak_samples_of_channel) {
-                            data_point.setFillColor(sf::Color(255, 0, 255) ) ;
-                            break;   
-                        }
-                    }
-
-                    window.draw(data_point);
-                }
-
+          for(auto const& peak_samples_of_channel : peak_samples_per_frequency[signal_of_frequency.first][channel_iterator]) {
+            if(sample_idx -2 <= peak_samples_of_channel && sample_idx + 2 >= peak_samples_of_channel) {
+              data_point.setFillColor(sf::Color(255, 0, 255) ) ;
+              break;   
             }
+          }
+
+          window.draw(data_point);
         }
-        ++draw_iteration_counter;
+
+      }
     }
+    ++draw_iteration_counter;
+  }
     
-    window.display();
+  window.display();
 }

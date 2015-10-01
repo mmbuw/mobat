@@ -2,9 +2,6 @@
 #define MOBAT_SERVER_H
 
 #include "locator.hpp"
-#include "table_visualizer.hpp"
-#include "drawable_object.hpp"
-#include "score.hpp"
 #include "configurator.hpp"
 #include "test.h"
 
@@ -22,7 +19,7 @@
 
 #include "address.hpp"
 #include "packet.hpp"
-#include "token_position.hpp"
+#include "token_packet.hpp"
 
 #define NB_ENABLE 1
 #define NB_DISABLE 0
@@ -54,6 +51,7 @@ private:
   time_t starttime_;// = time(0);
   time_t endtime_;// = starttime + 60;
 
+  bool is_verbose_;
   /*
     functions "kbhit" and "nonblock" taken from: 
     http://cc.byexamples.com/2007/04/08/non-blocking-user-input-in-loop-without-ncurses/
