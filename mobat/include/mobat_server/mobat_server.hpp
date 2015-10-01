@@ -28,7 +28,7 @@
 class MobatServer {
 
 public:
-  MobatServer( std::array<uint8_t, 4> receiver_address = {127,0,0,1}, std::uint16_t receiver_port = 30000, std::uint16_t sender_port = 6666  );
+  MobatServer( Address_ip4 const& in_address = Address_ip4( 127, 0, 0, 1, 30000 ), std::uint16_t in_sender_port = 6666 );
   ~MobatServer();
 
   void run();

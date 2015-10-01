@@ -1,12 +1,9 @@
 #include "mobat_server.hpp"
 
-MobatServer::MobatServer ( std::array<std::uint8_t, 4> receiver_address, std::uint16_t receiver_port, std::uint16_t sender_port ) 
-	: sender_socket_(sender_port),
-	  target_address_{receiver_address[0], 
-	  				 receiver_address[1],
-	  				 receiver_address[2],
-	  				 receiver_address[3],
-	  				 receiver_port},
+MobatServer::MobatServer ( Address_ip4 const& in_address , std::uint16_t in_sender_port ) 
+	: sender_socket_(in_sender_port),
+	  target_address_{in_address.address(), 
+                    in_address.port()},
 	  locator_{4},
 	  position_logger_(),
 	  is_logging_{false},
