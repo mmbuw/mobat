@@ -34,6 +34,12 @@ public:
   void run();
   //toggleLogging();
 private:
+  std::vector<unsigned> frequencies_to_record_;
+
+  bool show_signalvis_;
+  unsigned signal_vis_window_width_;
+  unsigned signal_vis_window_height_;
+
   // receiver for located positions
   Socket sender_socket_;
   Address_ip4 target_address_;
@@ -52,6 +58,9 @@ private:
   time_t endtime_;// = starttime + 60;
 
   bool is_verbose_;
+
+  void loadServerSettings();
+
   /*
     functions "kbhit" and "nonblock" taken from: 
     http://cc.byexamples.com/2007/04/08/non-blocking-user-input-in-loop-without-ncurses/

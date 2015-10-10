@@ -19,7 +19,7 @@
 class FftTransformer {
 	private:
 
-
+    volatile bool keep_threads_alive_;
 		unsigned int fft_window_size_;
 
 		float normalization_value_;
@@ -64,6 +64,8 @@ class FftTransformer {
 		void createHannWindow();
 		void createBlackmannHarrisWindow();
 
+
+
 		void initializeFFTThreads();
         void performFFTOnCertainChannel(unsigned channel_iterator);
 
@@ -88,6 +90,8 @@ class FftTransformer {
 	public:
 		FftTransformer(unsigned int fft_frame_size);
 		~FftTransformer();
+
+    void shutdown();
 
 		void resetSampleCounters(unsigned );
 		void clearCachedFFTResults(unsigned);

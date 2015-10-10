@@ -22,6 +22,7 @@ class SignalAnalyzer {
     	~SignalAnalyzer();
 
 
+        void shutdown();
         /* 
           loads analyzer specific parameters from the config file
         */

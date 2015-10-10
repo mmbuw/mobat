@@ -77,8 +77,13 @@ void FftTransformer::initializeFFTThreads() {
   fft_threads_[3] = std::shared_ptr<std::thread>( new std::thread([&] { this->performFFTOnCertainChannel(3); } ) ); 
 }
 
+void FftTransformer::shutdown() {
+  keep_threads_alive_ = false;
+}
+
 FftTransformer::FftTransformer(unsigned int fft_window_size)
- :fft_window_size_(fft_window_size),
+ :keep_threads_alive_(true),
+  fft_window_size_(fft_window_size),
   found_frequency_(false),
   start_sample_{std::numeric_limits<unsigned int>::max()},
   end_sample_{std::numeric_limits<unsigned int>::max()},
@@ -141,6 +146,14 @@ FftTransformer::~FftTransformer() {
     free(window_);
   }
 
+if(fft_threads_[0]->joinable() )
+  fft_threads_[0]->join();
+if(fft_threads_[1]->joinable() )
+  fft_threads_[1]->join();
+if(fft_threads_[2]->joinable() )
+  fft_threads_[2]->join();
+if(fft_threads_[3]->joinable() )
+  fft_threads_[3]->join();
 }
 
 
@@ -181,9 +194,11 @@ void FftTransformer::setListenedFrequencies(std::vector<unsigned> const& listeni
 
 void FftTransformer::performFFTOnCertainChannel(unsigned channel_iterator) {
   
-	    std::cout << "Trying to perform fft with thread "<< channel_iterator << "\n";
-
     while( true ) {
+
+      if( !keep_threads_alive_ ) {
+        break;
+      }
 
       if (allow_fft_[channel_iterator].load() == false ) {
         continue;
@@ -212,7 +227,9 @@ void FftTransformer::performFFTOnCertainChannel(unsigned channel_iterator) {
           smoothResults(channel_iterator);
 
 	        ffts_performed_[channel_iterator].store(true);
-        }
+
+
+  }
 
 
 }

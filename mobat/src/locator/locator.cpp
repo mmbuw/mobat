@@ -282,6 +282,7 @@ loadPeakSamples() const {
     }
   }
 
+  signal_analyzer_.shutdown();
   // stop recording loop
   recorder_.shutdown();
   recording_thread.join();

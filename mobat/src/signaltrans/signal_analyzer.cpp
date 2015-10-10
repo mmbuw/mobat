@@ -18,8 +18,13 @@ SignalAnalyzer() : fft_window_size_( ({configurator().getUint("fft_window_size")
 
 SignalAnalyzer::
 ~SignalAnalyzer() {
+
 }
 
+void SignalAnalyzer::
+shutdown() {
+    fft_transformer_.shutdown();
+}
 void SignalAnalyzer::
 loadAnalyzerParameters() {
   max_sample_distance_ = configurator().getUint("max_sample_distance");

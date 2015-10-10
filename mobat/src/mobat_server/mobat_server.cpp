@@ -2,7 +2,7 @@
 
 MobatServer::MobatServer ( Address_ip4 const& in_address , std::uint16_t in_sender_port ) 
 	: sender_socket_(in_sender_port),
-	  target_address_{in_address.address(), 
+	  target_address_{in_address.address(),
                     in_address.port()},
 	  locator_{4},
 	  position_logger_(),
@@ -11,40 +11,42 @@ MobatServer::MobatServer ( Address_ip4 const& in_address , std::uint16_t in_send
 	  starttime_{0},
 	  endtime_{starttime_+60},
     is_verbose_(false) {
-
 }
 
 MobatServer::~MobatServer() {
 }
 
+void MobatServer::loadServerSettings() {
+  frequencies_to_record_ = configurator().getList("known_frequencies");
+  show_signalvis_ = configurator().getUint("show_signalvis") > 0;
+  is_verbose_ = configurator().getUint("make_server_verbose") > 0;
+  signal_vis_window_width_  = configurator().getUint("svis_slot_width") * (frequencies_to_record_.size() );
+  signal_vis_window_height_ = configurator().getUint("svis_channel_height") * 4;//* num_audio_channels;
+
+}
+
 void MobatServer::run() {
 
+  loadServerSettings();
+  
+  locator_.setFrequenciesToRecord(frequencies_to_record_);
 
-  std::vector<unsigned> frequencies_to_record{configurator().getList("known_frequencies")};
+  auto recording_thread( std::thread(&Locator::recordPosition, &locator_) );
 
-  locator_.setFrequenciesToRecord(frequencies_to_record);
-
-  auto recording_thread = std::thread(&Locator::recordPosition, &locator_);
-
-  // visualisation
-  bool show_signalvis = configurator().getUint("show_signalvis") > 0;
-
-  is_verbose_ = configurator().getUint("make_server_verbose") > 0;
   //logging auxiliary
-  for(auto const& i : frequencies_to_record){
+  for(auto const& i : frequencies_to_record_){
     if(boost::filesystem::create_directory(std::to_string(i))){}
   }
 
   //std::vector<unsigned> const known_frequencies = configurator().getList("known_frequencies");
-  unsigned const num_audio_channels = 4;
-  unsigned signal_vis_window_width  = configurator().getUint("svis_slot_width") * (frequencies_to_record.size() );
-  unsigned signal_vis_window_height = configurator().getUint("svis_channel_height") * num_audio_channels;
-  if(!show_signalvis) {
-    signal_vis_window_height = 1;
-    signal_vis_window_width = 1;
+  //unsigned const num_audio_channels = 4;
+
+  if(!show_signalvis_) {
+    signal_vis_window_height_ = 1;
+    signal_vis_window_width_ = 1;
   }
 
-  sf::RenderWindow signal_plot_window_(sf::VideoMode(signal_vis_window_width, signal_vis_window_height)
+  sf::RenderWindow signal_plot_window_(sf::VideoMode(signal_vis_window_width_, signal_vis_window_height_)
                                        , "Transformed_Frequencies");
 
   char c = '0';
@@ -66,7 +68,7 @@ void MobatServer::run() {
         
       if(c == 'l' || c == 'L') {
         if(prev_character != 'l' && prev_character != 'L') {
-          toggleLogging( frequencies_to_record );
+          toggleLogging( frequencies_to_record_ );
         }
       } else {
         i=0;
@@ -86,16 +88,16 @@ void MobatServer::run() {
       }
     }
 
-    //if(show_signalvis) {
+    if(show_signalvis_) {
       drawSignalPlot(signal_plot_window_, locator_);
-    //}
+    }
     
 }
 
 nonblock(NB_DISABLE);
 locator_.shutdown();
+if(recording_thread.joinable())
 recording_thread.join();
-
 return;
 }
 
