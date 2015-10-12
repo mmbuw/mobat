@@ -10,6 +10,7 @@ Test::Test()
 
 
 void Test::update(unsigned const& freq, glm::vec2 const& pos){
+  // write current position and add it to average position, increase num_entries counter
   files_[std::to_string(freq)].writer_ << "(" + std::to_string(pos.x) + ", " + std::to_string(pos.y) + ")\n";
   files_[std::to_string(freq)].average_position_ += pos;
   ++files_[std::to_string(freq)].num_entries_;
