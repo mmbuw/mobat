@@ -1,5 +1,5 @@
-#ifndef TTT_TEST_H
-#define TTT_TEST_H
+#ifndef MOBAT_TEST_H
+#define MOBAT_TEST_H
 
 
 #include <fstream>
@@ -13,12 +13,12 @@
 
 #include "testMapEntry.hpp"
 
-namespace TTT{
+namespace MoB{
 
   
 class Test{
   private:
-    std::map<std::string, TTT::TestMapEntry> files_;
+    std::map<std::string, MoB::TestMapEntry> files_;
     //timestamp of current log session
     std::string timestamp_;
 

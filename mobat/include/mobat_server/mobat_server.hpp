@@ -16,7 +16,6 @@
 
 #include <termios.h>
 
-
 #include "address.hpp"
 #include "packet.hpp"
 #include "token_packet.hpp"
@@ -24,7 +23,7 @@
 #define NB_ENABLE 1
 #define NB_DISABLE 0
 
-
+using namespace MoB;
 class MobatServer {
 
 public:
@@ -47,7 +46,7 @@ private:
   Locator locator_;
 
   // position logger
-  TTT::Test position_logger_;
+  Test position_logger_;
   // is logging currently enabled
   bool is_logging_;
   // last received timestamp

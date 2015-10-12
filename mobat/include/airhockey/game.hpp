@@ -13,9 +13,7 @@
 
 #include <chrono>
 
-namespace TTT {
-
-
+namespace MoB {
 
 
 class Game : DrawableObject {

@@ -13,7 +13,7 @@
 
 #include <chrono>
 
-namespace TTT {
+namespace MoB {
 
 
 
@@ -130,5 +130,5 @@ class TableVisualizer : DrawableObject {
 
 };
 
-}; //end TTT
+}; //end MoB
 #endif

@@ -22,7 +22,7 @@
 
 
 
-namespace TTT {
+namespace MoB {
 
 	class UdpReceiver {
 
@@ -50,7 +50,7 @@ namespace TTT {
 			void updateTokens();
 	};
 
-}; //end TTT
+}; //end MoB
 #endif
 
 

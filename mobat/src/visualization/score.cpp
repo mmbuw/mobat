@@ -3,7 +3,7 @@
 #include <iostream>
 
 
-namespace TTT {
+namespace MoB {
 
 Score::Score(int max_points){
 	glm::vec2  min{pixel_projection_offset_.x , pixel_projection_offset_.y };	//local (0,0)
@@ -89,4 +89,4 @@ getMaxPoints(){
 	return max_points_;
 }
 
-}; //namespace TTT
+}; //namespace MoB

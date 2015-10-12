@@ -1,5 +1,5 @@
-#ifndef TESTMAPENTRY_PPP
-#define TESTMAPENTRY_PPP
+#ifndef MOBAT_TESTMAPENTRY_PPP
+#define MOBAT_TESTMAPENTRY_PPP
 
 #include <iostream>
 #include <fstream>
@@ -7,7 +7,7 @@
 #include <string>
 
 
-namespace TTT{
+namespace MoB{
 
 struct TestMapEntry{
   std::string filepath_;

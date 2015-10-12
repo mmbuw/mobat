@@ -3,7 +3,7 @@
 #include "glm/gtx/string_cast.hpp"
 #include <iostream>
 
-namespace TTT {
+namespace MoB {
 
 TableVisualizer::
 TableVisualizer(std::vector<glm::vec2> const& microphone_positions,
@@ -61,8 +61,8 @@ TableVisualizer(std::vector<glm::vec2> const& microphone_positions,
 
     player_speed_ = configurator().getFloat("player_speed");
 
-    player1_pos_ = glm::vec2{TTT::DrawableObject::physical_projection_offset_ + TTT::DrawableObject::physical_projection_size_ * glm::vec2{0.5f, 0.3f}};
-    player2_pos_ = glm::vec2{TTT::DrawableObject::physical_projection_offset_ + TTT::DrawableObject::physical_projection_size_ * glm::vec2{0.5f, 0.6f}};
+    player1_pos_ = glm::vec2{DrawableObject::physical_projection_offset_ + DrawableObject::physical_projection_size_ * glm::vec2{0.5f, 0.3f}};
+    player2_pos_ = glm::vec2{DrawableObject::physical_projection_offset_ + DrawableObject::physical_projection_size_ * glm::vec2{0.5f, 0.6f}};
 
     restart();
     
@@ -414,8 +414,8 @@ bool TableVisualizer::gameActive(){
 
 
 void TableVisualizer::handleKeyboardInput() {
-    glm::vec2 field_max{TTT::DrawableObject::physical_projection_offset_ + TTT::DrawableObject::physical_projection_size_ - glm::vec2{0.02f, 0.02f}};
-    glm::vec2 field_min{TTT::DrawableObject::physical_projection_offset_ + glm::vec2{0.02f, 0.02f}};
+    glm::vec2 field_max{DrawableObject::physical_projection_offset_ + DrawableObject::physical_projection_size_ - glm::vec2{0.02f, 0.02f}};
+    glm::vec2 field_min{DrawableObject::physical_projection_offset_ + glm::vec2{0.02f, 0.02f}};
         
     if(player1_keyboard_) {
         glm::vec2 pl1_dir{0, 0};
@@ -471,4 +471,4 @@ void TableVisualizer::writeTokens() {
     std::cout<<"\n";
 }
 
-}; //namespace TTT
+}; //namespace MoB

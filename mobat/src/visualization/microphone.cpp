@@ -1,7 +1,7 @@
 #include "microphone.hpp"
 #include <iostream>
 
-namespace TTT {
+namespace MoB {
 
 Microphone::
 Microphone(unsigned in_id, glm::vec2 const& in_position ) {

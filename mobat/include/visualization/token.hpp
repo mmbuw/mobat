@@ -3,7 +3,7 @@
 
 #include "drawable_object.hpp"
 
-namespace TTT {
+namespace MoB {
 
 class Token : DrawableObject {
 
@@ -52,5 +52,5 @@ class Token : DrawableObject {
 }; //end class Token
 
 
-}; //namespace TTT
+}; //namespace MoB
 #endif 

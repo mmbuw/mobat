@@ -16,12 +16,12 @@
 #include <time.h>
 #include <boost/filesystem.hpp>
 
-
+using namespace MoB;
 void draw_signal_plot(sf::RenderWindow& window, Locator const& locator);
 
 int main(int argc, char** argv) {
 //######################################RECEVER##########################################
-    TTT::UdpReceiver receiver;
+    UdpReceiver receiver;
     glm::vec2 rcv_test_pos{0.23, 0.45};
     std::pair<unsigned, glm::vec2> rcv_test_entry{123, rcv_test_pos};
     receiver.receive(rcv_test_entry);
@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
     std::vector<unsigned> frequencies_to_record{configurator().getList("known_frequencies")};
 
 // testing
-    TTT::Test test_logger;
+    Test test_logger;
     for(auto const& i : frequencies_to_record){
 
         if(boost::filesystem::create_directory(std::to_string(i))){}
@@ -105,12 +105,12 @@ int main(int argc, char** argv) {
                                                     configurator().getVec("microphone4_pos")};
 
     // initialize measures for drawing & simulation 
-    TTT::DrawableObject::setBasis(configurator().getVec("right"), configurator().getVec("up"));
-    TTT::DrawableObject::setResolution(windowResolution);
-    TTT::DrawableObject::setPhysTableSize(configurator().getVec("table_size"));
-    TTT::DrawableObject::setProjection(configurator().getVec("projection_offset"), configurator().getVec("projection_size"));
+    DrawableObject::setBasis(configurator().getVec("right"), configurator().getVec("up"));
+    DrawableObject::setResolution(windowResolution);
+    DrawableObject::setPhysTableSize(configurator().getVec("table_size"));
+    DrawableObject::setProjection(configurator().getVec("projection_offset"), configurator().getVec("projection_size"));
 
-    TTT::TableVisualizer tisualizer(microphone_positions_);
+    TableVisualizer tisualizer(microphone_positions_);
     tisualizer.setTokenRecognitionTimeout(configurator().getUint("recognition_timeout"));
 
     tisualizer.setTokenFillColor(configurator().getUint("player1"), sf::Color(0,0,255) );

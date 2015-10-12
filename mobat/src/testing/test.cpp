@@ -1,7 +1,7 @@
 #include "test.h"
 
 
-namespace TTT{
+namespace MoB{
 
 Test::Test()
   : files_()
@@ -19,7 +19,7 @@ void Test::update(unsigned const& freq, glm::vec2 const& pos){
 void Test::openFiles(std::vector<std::pair<std::string, std::string>> const& names){
   for(auto const& name : names){
     timestamp_ = name.second;
-    TTT::TestMapEntry tmp{name.first +"/" + name.second};
+    TestMapEntry tmp{name.first +"/" + name.second};
     files_[name.first] = tmp;
   }
 }

@@ -3,7 +3,7 @@
 
 #include "drawable_object.hpp"
 
-namespace TTT {
+namespace MoB {
 
 class Microphone : DrawableObject {
 
