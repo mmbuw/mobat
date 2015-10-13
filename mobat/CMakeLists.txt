@@ -22,12 +22,12 @@ target_include_directories(networking PUBLIC networking)
 target_link_libraries(networking -lpthread)
 
 # udp_reciever
-file(GLOB UDP_RECEIVER_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/udp_receiver/*.cpp)
-add_library(udp_receiver STATIC ${UDP_RECEIVER_SOURCES})
+#file(GLOB UDP_RECEIVER_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/udp_receiver/*.cpp)
+#add_library(udp_receiver STATIC ${UDP_RECEIVER_SOURCES})
 # populate both includedir and interfaceincludedir (include with targets linked with this)
-target_include_directories(udp_receiver PUBLIC include/udp_receiver)
+#target_include_directories(udp_receiver PUBLIC include/udp_receiver)
 # requires boostlib
-target_link_libraries(udp_receiver visualization)
+#target_link_libraries(udp_receiver visualization)
 
 # recorder
 file(GLOB RECORDER_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/recorder/*.cpp)
@@ -79,8 +79,6 @@ target_include_directories(airhockey PUBLIC include/airhockey)
 target_link_libraries(airhockey -lm -lsfml-graphics -lsfml-window -lsfml-system visualization game networking)
 
 
-
-
 # mobat_server
 file(GLOB MOBAT_SERVER_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/mobat_server/*.cpp)
 add_library(mobat_server STATIC ${MOBAT_SERVER_SOURCES})
@@ -90,24 +88,12 @@ if(ODROID_BUILD)
   target_link_libraries(mobat_server -lxcb -lxcb-randr -lxcb-icccm -lxcb-image -ludev)
 endif()
 
-# output executables
-add_executable(networking_example src/networking_example.cpp)
-target_link_libraries(networking_example networking)
-
-
-# output executables
-add_executable(ttt src/visualization.cpp)
-target_link_libraries(ttt recorder signaltrans locator visualization testing udp_receiver networking -lpthread)
-if(ODROID_BUILD)
-  target_link_libraries(ttt -lX11 -lX11-xcb)
-endif()
-
 add_executable(airhockey_demo src/airhockey/airhockey.cpp)
-target_link_libraries(airhockey_demo airhockey game udp_receiver -lpthread)
-
+target_link_libraries(airhockey_demo airhockey game -lpthread)
 
 
 add_executable(mobat_localizer src/mobat_localizer.cpp)
+target_include_directories(mobat_localizer PUBLIC include/mobat_server)
 target_link_libraries(mobat_localizer mobat_server recorder signaltrans locator visualization testing networking -lpthread)
 if(ODROID_BUILD)
   target_link_libraries(mobat_localizer -lX11 -lX11-xcb)
@@ -140,4 +126,4 @@ endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 
 # installation rules, copy over binaries to bin
-install(TARGETS ttt DESTINATION bin)
+#install(TARGETS ttt DESTINATION bin)

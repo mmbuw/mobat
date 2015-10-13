@@ -2,7 +2,6 @@
 #ifndef FFT_TRANSFORMER_H
 #define FFT_TRANSFORMER_H
 
-#include "ring_buffer.h"
 #include "buffer_collection.hpp"
 
 #include <fftw3.h>
