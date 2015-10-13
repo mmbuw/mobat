@@ -6,13 +6,13 @@ include_directories(external/glm0.9.6.3/)
 
 option(ODROID_BUILD "Build visualisation for odroid/raspberry" OFF)
 
-#testing
-file(GLOB TESTING_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/testing/*.cpp)
-add_library(testing STATIC ${TESTING_SOURCES})
+#logging
+file(GLOB LOGGING_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/logging/*.cpp)
+add_library(logging STATIC ${LOGGING_SOURCES})
 # populate both includedir and interfaceincludedir (include with targets linked with this)
-target_include_directories(testing PUBLIC include/testing)
+target_include_directories(logging PUBLIC include/logging)
 # requires boostlib
-target_link_libraries(testing -lboost_filesystem -lboost_system visualization)
+target_link_libraries(logging -lboost_filesystem -lboost_system visualization)
 
 # networking
 file(GLOB NETWORKING_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} networking/*.cpp)
@@ -61,8 +61,6 @@ if(ODROID_BUILD)
 endif()
 
 
-
-
 #game
 file(GLOB GAME_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/airhockey/*.cpp)
 add_library(game STATIC ${GAME_SOURCES})
@@ -83,7 +81,7 @@ target_link_libraries(airhockey -lm -lsfml-graphics -lsfml-window -lsfml-system 
 file(GLOB MOBAT_SERVER_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/mobat_server/*.cpp)
 add_library(mobat_server STATIC ${MOBAT_SERVER_SOURCES})
 target_include_directories(mobat_server PUBLIC include/mobat_server)
-target_link_libraries(mobat_server locator testing networking -lm -lsfml-graphics -lsfml-window -lsfml-system)
+target_link_libraries(mobat_server locator logging networking -lm -lsfml-graphics -lsfml-window -lsfml-system)
 if(ODROID_BUILD)
   target_link_libraries(mobat_server -lxcb -lxcb-randr -lxcb-icccm -lxcb-image -ludev)
 endif()
@@ -94,14 +92,14 @@ target_link_libraries(airhockey_demo airhockey game -lpthread)
 
 add_executable(mobat_localizer src/mobat_localizer.cpp)
 target_include_directories(mobat_localizer PUBLIC include/mobat_server)
-target_link_libraries(mobat_localizer mobat_server recorder signaltrans locator visualization testing networking -lpthread)
+target_link_libraries(mobat_localizer mobat_server recorder signaltrans locator visualization logging networking -lpthread)
 if(ODROID_BUILD)
   target_link_libraries(mobat_localizer -lX11 -lX11-xcb)
 endif()
 
 # output executables
 add_executable(table_plot src/table_plot/svg_plot_generator.cpp)
-#target_link_libraries(ttt recorder signaltrans locator visualization testing -lpthread)
+#target_link_libraries(ttt recorder signaltrans locator visualization logging -lpthread)
 #if(ODROID_BUILD)
 #  target_link_libraries(ttt -lX11 -lX11-xcb)
 #endif()

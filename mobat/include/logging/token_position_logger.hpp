@@ -1,6 +1,5 @@
-#ifndef MOBAT_TEST_H
-#define MOBAT_TEST_H
-
+#ifndef MOBAT_TOKEN_POSITION_LOGGER_H
+#define MOBAT_TOKEN_POSITION_LOGGER_H
 
 #include <fstream>
 
@@ -11,19 +10,18 @@
 #include <boost/algorithm/string.hpp>
 #include <cmath>
 
-#include "testMapEntry.hpp"
+#include "logger_map_entry.hpp"
 
 namespace MoB{
 
-  
-class Test{
+class TokenPositionLogger{
   private:
-    std::map<std::string, MoB::TestMapEntry> files_;
+    std::map<std::string, logger_map_entry> files_;
     //timestamp of current log session
     std::string timestamp_;
 
   public:
-    Test();
+    TokenPositionLogger();
     //writes positions to files
     void update(unsigned const& freq, glm::vec2 const& pos);
     //opens log files in given directory and names them, also sets timestamp, pair<frequency, timestamp>

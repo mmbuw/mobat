@@ -3,7 +3,7 @@
 
 #include "locator.hpp"
 #include "configurator.hpp"
-#include "test.h"
+#include "token_position_logger.hpp"
 
 #include <SFML/Graphics.hpp>
 
@@ -45,8 +45,7 @@ private:
 
   Locator locator_;
 
-  // position logger
-  Test position_logger_;
+  TokenPositionLogger position_logger_;
   // is logging currently enabled
   bool is_logging_;
   // last received timestamp

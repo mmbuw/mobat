@@ -1,31 +1,31 @@
-#include "test.h"
+#include "token_position_logger.hpp"
 
 
 namespace MoB{
 
-Test::Test()
+TokenPositionLogger::TokenPositionLogger()
   : files_()
   , timestamp_()
 {}
 
 
-void Test::update(unsigned const& freq, glm::vec2 const& pos){
+void TokenPositionLogger::update(unsigned const& freq, glm::vec2 const& pos){
   files_[std::to_string(freq)].writer_ << "(" + std::to_string(pos.x) + ", " + std::to_string(pos.y) + ")\n";
   files_[std::to_string(freq)].average_position_ += pos;
   ++files_[std::to_string(freq)].num_entries_;
 }
 
 
-void Test::openFiles(std::vector<std::pair<std::string, std::string>> const& names){
+void TokenPositionLogger::openFiles(std::vector<std::pair<std::string, std::string>> const& names){
   for(auto const& name : names){
     timestamp_ = name.second;
-    TestMapEntry tmp{name.first +"/" + name.second};
+    logger_map_entry tmp{name.first +"/" + name.second};
     files_[name.first] = tmp;
   }
 }
 
 
-void Test::closeFiles(){
+void TokenPositionLogger::closeFiles(){
   for(auto & i : files_){
     auto avg_pos = i.second.average_position_ / glm::vec2 {i.second.num_entries_, i.second.num_entries_};
     i.second.writer_ << "average position: (" << avg_pos.x << ", " << avg_pos.y << ")\n";
@@ -43,7 +43,7 @@ void Test::closeFiles(){
   files_.clear();
 }
 
-double Test::calculateStandardDeviation(std::string const& path, glm::vec2 const& avg_pos, int num_entries){
+double TokenPositionLogger::calculateStandardDeviation(std::string const& path, glm::vec2 const& avg_pos, int num_entries){
   double std_drvtn = 0.0;
   std::ifstream file(path);
   std::string line;
@@ -66,7 +66,7 @@ double Test::calculateStandardDeviation(std::string const& path, glm::vec2 const
   return std_drvtn / num_entries;
 }
 
-double Test::calculatePercentile(std::string const& path, glm::vec2 const& avg_pos, long){
+double TokenPositionLogger::calculatePercentile(std::string const& path, glm::vec2 const& avg_pos, long){
   double perc = 0;
   std::vector<double> deviations;
   std::ifstream file(path);
@@ -102,7 +102,7 @@ double Test::calculatePercentile(std::string const& path, glm::vec2 const& avg_p
   return perc;
 }
 
-std::string Test::getTimestamp(){
+std::string TokenPositionLogger::getTimestamp(){
   return timestamp_;
 }
 
