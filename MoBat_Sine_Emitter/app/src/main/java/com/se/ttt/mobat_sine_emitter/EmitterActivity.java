@@ -1,20 +1,16 @@
-package com.se.ttt.ttt_sine_emitter;
+package com.se.ttt.mobat_sine_emitter;
 
 import android.app.Activity;
 import android.os.Handler;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.media.*;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 //initial sound sample code from:
 //http://stackoverflow.com/questions/2413426/playing-an-arbitrary-tone-with-android

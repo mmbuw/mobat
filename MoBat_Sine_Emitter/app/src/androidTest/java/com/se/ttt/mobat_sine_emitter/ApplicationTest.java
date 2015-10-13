@@ -1,4 +1,4 @@
-package com.se.ttt.ttt_sine_emitter;
+package com.se.ttt.mobat_sine_emitter;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
