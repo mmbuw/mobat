@@ -4,7 +4,6 @@
 #include "table.hpp"
 #include "microphone.hpp"
 #include "token.hpp"
-// #include "Ball.h"
 #include "score.hpp"
 
 #include <vector>
@@ -74,6 +73,8 @@ class TableVisualizer : DrawableObject {
 		void Calculate_Elapsed_Milliseconds();
 
 		sf::RectangleShape projection_shape_;
+	
+
 	public:
 		Table table_;
 		
@@ -92,7 +93,7 @@ class TableVisualizer : DrawableObject {
 		virtual void draw(sf::RenderWindow& in_canvas) const;
 
 		void resetMicrophones(std::vector<Microphone> const& in_microphones);
-
+		//game logic
 		void recalculateGeometry();
 
 		void setCanvasResolution(glm::vec2 const& in_resolution );
@@ -106,7 +107,7 @@ class TableVisualizer : DrawableObject {
 		void setTokenRecognitionTimeout( unsigned in_timeout_in_ms );
 
 		void signalToken(unsigned int in_id, glm::vec2 const& in_position);
-
+		//checks active tokens and lets inactive die
 		void updateTokens();
 
 
@@ -119,11 +120,11 @@ class TableVisualizer : DrawableObject {
 		std::pair<bool, std::string> gameOver();
 
 		void restart();
-
+		//switches game on and off
 		void toggleGame();
 
 		bool gameActive();
-
+		//moves keyboardcontrolled tokens according to input
 		void handleKeyboardInput();
 
 		void writeTokens();
