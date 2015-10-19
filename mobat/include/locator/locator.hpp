@@ -23,7 +23,7 @@ public:
     std::map<unsigned, std::array<std::vector<unsigned> ,4> > const loadPeakSamples() const;
 
     void setFrequenciesToRecord(std::vector<unsigned> const& frequencies_to_find);
-
+    //also middles the position with the last positions
     void recordPosition();
 
     void shutdown();
