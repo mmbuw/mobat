@@ -4,7 +4,6 @@
 #include "table.hpp"
 #include "microphone.hpp"
 #include "token.hpp"
-// #include "Ball.h"
 #include "score.hpp"
 
 #include <vector>
@@ -37,7 +36,7 @@ class Game : DrawableObject {
 		bool gamemode_;
 
 		glm::vec2 ball_pos_;
-		// Ball ball_;	
+		
 		sf::CircleShape ball_;
 		glm::vec2 ball_dir_;
 
@@ -74,6 +73,7 @@ class Game : DrawableObject {
 		void Calculate_Elapsed_Milliseconds();
 
 		sf::RectangleShape projection_shape_;
+
 	public:
 		Table table_;
 		
@@ -90,9 +90,9 @@ class Game : DrawableObject {
 		~Game();
 
 		virtual void draw(sf::RenderWindow& in_canvas) const;
-
+		//replaces mic vector
 		void resetMicrophones(std::vector<Microphone> const& in_microphones);
-
+		// actual game logic, calls recalculation of geometry for all tokens
 		void recalculateGeometry();
 
 		void setCanvasResolution(glm::vec2 const& in_resolution );
@@ -106,26 +106,26 @@ class Game : DrawableObject {
 		void setTokenRecognitionTimeout( unsigned in_timeout_in_ms );
 
 		void signalToken(unsigned int in_id, glm::vec2 const& in_position);
-
+		//checks which tokens are recognized and which should die
 		void updateTokens();
 
-
+		//returns ellapsed milliseconds since last frame
 		unsigned getElapsedMilliseconds();
-
+		//checks for intersection between ball and given paddle
 		std::pair<bool, glm::vec2> ballIntersect(Token const& paddle) const;
-
+		// moves ball out of token if it gets inside; problem of realising a real situation in virtuality
 		void moveBallOutOfToken(Token const& paddle, glm::vec2 const& dir = glm::vec2{0.0f});
-
+		//returns bool if game is over and string with winner
 		std::pair<bool, std::string> gameOver();
-
+		// resets points and ball
 		void restart();
-
+		//turns game on and off
 		void toggleGame();
 
 		bool gameActive();
-
+		//moves players according to keyboard input
 		void handleKeyboardInput();
-
+		//prints all acitve tokens
 		void writeTokens();
 
 };

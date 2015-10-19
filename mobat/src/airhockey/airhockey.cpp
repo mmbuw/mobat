@@ -26,10 +26,9 @@ void Airhockey::forwardToken(token_packet const& in){
 
 
 int main(int argc, char** argv) {
-// std::cout<<"TEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEESSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSTTTTTTTTTTTTTTTTTTTTTTT";
-    // instance.receiver_.set_receive_callback(forwardToken);
+
     if (argc > 2) {
-      std::cout << "sender" << std::endl;
+      // std::cout << "sender" << std::endl;
       Socket socket{6666};
       Address_ip4 target_address{127, 0, 0, 1, 30000};
 
@@ -39,7 +38,7 @@ int main(int argc, char** argv) {
       packet::send<token_packet>(socket, target_address, test);
     }
     else {
-      std::cout << "receiver" << std::endl;
+      // std::cout << "receiver" << std::endl;
 
 
 
@@ -61,7 +60,7 @@ int main(int argc, char** argv) {
         std::vector<unsigned> frequencies_to_record{configurator().getList("known_frequencies")};
 
 
-    // calculation
+
 
 
     // visualisation
@@ -174,10 +173,7 @@ int main(int argc, char** argv) {
 
 
 
-    //TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING 
-                    // token_packet test_tp{19000, 0.5, 0.5, 123};
-                    // instance.forwardToken(test_tp);
-    //TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING TESTING 
+ 
 
 
 

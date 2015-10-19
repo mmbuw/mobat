@@ -31,6 +31,7 @@ class Airhockey{
   public:
   	Airhockey();
   	Airhockey(std::uint16_t port);
+  	// calls signal token of game_ needed for receiving function of receiver
   	void forwardToken(token_packet const& in);
   	
   	Receiver<token_packet> receiver_;

@@ -92,7 +92,7 @@ draw(sf::RenderWindow& canvas) const {
     }
 
 
-    // ball_.draw(canvas);
+    
     if(gamemode_ == true && (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - time_of_last_goal_).count() > ball_respawn_delay_)){
         canvas.draw(ball_);
 
@@ -332,7 +332,7 @@ Calculate_Elapsed_Milliseconds() {
 
 unsigned Game::
 getElapsedMilliseconds(){
-    return elapsed_milliseconds_since_last_frame_;//.asMilliseconds();
+    return elapsed_milliseconds_since_last_frame_;
 }
 
 std::pair<bool, glm::vec2> Game::ballIntersect(Token const& paddle) const{
@@ -370,7 +370,7 @@ std::pair<bool, std::string> Game::gameOver(){
     if(abs(tmp) < points_.getMaxPoints() / 2){
         return {false, "Chuck Norris"};
     }else{
-        if(tmp > 0){  //>= 3
+        if(tmp > 0){  
             return {true, "Red"};
         }else{
             return {true, "Blue"};//"upper/higher"
@@ -396,7 +396,7 @@ void Game::restart(){
 
     points_.reset();
     
-    //get initial timestamp
+
     last_time_stamp_ = std::chrono::high_resolution_clock::now();
 
 }
