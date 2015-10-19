@@ -1,7 +1,7 @@
 #include "token.hpp"
 
 #include <iostream>
-namespace TTT {
+namespace MoB {
 
 Token::
 Token(unsigned in_id, 
@@ -96,4 +96,4 @@ glm::vec2 const& Token::getPhysicalPosition() const {
 
 
 
-}; //namespace TTT
+}; //namespace MoB

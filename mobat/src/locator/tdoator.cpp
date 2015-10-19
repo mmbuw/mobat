@@ -10,7 +10,7 @@ TDOAtor(double c, glm::vec2 const& m1, glm::vec2 const& m2, glm::vec2 const& m3,
  :c_{c}
  ,mics_{m1, m2, m3, m4}
  ,toas_(4, 0)
- ,sample_size_{configurator().getFloat("sample_size")}
+ ,sample_size_{configurator().getFloat("sample_resolution")}
  ,min_{std::min(std::min(std::min(mics_[0].x , mics_[1].x), mics_[2].x), mics_[3].x),
       std::min(std::min(std::min(mics_[0].y , mics_[1].y), mics_[2].y), mics_[3].y)}
  ,max_{std::max(std::max(std::max(mics_[0].x , mics_[1].x), mics_[2].x), mics_[3].x),

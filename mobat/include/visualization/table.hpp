@@ -5,7 +5,7 @@
 #include "microphone.hpp"
 #include <glm/glm.hpp>
 
-namespace TTT {
+namespace MoB {
 
 class Table : DrawableObject {
 

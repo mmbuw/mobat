@@ -7,7 +7,7 @@
 
 
 
-namespace TTT {
+namespace MoB {
 
 class Score : DrawableObject{
   private:
@@ -32,6 +32,6 @@ class Score : DrawableObject{
     int getMaxPoints();
 };
 
-};//Namespace TTT
+};//Namespace MoB
 
 #endif

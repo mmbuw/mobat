@@ -2,7 +2,7 @@
 #include "configurator.hpp"
 #include <iostream>
 
-namespace TTT {
+namespace MoB {
 
 
 static sf::Color heatmap(float norm_val) {

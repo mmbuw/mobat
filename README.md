@@ -15,3 +15,6 @@ The prototype set-up consists of the following:
 *  **Behringer U-PHORIA UMC404** sound-card 
 * notebook with an **Intel Core i7-2630QM  2Ghz** CPU. 
 * **Nexus 4** devices as sound emitters.
+
+## Further Details
+For details about the system about the initial setup, the parameters, calibration of the system or know issues, please refer to the [Wiki](https://github.com/mmbuw/mobat/wiki).
