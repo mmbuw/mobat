@@ -34,6 +34,7 @@ public:
   //toggleLogging();
 private:
   std::vector<unsigned> frequencies_to_record_;
+  std::map<unsigned, unsigned> frequency_id_map;
 
   bool show_signalvis_;
   unsigned signal_vis_window_width_;
@@ -75,6 +76,8 @@ private:
   void toggleLogging( std::vector<unsigned> const& frequencies_to_log );
 
   void drawSignalPlot( sf::RenderWindow& window, Locator const& locator);
+
+  std::vector<unsigned> read_frequencies();
 
 };
 

@@ -114,9 +114,12 @@ loadPeakSamples() const {
     frequencies_to_locate = frequencies_to_find;
     frequency_to_record_setter_mutex.unlock();
   }
+
  }
 
  void Locator::recordPosition() {
+
+
   bool show_times = configurator().getUint("show_times") > 0;
   std::chrono::high_resolution_clock::time_point start_loop, start;
   unsigned elapsed_time;
@@ -213,14 +216,36 @@ loadPeakSamples() const {
         glm::vec2 accumulated_position = glm::vec2(0.0, 0.0);
         //glm::temp_pos = glm::vec2(0.0, 0.0);
         cached_located_positions[currently_located_position_entry.first] = std::make_pair(  locator_frame_counter_ , currently_located_position_entry.second);
-        cached_positions[currently_located_position_entry.first][locator_frame_counter_ % cached_positions[currently_located_position_entry.first].size()] = std::make_pair(locator_frame_counter_,currently_located_position_entry.second);
+        if(cached_positions[currently_located_position_entry.first].size() != 0){
+          cached_positions[currently_located_position_entry.first][locator_frame_counter_ % cached_positions[currently_located_position_entry.first].size()] = std::make_pair(locator_frame_counter_,currently_located_position_entry.second);
+        }else{
+          // cached_positions[currently_located_position_entry.first][locator_frame_counter_ % cached_positions[currently_located_position_entry.first].size()] = std::make_pair(locator_frame_counter_,currently_located_position_entry.second);
+          continue;
+        }
 
-        unsigned normalization_counter = 0;
+        //unsigned normalization_counter = 0;
         std::vector< float > valid_x_pos;
         std::vector< float > valid_y_pos;
 
-        for (auto const& glm_vec : cached_positions[currently_located_position_entry.first]) {
+          //one euro filter like mddling
+        auto size_cached_positions = cached_positions[currently_located_position_entry.first].size();
+        auto distance = glm::distance(cached_positions[currently_located_position_entry.first][size_cached_positions -2].second, cached_positions[currently_located_position_entry.first][size_cached_positions -1].second );
+        int alpha = ceil(size_cached_positions - distance);
+        if(alpha < 0){
+          alpha = 0;
+          for(unsigned i = size_cached_positions -1; i >= size_cached_positions - alpha; --i){
+            accumulated_position += cached_positions[currently_located_position_entry.first][i].second;
+          }
+          //one euro like
+          accumulated_position /= alpha;
+        }
 
+            /* not one euro like middling
+        for(unsigned i = size_cached_positions -1; i >= size_cached_positions - alpha; --i){
+
+
+
+        for (auto const& glm_vec : cached_positions[currently_located_position_entry.first]) {
             if (locator_frame_counter_ - glm_vec.first < cached_positions[currently_located_position_entry.first].size()) {
                valid_x_pos.push_back(glm_vec.second.x);
                valid_y_pos.push_back(glm_vec.second.y);
@@ -230,15 +255,17 @@ loadPeakSamples() const {
 
                accumulated_position += glm_vec.second ;    
                ++normalization_counter;                 
-            }
             //temp_pos = glm_vec * 2.0f;
             //accumulated_position += temp_pos;
         }
+            }*/
 
         //float median_x = valid_x_pos[valid_x_pos.size()/2.0];
         //float median_y = valid_y_pos[valid_y_pos.size()/2.0];                
 
-        accumulated_position /= normalization_counter;
+        // not 1 euro like
+        // accumulated_position /= normalization_counter;
+
 
         //accumulated_position.x = median_x;
         //accumulated_position.y = median_y;

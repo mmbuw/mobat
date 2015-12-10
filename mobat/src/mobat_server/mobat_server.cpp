@@ -91,7 +91,11 @@ void MobatServer::run() {
     if(show_signalvis_) {
       drawSignalPlot(signal_plot_window_, locator_);
     }
-    
+
+
+    //dynamic frequencies
+    //if(update_frequencies)
+    locator_.setFrequenciesToRecord(read_frequencies());    
 }
 
 nonblock(NB_DISABLE);
@@ -140,7 +144,7 @@ void MobatServer::sendPositions( std::map<unsigned, std::pair<unsigned, glm::vec
     if(frontier_timestamp_ < frequency_position_entry.second.first) {
       frontier_timestamp = frequency_position_entry.second.first;
 
-      token_packet t_packet{frequency_position_entry.first, 
+      token_packet t_packet{frequency_id_map[frequency_position_entry.first], 
                   frequency_position_entry.second.second[0] , 
                   frequency_position_entry.second.second[1], 
                   frontier_timestamp};
@@ -235,3 +239,30 @@ void MobatServer::drawSignalPlot( sf::RenderWindow& window, Locator const& locat
     
   window.display();
 }
+
+
+std::vector<unsigned> MobatServer::read_frequencies(){
+  std::vector<unsigned> frequencies;
+  std::ifstream file("../freqs.txt");
+  std::string line;
+  while ( std::getline (file,line) ){
+      // std::vector<std::string> frags;
+      std::size_t pos = line.find(";");
+      unsigned frequency = std::stoul(line.substr(pos +1  , line.length()));
+    frequencies.push_back( std::stoul(line.substr(pos +1  , line.length())) );
+    frequency_id_map[std::stoul(line.substr(0 , pos))] = frequency;
+
+
+  }
+  file.close();
+
+  // for(auto const& i : frequencies){
+  //   std::cout<<i<<std::endl;
+  // }
+
+  return frequencies;
+
+
+}
+
+
