@@ -243,7 +243,7 @@ void MobatServer::drawSignalPlot( sf::RenderWindow& window, Locator const& locat
 
 std::vector<unsigned> MobatServer::read_frequencies(){
   std::vector<unsigned> frequencies;
-  std::ifstream file("../freqs.txt");
+  std::ifstream file("../../../frequencies_for_mobat");
   std::string line;
   while ( std::getline (file,line) ){
       // std::vector<std::string> frags;
@@ -256,9 +256,9 @@ std::vector<unsigned> MobatServer::read_frequencies(){
   }
   file.close();
 
-  // for(auto const& i : frequencies){
-  //   std::cout<<i<<std::endl;
-  // }
+//   for(auto const& i : frequencies){
+//     std::cout<<i<<std::endl;
+//   }
 
   return frequencies;
 
