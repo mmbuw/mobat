@@ -223,30 +223,31 @@ loadPeakSamples() const {
           continue;
         }
 
-        //unsigned normalization_counter = 0;
         std::vector< float > valid_x_pos;
         std::vector< float > valid_y_pos;
-
+#if 1
           //one euro filter like mddling
         auto size_cached_positions = cached_positions[currently_located_position_entry.first].size();
         auto distance = glm::distance(cached_positions[currently_located_position_entry.first][size_cached_positions -2].second, cached_positions[currently_located_position_entry.first][size_cached_positions -1].second );
         int alpha = ceil(size_cached_positions - distance);
-        if(alpha < 0){
-          alpha = 0;
-          for(unsigned i = size_cached_positions -1; i >= size_cached_positions - alpha; --i){
-            accumulated_position += cached_positions[currently_located_position_entry.first][i].second;
-          }
-          //one euro like
-          accumulated_position /= alpha;
+        if(alpha < 1){
+          alpha = 1;
         }
-
-            /* not one euro like middling
         for(unsigned i = size_cached_positions -1; i >= size_cached_positions - alpha; --i){
+          accumulated_position += cached_positions[currently_located_position_entry.first][i].second;
+        }
+        //one euro like
+        accumulated_position /= alpha;
+        
+#else
+        //not one euro like middling
+        unsigned normalization_counter = 0;
+
 
 
 
         for (auto const& glm_vec : cached_positions[currently_located_position_entry.first]) {
-            if (locator_frame_counter_ - glm_vec.first < cached_positions[currently_located_position_entry.first].size()) {
+          if (locator_frame_counter_ - glm_vec.first < cached_positions[currently_located_position_entry.first].size()) {
                valid_x_pos.push_back(glm_vec.second.x);
                valid_y_pos.push_back(glm_vec.second.y);
                
@@ -257,9 +258,9 @@ loadPeakSamples() const {
                ++normalization_counter;                 
             //temp_pos = glm_vec * 2.0f;
             //accumulated_position += temp_pos;
+          }
         }
-            }*/
-
+#endif
         //float median_x = valid_x_pos[valid_x_pos.size()/2.0];
         //float median_y = valid_y_pos[valid_y_pos.size()/2.0];                
 

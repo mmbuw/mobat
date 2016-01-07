@@ -149,6 +149,8 @@ void MobatServer::sendPositions( std::map<unsigned, std::pair<unsigned, glm::vec
                   frequency_position_entry.second.second[1], 
                   frontier_timestamp};
 
+      std::cout<<t_packet<<std::endl;
+
       // send packet per UDP to receiver
       packet::send<token_packet>(sender_socket_, target_address_, t_packet);
 
@@ -250,7 +252,8 @@ std::vector<unsigned> MobatServer::read_frequencies(){
       std::size_t pos = line.find(";");
       unsigned frequency = std::stoul(line.substr(pos +1  , line.length()));
     frequencies.push_back( std::stoul(line.substr(pos +1  , line.length())) );
-    frequency_id_map[std::stoul(line.substr(0 , pos))] = frequency;
+    frequency_id_map[frequency] = std::stoul(line.substr(0 , pos));
+     //std::cout<<std::stoul(line.substr(0 , pos))<<std::endl;
 
 
   }
