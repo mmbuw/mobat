@@ -229,10 +229,13 @@ loadPeakSamples() const {
           //one euro filter like mddling
         auto size_cached_positions = cached_positions[currently_located_position_entry.first].size();
         auto distance = glm::distance(cached_positions[currently_located_position_entry.first][size_cached_positions -2].second, cached_positions[currently_located_position_entry.first][size_cached_positions -1].second );
-        int alpha = ceil(size_cached_positions - distance);
+        unsigned alpha = ceil(size_cached_positions - distance);
         if(alpha < 1){
           alpha = 1;
+        }else if(alpha >= size_cached_positions){
+          alpha = size_cached_positions-1;
         }
+        std::cout<<size_cached_positions<<   "      "  << alpha <<std::endl;
         for(unsigned i = size_cached_positions -1; i >= size_cached_positions - alpha; --i){
           accumulated_position += cached_positions[currently_located_position_entry.first][i].second;
         }
