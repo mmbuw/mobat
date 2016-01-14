@@ -63,6 +63,7 @@ private:
 
     bool shutdown_;
     bool request_vis_vectors_;
+    bool one_euro_filter_;
     Recorder recorder_;
     buffer_collection collector_;
     SignalAnalyzer signal_analyzer_;

@@ -26,6 +26,7 @@ Locator::Locator(unsigned int num_mics)
   for (auto freq : configurator().getList("known_frequencies")) {
     cached_positions[freq] = std::vector<std::pair<unsigned, glm::vec2>>(std::size_t{configurator().getUint("num_median_samples")});
   }
+  one_euro_filter_ = configurator().getUint("one_euro_filter") > 0;
 }
 
 void Locator::
@@ -191,6 +192,8 @@ loadPeakSamples() const {
 
       if (toa_max != std::numeric_limits<double>::max() && toa_max - toa_min < 100.00 ) {
 
+        // std::cout << frequency_to_locate << std::endl;
+
         found_positions = true;
 
         currently_located_positions[frequency_to_locate] = tdoator_.locate(current_frequency_toas[0],
@@ -223,56 +226,58 @@ loadPeakSamples() const {
           continue;
         }
 
-        std::vector< float > valid_x_pos;
-        std::vector< float > valid_y_pos;
-#if 1
+
+        if(one_euro_filter_){
           //one euro filter like mddling
-        auto size_cached_positions = cached_positions[currently_located_position_entry.first].size();
-        auto distance = glm::distance(cached_positions[currently_located_position_entry.first][size_cached_positions -2].second, cached_positions[currently_located_position_entry.first][size_cached_positions -1].second );
-        unsigned alpha = ceil(size_cached_positions - distance);
-        if(alpha < 1){
-          alpha = 1;
-        }else if(alpha >= size_cached_positions){
-          alpha = size_cached_positions-1;
-        }
-        std::cout<<size_cached_positions<<   "      "  << alpha <<std::endl;
-        for(unsigned i = size_cached_positions -1; i >= size_cached_positions - alpha; --i){
-          accumulated_position += cached_positions[currently_located_position_entry.first][i].second;
-        }
-        //one euro like
-        accumulated_position /= alpha;
         
-#else
-        //not one euro like middling
-        unsigned normalization_counter = 0;
-
-
-
-
-        for (auto const& glm_vec : cached_positions[currently_located_position_entry.first]) {
-          if (locator_frame_counter_ - glm_vec.first < cached_positions[currently_located_position_entry.first].size()) {
-               valid_x_pos.push_back(glm_vec.second.x);
-               valid_y_pos.push_back(glm_vec.second.y);
-               
-               std::sort(valid_x_pos.begin(), valid_x_pos.end());
-               std::sort(valid_y_pos.begin(), valid_y_pos.end());
-
-               accumulated_position += glm_vec.second ;    
-               ++normalization_counter;                 
-            //temp_pos = glm_vec * 2.0f;
-            //accumulated_position += temp_pos;
+          auto size_cached_positions = cached_positions[currently_located_position_entry.first].size();
+          auto distance = glm::distance(cached_positions[currently_located_position_entry.first][size_cached_positions -2].second, cached_positions[currently_located_position_entry.first][size_cached_positions -1].second );
+          unsigned alpha = ceil(size_cached_positions - distance);
+          if(alpha < 1){
+            alpha = 1;
+          }else if(alpha >= size_cached_positions){
+            alpha = size_cached_positions-1;
           }
+          std::cout<<size_cached_positions<<   "      "  << alpha <<std::endl;
+          for(unsigned i = size_cached_positions -1; i >= size_cached_positions - alpha; --i){
+            accumulated_position += cached_positions[currently_located_position_entry.first][i].second;
+          }
+          //one euro like
+          accumulated_position /= alpha;
+        
+        }else{
+
+          //not one euro like middling
+          unsigned normalization_counter = 0;
+          std::vector< float > valid_x_pos;
+          std::vector< float > valid_y_pos;
+
+
+
+          for (auto const& glm_vec : cached_positions[currently_located_position_entry.first]) {
+            if (locator_frame_counter_ - glm_vec.first < cached_positions[currently_located_position_entry.first].size()) {
+                 valid_x_pos.push_back(glm_vec.second.x);
+                 valid_y_pos.push_back(glm_vec.second.y);
+                 
+                 std::sort(valid_x_pos.begin(), valid_x_pos.end());
+                 std::sort(valid_y_pos.begin(), valid_y_pos.end());
+
+                 accumulated_position += glm_vec.second ;    
+                 ++normalization_counter;                 
+              //temp_pos = glm_vec * 2.0f;
+              //accumulated_position += temp_pos;
+            }
+          }
+          //float median_x = valid_x_pos[valid_x_pos.size()/2.0];
+          //float median_y = valid_y_pos[valid_y_pos.size()/2.0];                
+
+        
+          accumulated_position /= normalization_counter;
+
+
+          //accumulated_position.x = median_x;
+          //accumulated_position.y = median_y;
         }
-#endif
-        //float median_x = valid_x_pos[valid_x_pos.size()/2.0];
-        //float median_y = valid_y_pos[valid_y_pos.size()/2.0];                
-
-        // not 1 euro like
-        // accumulated_position /= normalization_counter;
-
-
-        //accumulated_position.x = median_x;
-        //accumulated_position.y = median_y;
 
         cached_located_positions[currently_located_position_entry.first] = std::make_pair(  locator_frame_counter_ , accumulated_position);
       }
