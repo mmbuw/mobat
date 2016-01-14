@@ -230,7 +230,7 @@ loadPeakSamples() const {
         if(one_euro_filter_){
           //one euro filter like mddling
         
-          auto size_cached_positions = cached_positions[currently_located_position_entry.first].size();
+          unsigned size_cached_positions = cached_positions[currently_located_position_entry.first].size();
           auto distance = glm::distance(cached_positions[currently_located_position_entry.first][size_cached_positions -2].second, cached_positions[currently_located_position_entry.first][size_cached_positions -1].second );
           unsigned alpha = ceil(size_cached_positions - distance);
           if(alpha < 1){
@@ -238,11 +238,16 @@ loadPeakSamples() const {
           }else if(alpha >= size_cached_positions){
             alpha = size_cached_positions-1;
           }
+          unsigned actual_idx = locator_frame_counter_ % size_cached_positions;
+
           std::cout<<size_cached_positions<<   "      "  << alpha <<std::endl;
-          for(unsigned i = size_cached_positions -1; i >= size_cached_positions - alpha; --i){
-            accumulated_position += cached_positions[currently_located_position_entry.first][i].second;
+          for(unsigned i = 0; i < size_cached_positions; ++i){
+            if(i >= ( (actual_idx - alpha + size_cached_positions) % size_cached_positions)   &&   i <= actual_idx){
+              accumulated_position += cached_positions[currently_located_position_entry.first][i].second;
+            }
           }
-          //one euro like
+
+
           accumulated_position /= alpha;
         
         }else{
