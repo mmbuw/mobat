@@ -201,6 +201,8 @@ loadPeakSamples() const {
                                                                            current_frequency_toas[2],
                                                                            current_frequency_toas[3]);
         currently_located_positions[frequency_to_locate].y = currently_located_positions[frequency_to_locate].y;
+      }else{
+        std::cout<< "IF CONDITION FAILED ON FREQUENCY " << frequency_to_locate << std::endl;
       }
     }
     //cached_signal_vis_samples = signal_analyzer_.get_signal_samples_for(17000);
@@ -231,18 +233,18 @@ loadPeakSamples() const {
           //one euro filter like mddling
         
           unsigned size_cached_positions = cached_positions[currently_located_position_entry.first].size();
-          auto distance = glm::distance(cached_positions[currently_located_position_entry.first][size_cached_positions -2].second, cached_positions[currently_located_position_entry.first][size_cached_positions -1].second );
+          unsigned actual_idx = locator_frame_counter_ % size_cached_positions;
+          auto distance = 0.01 * glm::distance(cached_positions[currently_located_position_entry.first][(actual_idx - 1 + size_cached_positions) % size_cached_positions].second, cached_positions[currently_located_position_entry.first][actual_idx].second );
           unsigned alpha = ceil(size_cached_positions - distance);
           if(alpha < 1){
             alpha = 1;
           }else if(alpha >= size_cached_positions){
             alpha = size_cached_positions-1;
           }
-          unsigned actual_idx = locator_frame_counter_ % size_cached_positions;
 
-          std::cout<<size_cached_positions<<   "      "  << alpha <<std::endl;
+          std::cout<< "Size:  " << size_cached_positions<<   " idx  " << actual_idx << " alpha  "  << alpha <<std::endl;
           for(unsigned i = 0; i < size_cached_positions; ++i){
-            if(i >= ( (actual_idx - alpha + size_cached_positions) % size_cached_positions)   &&   i <= actual_idx){
+            if(i >= ( (actual_idx - alpha + size_cached_positions) % size_cached_positions)   ||   i <= actual_idx){
               accumulated_position += cached_positions[currently_located_position_entry.first][i].second;
             }
           }
