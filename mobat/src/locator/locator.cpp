@@ -234,7 +234,8 @@ loadPeakSamples() const {
         
           unsigned size_cached_positions = cached_positions[currently_located_position_entry.first].size();
           unsigned actual_idx = locator_frame_counter_ % size_cached_positions;
-          auto distance = 0.01 * glm::distance(cached_positions[currently_located_position_entry.first][(actual_idx - 1 + size_cached_positions) % size_cached_positions].second, cached_positions[currently_located_position_entry.first][actual_idx].second );
+          //distance in cm
+          auto distance = 10 * glm::distance(cached_positions[currently_located_position_entry.first][(actual_idx - 1 + size_cached_positions) % size_cached_positions].second, cached_positions[currently_located_position_entry.first][actual_idx].second );
           unsigned alpha = ceil(size_cached_positions - distance);
           if(alpha < 1){
             alpha = 1;
@@ -242,7 +243,7 @@ loadPeakSamples() const {
             alpha = size_cached_positions-1;
           }
 
-          std::cout<< "Size:  " << size_cached_positions<<   " idx  " << actual_idx << " alpha  "  << alpha <<std::endl;
+
           for(unsigned i = 0; i < size_cached_positions; ++i){
             if(i >= ( (actual_idx - alpha + size_cached_positions) % size_cached_positions)   ||   i <= actual_idx){
               accumulated_position += cached_positions[currently_located_position_entry.first][i].second;
