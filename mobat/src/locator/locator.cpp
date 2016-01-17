@@ -19,7 +19,7 @@ Locator::Locator(unsigned int num_mics)
                 configurator().getVec("microphone2_pos"),
                 configurator().getVec("microphone3_pos"),
                 configurator().getVec("microphone4_pos")}
- ,locator_frame_counter_(cached_positions[0].size())
+ //,locator_frame_counter_(cached_positions[0].size())
  ,current_signal_chunk_(0)
 {
   loadLocatorParameters();
@@ -113,6 +113,13 @@ loadPeakSamples() const {
 
   if (frequency_to_record_setter_mutex.try_lock()) {
     frequencies_to_locate = frequencies_to_find;
+    for(unsigned  freq : frequencies_to_find){
+      if(locator_frame_counters_.find(freq) == locator_frame_counters_.end() ){
+        locator_frame_counters_[freq] = 0;
+        cached_positions[freq] = std::vector<std::pair<unsigned, glm::vec2>>(std::size_t{configurator().getUint("num_median_samples")});
+        //std::cout<<"TRIGGERED\n";
+      }
+    }
     frequency_to_record_setter_mutex.unlock();
   }
 
@@ -192,7 +199,7 @@ loadPeakSamples() const {
 
       if (toa_max != std::numeric_limits<double>::max() && toa_max - toa_min < 100.00 ) {
 
-        // std::cout << frequency_to_locate << std::endl;
+        //std::cout << frequency_to_locate << std::endl;
 
         found_positions = true;
 
@@ -202,7 +209,7 @@ loadPeakSamples() const {
                                                                            current_frequency_toas[3]);
         currently_located_positions[frequency_to_locate].y = currently_located_positions[frequency_to_locate].y;
       }else{
-        std::cout<< "IF CONDITION FAILED ON FREQUENCY " << frequency_to_locate << std::endl;
+        //std::cout<< "IF CONDITION FAILED ON FREQUENCY " << frequency_to_locate << std::endl;
       }
     }
     //cached_signal_vis_samples = signal_analyzer_.get_signal_samples_for(17000);
@@ -214,28 +221,31 @@ loadPeakSamples() const {
     }
 
     if (found_positions) {
-      ++locator_frame_counter_;
+      //++locator_frame_counter_;
       cached_located_positions.clear();
 
       for (auto const& currently_located_position_entry :  currently_located_positions) {
+        unsigned tmp_frequency = currently_located_position_entry.first;
+        ++locator_frame_counters_[tmp_frequency];
         glm::vec2 accumulated_position = glm::vec2(0.0, 0.0);
         //glm::temp_pos = glm::vec2(0.0, 0.0);
-        cached_located_positions[currently_located_position_entry.first] = std::make_pair(  locator_frame_counter_ , currently_located_position_entry.second);
-        if(cached_positions[currently_located_position_entry.first].size() != 0){
-          cached_positions[currently_located_position_entry.first][locator_frame_counter_ % cached_positions[currently_located_position_entry.first].size()] = std::make_pair(locator_frame_counter_,currently_located_position_entry.second);
+        cached_located_positions[tmp_frequency] = std::make_pair(  locator_frame_counters_[tmp_frequency] , currently_located_position_entry.second);
+        if(cached_positions[tmp_frequency].size() != 0){
+          cached_positions[tmp_frequency][locator_frame_counters_[tmp_frequency] % cached_positions[tmp_frequency].size()] = std::make_pair(locator_frame_counters_[tmp_frequency],currently_located_position_entry.second);        
         }else{
-          // cached_positions[currently_located_position_entry.first][locator_frame_counter_ % cached_positions[currently_located_position_entry.first].size()] = std::make_pair(locator_frame_counter_,currently_located_position_entry.second);
+
+          // cached_positions[tmp_frequency][locator_frame_counter_ % cached_positions[tmp_frequency].size()] = std::make_pair(locator_frame_counter_,currently_located_position_entry.second);
           continue;
         }
 
 
         if(one_euro_filter_){
-          //one euro filter like mddling
+          //one euro filter like middling
         
-          unsigned size_cached_positions = cached_positions[currently_located_position_entry.first].size();
-          unsigned actual_idx = locator_frame_counter_ % size_cached_positions;
+          unsigned size_cached_positions = cached_positions[tmp_frequency].size();
+          unsigned actual_idx = locator_frame_counters_[tmp_frequency] % size_cached_positions;
           //distance in cm
-          auto distance = 10 * glm::distance(cached_positions[currently_located_position_entry.first][(actual_idx - 1 + size_cached_positions) % size_cached_positions].second, cached_positions[currently_located_position_entry.first][actual_idx].second );
+          auto distance = 10 * glm::distance(cached_positions[tmp_frequency][(actual_idx - 1 + size_cached_positions) % size_cached_positions].second, cached_positions[tmp_frequency][actual_idx].second );
           unsigned alpha = ceil(size_cached_positions - distance);
           if(alpha < 1){
             alpha = 1;
@@ -246,7 +256,7 @@ loadPeakSamples() const {
 
           for(unsigned i = 0; i < size_cached_positions; ++i){
             if(i >= ( (actual_idx - alpha + size_cached_positions) % size_cached_positions)   ||   i <= actual_idx){
-              accumulated_position += cached_positions[currently_located_position_entry.first][i].second;
+              accumulated_position += cached_positions[tmp_frequency][i].second;
             }
           }
 
@@ -262,8 +272,8 @@ loadPeakSamples() const {
 
 
 
-          for (auto const& glm_vec : cached_positions[currently_located_position_entry.first]) {
-            if (locator_frame_counter_ - glm_vec.first < cached_positions[currently_located_position_entry.first].size()) {
+          for (auto const& glm_vec : cached_positions[tmp_frequency]) {
+            if (locator_frame_counters_[tmp_frequency] - glm_vec.first < cached_positions[tmp_frequency].size()) {
                  valid_x_pos.push_back(glm_vec.second.x);
                  valid_y_pos.push_back(glm_vec.second.y);
                  
@@ -285,9 +295,10 @@ loadPeakSamples() const {
 
           //accumulated_position.x = median_x;
           //accumulated_position.y = median_y;
+          std::cout<<"TRIGGERED at freq " <<  /*locator_frame_counters_[tmp_frequency]*/tmp_frequency << "!\n";
         }
 
-        cached_located_positions[currently_located_position_entry.first] = std::make_pair(  locator_frame_counter_ , accumulated_position);
+        cached_located_positions[tmp_frequency] = std::make_pair(  locator_frame_counters_[tmp_frequency] , accumulated_position);
       }
 
       position_mutex.lock();

@@ -69,7 +69,8 @@ private:
     SignalAnalyzer signal_analyzer_;
     TDOAtor tdoator_;
 
-    unsigned locator_frame_counter_;
+    //frame_counters for each frequency
+    std::map<unsigned, unsigned> locator_frame_counters_;
     unsigned current_signal_chunk_;
  };
 

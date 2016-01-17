@@ -141,7 +141,7 @@ void MobatServer::sendPositions( std::map<unsigned, std::pair<unsigned, glm::vec
 
   for(auto const& frequency_position_entry : located_positions ) {     
 
-    if(frontier_timestamp_ < frequency_position_entry.second.first) {
+    //if(frontier_timestamp_ < frequency_position_entry.second.first) {
       frontier_timestamp = frequency_position_entry.second.first;
 
       token_packet t_packet{frequency_id_map[frequency_position_entry.first], 
@@ -163,7 +163,7 @@ void MobatServer::sendPositions( std::map<unsigned, std::pair<unsigned, glm::vec
       if(is_logging_){
         position_logger_.update(frequency_position_entry.first, frequency_position_entry.second.second);
       }
-    }
+    //}
   }
 }
 
