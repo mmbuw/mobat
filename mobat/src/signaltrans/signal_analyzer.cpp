@@ -7,6 +7,7 @@
 #include <utility>
 
 #include <chrono>
+#include <numeric>
 
 SignalAnalyzer::
 SignalAnalyzer() : fft_window_size_( ({configurator().getUint("fft_window_size");  }) ),
