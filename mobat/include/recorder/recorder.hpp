@@ -4,7 +4,7 @@
 #include "config.hpp"
 #include "device.hpp"
 // requires libasound2-dev
-#include </usr/include/alsa/asoundlib.h>
+#include <alsa/asoundlib.h>
 #include <vector>
 
 class Recorder {

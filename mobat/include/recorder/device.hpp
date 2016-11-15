@@ -1,7 +1,7 @@
 #ifndef DEVICE_HPP
 #define DEVICE_HPP
 
-#include </usr/include/alsa/asoundlib.h>
+#include <alsa/asoundlib.h>
 #include <iostream>
 
 struct device {
