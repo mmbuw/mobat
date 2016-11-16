@@ -1,7 +1,7 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 
-#include </usr/include/alsa/asoundlib.h>
+#include <alsa/asoundlib.h>
 #include <utility>
 
 class Config {
