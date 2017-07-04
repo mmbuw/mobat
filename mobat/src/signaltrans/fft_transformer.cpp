@@ -369,8 +369,8 @@ unsigned int FftTransformer::performFFT(unsigned channel_num) {
         for (unsigned int signal_it = 0; signal_it < (unsigned int) (fft_window_size_ / 2 - 1); ++signal_it) {
           float current_frequency = signal_it * sampling_rate_by_window_size;
 
-          double frequency_sum_chunk = std::sqrt(fft_result_[channel_num][signal_it][0]*fft_result_[channel_num][signal_it][0]) + 
-                                                (fft_result_[channel_num][signal_it][1]*fft_result_[channel_num][signal_it][1]) ;
+          double frequency_sum_chunk = std::sqrt(fft_result_[channel_num][signal_it][0]*fft_result_[channel_num][signal_it][0] + 
+                                                 fft_result_[channel_num][signal_it][1]*fft_result_[channel_num][signal_it][1]) ;
 
           bool is_already_in_frequency_bucket = false;
           for (unsigned iterated_frequency : listening_to_those_frequencies) {
